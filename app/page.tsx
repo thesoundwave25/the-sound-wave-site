@@ -247,13 +247,13 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       {
         id: "italian-remix-party",
         title: "Italian Remix Party",
-        logoSrc: "/brand/italian-remix-party-logo.png",
+        logoSrc: "/brand/italian-remix-logo.svg",
         tracks: [{ title: "Italian Remix 1", src: "/audio/remix-italian-audio.mp3" }],
       },
       {
         id: "the-ritual",
         title: "The Ritual",
-        logoSrc: "/brand/the-ritual-logo.png",
+        logoSrc: "/brand/the-ritual-logo.svg",
         tracks: [{ title: "The Ritual", src: "/audio/audio-the-ritual.mp3" }],
       },
     ],
@@ -285,7 +285,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         title: "ITALIAN REMIX PARTY",
         date: "20 FEBBRAIO 2026",
         venue: "'Loft Cafè - Rovato'",
-        imageSrc: "/brand/italian-remix-party-logo.png",
+        imageSrc: "/brand/italian-remix-logo.svg",
         cta: "MAGGIORI DETTAGLI",
         description: "work in progress",
       },
@@ -294,7 +294,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         title: "ITALIAN REMIX PARTY",
         date: "24 Aprile  2026",
         venue: "Quintano",
-        imageSrc: "/brand/italian-remix-party-logo.png",
+        imageSrc: "/brand/italian-remix-logo.svg",
         cta: "MAGGIORI DETTAGLI",
         description: "DESCRIZIONE DETTAGLIATA EVENTO...",
       },
@@ -618,8 +618,8 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { id: "emotion", title: "Emotion 90/2000", logo: "/brand/EMOTION_2.png", logoClass: "h-20" },
-            { id: "italian-remix-party", title: "Italian Remix Party", logo: "/brand/italian-remix-party-logo.png", logoClass: "h-28" },
-            { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.png", logoClass: "h-36" },
+            { id: "italian-remix-party", title: "Italian Remix Party", logo: "/brand/italian-remix-logo.svg", logoClass: "h-28" },
+            { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.svgg", logoClass: "h-36" },
           ].map((f) => {
             const g = formatGlow(f.id);
             return (
@@ -951,7 +951,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                   <div className="relative h-14 sm:h-16 w-40 sm:w-44 rounded-2xl border border-white/10 bg-white/5 p-3">
                     <div className="relative h-full w-full">
                       <Image
-                        src="/brand/logo-wallen.png"
+                        src="/brand/waven-logo.svg"
                         alt="DJ Wallen"
                         fill
                         className="object-contain"
@@ -965,7 +965,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                   <div className="relative h-14 sm:h-16 w-40 sm:w-44 rounded-2xl border border-white/10 bg-white/5 p-3">
                     <div className="relative h-full w-full">
                       <Image
-                        src="/brand/logo-gianluk.png"
+                        src="/brand/gianluk-logo.svg"
                         alt="DJ Gianluk"
                         fill
                         className="object-contain"
@@ -1073,10 +1073,10 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
               <Image src="/brand/logo-wallen.png" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
             </div>
             <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/waven-logo.png" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
+              <Image src="/brand/waven-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
             </div>
             <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/alemembrini-logo.png" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
+              <Image src="/brand/alemembrini-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
             </div>
           </div>
         </div>
