@@ -619,7 +619,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
           {[
             { id: "emotion", title: "Emotion 90/2000", logo: "/brand/EMOTION_2.png", logoClass: "h-20" },
             { id: "italian-remix-party", title: "Italian Remix Party", logo: "/brand/italian-remix-logo.svg", logoClass: "h-28" },
-            { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.svgg", logoClass: "h-36" },
+            { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.svg", logoClass: "h-36" },
           ].map((f) => {
             const g = formatGlow(f.id);
             return (
@@ -951,7 +951,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                   <div className="relative h-14 sm:h-16 w-40 sm:w-44 rounded-2xl border border-white/10 bg-white/5 p-3">
                     <div className="relative h-full w-full">
                       <Image
-                        src="/brand/waven-logo.svg"
+                        src="/brand/wallen-logo.svg"
                         alt="DJ Wallen"
                         fill
                         className="object-contain"
