@@ -250,7 +250,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                 className={[
                   "relative w-full bg-black",
                   // ✅ mobile: usa dvh (stabile con barra Safari)
-                  isMobile ? "h-[72dvh]" : "h-[70vh]",
+                  isMobile ? "h-[70dvh]" : "h-[70vh]",
                 ].join(" ")}
                 style={{
                   touchAction: "pan-y",
