@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type PhotoItem = {
   id: string;
-  src: string; // es: "/gallery/1.jpg"
+  src: string;
   alt?: string;
 };
 
@@ -13,19 +13,25 @@ type Props = {
   open: boolean;
   onClose: () => void;
   photo: PhotoItem | null;
-
-  // ✅ opzionale: se lo passi, abiliti frecce + scorrimento nel popup
   photos?: PhotoItem[];
 };
+
+function isMobileViewport() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches; // < md
+}
 
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [isClosing, setIsClosing] = useState(false);
   const safePhotos = useMemo(() => (Array.isArray(photos) ? photos : []), [photos]);
-
-  // index valido SOLO se safePhotos è presente
   const [index, setIndex] = useState(0);
-
   const canNavigate = safePhotos.length > 1;
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Swipe support (mobile only)
+  const startXRef = useRef<number | null>(null);
+  const startYRef = useRef<number | null>(null);
 
   const currentPhoto: PhotoItem | null = useMemo(() => {
     if (safePhotos.length > 0) return safePhotos[index] ?? safePhotos[0] ?? null;
@@ -52,7 +58,15 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     setIndex((i) => (i + 1) % safePhotos.length);
   };
 
-  // Quando apro il modal: se ho la lista, setto l’index partendo dalla foto cliccata
+  // ✅ mobile watcher
+  useEffect(() => {
+    const update = () => setIsMobile(isMobileViewport());
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // Quando apro il modal: set index dalla foto cliccata
   useEffect(() => {
     if (!open) return;
     setIsClosing(false);
@@ -66,26 +80,82 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // ESC + blocco scroll + frecce tastiera
+  // ✅ ESC + body lock (iOS safe) + arrows desktop
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose();
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
+      // frecce solo desktop (su mobile spesso non esistono)
+      if (!isMobile) {
+        if (e.key === "ArrowLeft") goPrev();
+        if (e.key === "ArrowRight") goNext();
+      }
     };
 
     document.addEventListener("keydown", onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    // iOS-safe lock: position fixed
+    const body = document.body;
+    const prevOverflow = body.style.overflow;
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevWidth = body.style.width;
+
+    const scrollY = window.scrollY;
+
+    body.style.overflow = "hidden";
+    if (isMobile) {
+      body.style.position = "fixed";
+      body.style.top = `-${scrollY}px`;
+      body.style.width = "100%";
+    }
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prevOverflow;
+
+      body.style.overflow = prevOverflow;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.width = prevWidth;
+
+      if (isMobile) {
+        // restore scroll
+        const y = Math.abs(parseInt(body.style.top || "0", 10)) || scrollY;
+        window.scrollTo(0, y);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, canNavigate, safePhotos.length]);
+  }, [open, canNavigate, safePhotos.length, isMobile]);
+
+  // ✅ Swipe handlers (mobile only)
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile || !canNavigate) return;
+    const t = e.touches[0];
+    startXRef.current = t.clientX;
+    startYRef.current = t.clientY;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobile || !canNavigate) return;
+
+    const sx = startXRef.current;
+    const sy = startYRef.current;
+    startXRef.current = null;
+    startYRef.current = null;
+    if (sx == null || sy == null) return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+
+    // evita swipe se è scroll verticale
+    if (Math.abs(dy) > Math.abs(dx)) return;
+
+    const threshold = 40; // px
+    if (dx > threshold) goPrev();
+    if (dx < -threshold) goNext();
+  };
 
   if (!open || !currentPhoto) return null;
 
@@ -103,29 +173,34 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
       {/* Dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        {/* ✅ Wrapper glow (NON overflow-hidden) */}
         <div
           className={[
-            "relative w-full max-w-5xl",
-            "rounded-3xl",
-            "tsw-photo-glow",
+            "relative w-full max-w-5xl rounded-3xl tsw-photo-glow",
             isClosing ? "tsw-modal-out" : "tsw-modal-in",
           ].join(" ")}
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* ✅ Card interna con overflow-hidden */}
-          <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+          <div
+            className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl"
+            // ✅ Mobile: permette swipe e scroll “naturale”
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" as any }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
             {/* Close */}
             <button
               onClick={requestClose}
               className="absolute right-4 top-4 z-20 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+              style={{
+                top: "calc(1rem + env(safe-area-inset-top))" as any,
+              }}
             >
               Chiudi ✕
             </button>
 
-            {/* ✅ Frecce dentro popup (solo se photos è passato) */}
+            {/* Frecce: desktop ok, mobile più “light” */}
             {canNavigate && (
               <>
                 <button
@@ -136,10 +211,13 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                     "h-11 w-11 rounded-full",
                     "border border-white/15 bg-black/55 backdrop-blur",
                     "grid place-items-center text-white/90",
-                    "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                    "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                    "active:scale-[0.98]",
+                    // ✅ hover solo desktop
+                    isMobile ? "active:scale-[0.98]" : [
+                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                      "active:scale-[0.98]",
+                    ].join(" "),
                   ].join(" ")}
                 >
                   ‹
@@ -153,10 +231,12 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                     "h-11 w-11 rounded-full",
                     "border border-white/15 bg-black/55 backdrop-blur",
                     "grid place-items-center text-white/90",
-                    "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                    "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                    "active:scale-[0.98]",
+                    isMobile ? "active:scale-[0.98]" : [
+                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                      "active:scale-[0.98]",
+                    ].join(" "),
                   ].join(" ")}
                 >
                   ›
@@ -166,7 +246,16 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
             {/* Immagine */}
             <div className="relative w-full">
-              <div className="relative h-[70vh] w-full bg-black">
+              <div
+                className={[
+                  "relative w-full bg-black",
+                  // ✅ mobile: usa dvh (stabile con barra Safari)
+                  isMobile ? "h-[72dvh]" : "h-[70vh]",
+                ].join(" ")}
+                style={{
+                  touchAction: "pan-y",
+                }}
+              >
                 <Image
                   src={currentPhoto.src}
                   alt={currentPhoto.alt ?? "Foto evento"}
@@ -177,13 +266,18 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
               </div>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
             </div>
+
+            {/* hint swipe (solo mobile) */}
+            {isMobile && canNavigate && (
+              <div className="px-4 pb-3 text-center text-[12px] text-zinc-300/70">
+                Scorri a sinistra/destra per cambiare foto
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Animazioni + Glow */}
       <style jsx global>{`
-        /* ✅ Glow esterno (non tagliato perché sta sul wrapper) */
         .tsw-photo-glow::before {
           content: "";
           position: absolute;
@@ -252,20 +346,12 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           }
         }
         @keyframes tswBackdropIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
         @keyframes tswBackdropOut {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-          }
+          from { opacity: 1; }
+          to { opacity: 0; }
         }
       `}</style>
     </div>
