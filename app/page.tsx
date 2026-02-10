@@ -393,19 +393,20 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
           {/* MOBILE HAMBURGER (solo < md) */}
           <button
-            type="button"
-            aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
-            aria-expanded={mobileNavOpen}
-            onClick={() => setMobileNavOpen((v) => !v)}
-            className={[
-              "md:hidden justify-self-end",
-              "h-11 w-11 rounded-xl",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "grid place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.04] active:scale-[0.98]",
-            ].join(" ")}
-          >
+  type="button"
+  aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
+  aria-expanded={mobileNavOpen}
+  onClick={() => setMobileNavOpen((v) => !v)}
+  className={[
+    "md:hidden col-start-3 justify-self-end",
+    "h-11 w-11 rounded-xl",
+    "border border-white/15 bg-black/55 backdrop-blur",
+    "grid place-items-center text-white/90",
+    "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+    "hover:scale-[1.04] active:scale-[0.98]",
+  ].join(" ")}
+>
+
             {/* Icona hamburger / X */}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               {mobileNavOpen ? (
