@@ -758,29 +758,39 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
                   "w-[82vw] sm:w-[46vw] md:w-[24%]",
                 ].join(" ")}
               >
-               <div className="relative overflow-hidden rounded-2xl flex items-center justify-center bg-black">
+   <div className="relative overflow-hidden rounded-2xl bg-black">
 
-               <div className="relative w-full flex items-center justify-center h-[240px] sm:h-[280px] md:aspect-[16/10] md:h-auto">
+  {/* MOBILE (no fill → niente tagli) */}
+  <div className="md:hidden flex items-center justify-center px-3 py-4">
+    <Image
+      src={p.src}
+      alt={p.alt ?? "Foto evento"}
+      width={1600}
+      height={900}
+      className="w-full h-auto max-h-[240px] object-contain object-center"
+      sizes="82vw"
+    />
+  </div>
 
- <Image
-  src={p.src}
-  alt={p.alt ?? "Foto evento"}
-  fill
-  className="object-contain object-center p-3 sm:p-2 md:p-0"
-  sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
-/>
-
-  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+  {/* DESKTOP (invariato come prima) */}
+  <div className="hidden md:block relative aspect-[16/10] w-full">
+    <Image
+      src={p.src}
+      alt={p.alt ?? "Foto evento"}
+      fill
+      className="object-cover object-center"
+      sizes="(max-width: 1024px) 46vw, 25vw"
+    />
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+  </div>
 
   {/* Swipe hint (solo mobile) */}
-  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center sm:hidden">
+  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
     <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
       ← scorri →
     </div>
   </div>
 </div>
-
-                </div>
               </button>
             ))}
           </div>
