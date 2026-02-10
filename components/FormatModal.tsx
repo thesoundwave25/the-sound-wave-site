@@ -322,7 +322,7 @@ export default function FormatModal({ open, onClose, format }: Props) {
 
               {activeSrc && (
                 <div className="mt-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={togglePlay}
                       className={[
@@ -371,30 +371,16 @@ export default function FormatModal({ open, onClose, format }: Props) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setMuted((m) => !m)}
-                        className="h-9 w-9 rounded-full border border-white/10 bg-white/5 grid place-items-center hover:bg-white/10"
-                        aria-label={muted ? "Attiva audio" : "Silenzia"}
-                      >
-                        <span className="text-white text-sm">{muted ? "🔇" : "🔊"}</span>
-                      </button>
+                    <div className="flex items-center">
+  <button
+    onClick={() => setMuted((m) => !m)}
+    className="h-9 w-9 rounded-full border border-white/10 bg-white/5 grid place-items-center hover:bg-white/10"
+    aria-label={muted ? "Attiva audio" : "Silenzia"}
+  >
+    <span className="text-white text-sm">{muted ? "🔇" : "🔊"}</span>
+  </button>
+</div>
 
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={muted ? 0 : volume}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          setMuted(v === 0);
-                          setVolume(v);
-                        }}
-                        className="tsw-range tsw-volume w-[120px]"
-                        aria-label="Volume"
-                      />
-                    </div>
                   </div>
                 </div>
               )}
