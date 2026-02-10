@@ -47,17 +47,25 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const [isMobile, setIsMobile] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  // gesture refs
-  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(
-    null
-  );
-  const gestureLockRef = useRef<"none" | "h" | "v">("none");
-  const animatingRef = useRef(false);
-
+  // ✅ FIX: indice evento gestito dentro al modal (così lo swipe cambia DAVVERO l’evento)
   const safeIndex = useMemo(() => {
     if (!event) return -1;
     return events.findIndex((e) => e.id === event.id);
   }, [event, events]);
+
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+
+  useEffect(() => {
+    if (!open) return;
+    // quando apro o cambia l’evento dal parent, sincronizzo l’indice interno
+    if (safeIndex >= 0) setCurrentIndex(safeIndex);
+  }, [open, safeIndex, event?.id]);
+
+  const currentEvent = useMemo<EventItem | null>(() => {
+    if (!events?.length) return event ?? null;
+    if (currentIndex < 0) return event ?? null;
+    return events[currentIndex] ?? (event ?? null);
+  }, [events, currentIndex, event]);
 
   const requestClose = () => {
     if (isClosing) return;
@@ -70,19 +78,23 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   };
 
   const go = (dir: -1 | 1) => {
-    if (!event) return;
     if (!events?.length) return;
-    if (safeIndex < 0) return;
+    if (currentIndex < 0) return;
 
-    const nextIndex = (safeIndex + dir + events.length) % events.length;
+    const nextIndex = (currentIndex + dir + events.length) % events.length;
+    setCurrentIndex(nextIndex);
+
+    // (facoltativo) mantengo anche il CustomEvent, nel caso in futuro tu voglia ascoltarlo nel page
     window.dispatchEvent(
       new CustomEvent("tsw:event:navigate", { detail: { index: nextIndex } })
     );
   };
 
   // ✅ decide media (sempre, anche se event è null)
-  const mt: "image" | "video" = (event?.mediaType ?? "image") as any;
-  const ms: string = (event?.mediaSrc ?? event?.imageSrc ?? "") as any;
+  const mt: "image" | "video" = (currentEvent?.mediaType ?? "image") as any;
+  const ms: string = (currentEvent?.mediaSrc ??
+    currentEvent?.imageSrc ??
+    "") as any;
 
   // ESC + blocco scroll pagina + frecce tastiera (solo keyboard)
   useEffect(() => {
@@ -103,7 +115,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       document.body.style.overflow = prevOverflow;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, safeIndex, events]);
+  }, [open, currentIndex, events]);
 
   useEffect(() => {
     if (!open) return;
@@ -116,7 +128,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const mq = window.matchMedia("(max-width: 768px)");
     const apply = () => setIsMobile(!!mq.matches);
     apply();
-    // safari compat
     if (typeof mq.addEventListener === "function") {
       mq.addEventListener("change", apply);
       return () => mq.removeEventListener("change", apply);
@@ -149,7 +160,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       v.currentTime = 0;
     } catch {}
 
-    // audio ON (può essere bloccato da alcuni browser se non “gesture”)
     v.muted = false;
     v.volume = 1;
     setMuted(false);
@@ -178,7 +188,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
         v.currentTime = 0;
       } catch {}
     };
-  }, [open, mt, ms, event?.id]);
+  }, [open, mt, ms, currentEvent?.id]);
 
   const fmt = (s: number) => {
     if (!Number.isFinite(s)) return "0:00";
@@ -193,8 +203,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
 
     if (v.paused || v.ended) {
       setShowTapToPlay(false);
-
-      // riparti sempre da 0
       try {
         v.currentTime = 0;
       } catch {}
@@ -232,7 +240,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const v = videoRef.current;
     if (!v) return;
 
-    // iOS Safari spesso usa questo
     const anyV = v as any;
     if (typeof anyV.webkitEnterFullscreen === "function") {
       try {
@@ -241,7 +248,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       } catch {}
     }
 
-    // standard fullscreen
     const el: any = v;
     const req =
       el.requestFullscreen ||
@@ -257,6 +263,12 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   };
 
   // ✅ MOBILE ONLY: swipe handlers (drag fluido + animazione)
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(
+    null
+  );
+  const gestureLockRef = useRef<"none" | "h" | "v">("none");
+  const animatingRef = useRef(false);
+
   const setModalTransform = (tx: number, ty: number, withTransition: boolean) => {
     const el = modalRef.current;
     if (!el) return;
@@ -279,10 +291,8 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const shouldIgnoreGesture = (target: EventTarget | null) => {
     const el = target as HTMLElement | null;
     if (!el) return false;
-    // non rompere click su bottoni/controlli
     if (el.closest("button, a, input, textarea, select, [role='button']"))
       return true;
-    // lascia che la barra player/video funzioni senza “tirarla via”
     if (el.closest(".tsw-no-swipe")) return true;
     return false;
   };
@@ -311,7 +321,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const dx = t0.clientX - touchStartRef.current.x;
     const dy = t0.clientY - touchStartRef.current.y;
 
-    // lock direzione (prima intenzione dell'utente)
     if (gestureLockRef.current === "none") {
       const adx = Math.abs(dx);
       const ady = Math.abs(dy);
@@ -320,16 +329,11 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       }
     }
 
-    // drag fluido
     if (gestureLockRef.current === "h") {
-      // leggero damping
-      const damp = 0.95;
-      setModalTransform(dx * damp, 0, false);
+      setModalTransform(dx * 0.95, 0, false);
     } else if (gestureLockRef.current === "v") {
-      // solo swipe UP per chiudere (dy negativo)
       const up = Math.min(0, dy);
-      const damp = 0.9;
-      setModalTransform(0, up * damp, false);
+      setModalTransform(0, up * 0.9, false);
     }
   };
 
@@ -346,8 +350,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       return;
     }
 
-    // recupera transform corrente (approx) leggendo la style attuale
-    // (se vuota = 0)
     const tr = el.style.transform || "";
     const match = tr.match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px,/);
     const tx = match ? Number(match[1]) : 0;
@@ -358,27 +360,22 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const absX = Math.abs(tx);
     const absY = Math.abs(ty);
 
-    // soglie + “velocità” base
     const swipeX = absX > 70 || (absX > 35 && absX / elapsed > 0.6);
     const swipeUp = ty < -90 || (ty < -45 && absY / elapsed > 0.7);
 
     if (gestureLockRef.current === "h" && swipeX) {
       animatingRef.current = true;
 
-      const dir: -1 | 1 = tx < 0 ? 1 : -1; // trascino a sx => prossimo (dir +1)
+      const dir: -1 | 1 = tx < 0 ? 1 : -1; // trascino a sx => prossimo
       const outX = tx < 0 ? -420 : 420;
 
-      // slide out
       setModalTransform(outX, 0, true);
 
       window.setTimeout(() => {
-        // naviga evento
         go(dir);
 
-        // prepara da lato opposto
         setModalTransform(-outX, 0, false);
 
-        // slide in
         requestAnimationFrame(() => {
           setModalTransform(0, 0, true);
           window.setTimeout(() => {
@@ -394,7 +391,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     if (gestureLockRef.current === "v" && swipeUp) {
       animatingRef.current = true;
 
-      // swipe up => chiudi con animazione
       el.style.opacity = "1";
       el.style.transition =
         "transform 240ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease";
@@ -410,13 +406,12 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       return;
     }
 
-    // snap back
     clearModalTransform(true);
     window.setTimeout(() => clearModalTransform(false), 280);
   };
 
   // ✅ return null SOLO dopo gli hooks
-  if (!open || !event) return null;
+  if (!open || !currentEvent) return null;
 
   const isVideo = mt === "video";
 
@@ -433,7 +428,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        {/* ✅ popup più “portrait” (9:16 vibe) */}
         <div
           ref={modalRef}
           className={[
@@ -443,7 +437,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
-          // ✅ Swipe SOLO su mobile
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -463,7 +456,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
               onMouseEnter={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
             >
-              {/* ✅ media più grande + proporzioni più “verticali” */}
               <div className="relative w-full bg-black">
                 <div
                   className={[
@@ -495,7 +487,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                   ) : (
                     <Image
                       src={ms}
-                      alt={event.title}
+                      alt={currentEvent.title}
                       fill
                       className="object-contain object-center"
                       priority
@@ -506,10 +498,8 @@ export default function EventModal({ open, onClose, event, events }: Props) {
 
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
 
-              {/* Controls (solo video) */}
               {isVideo && (
                 <>
-                  {/* Tap-to-play overlay */}
                   {(showTapToPlay || !isPlaying) && (
                     <button
                       onClick={togglePlay}
@@ -530,18 +520,16 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                     </button>
                   )}
 
-                  {/* ✅ player più sottile */}
                   <div
                     className={[
                       "absolute inset-x-0 bottom-0 z-20",
                       "px-5 pb-4 pt-2",
                       "transition-opacity duration-300",
                       hovering || isPlaying ? "opacity-100" : "opacity-0",
-                      "tsw-no-swipe", // ✅ evita che lo swipe “rubi” i tocchi al player
+                      "tsw-no-swipe",
                     ].join(" ")}
                   >
                     <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur px-3 py-2">
-                      {/* progress */}
                       <div
                         className="relative h-1.5 w-full cursor-pointer rounded-full bg-white/15"
                         onClick={(e) => {
@@ -597,7 +585,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                             {muted ? "🔇" : "🔊"}
                           </button>
 
-                          {/* ✅ Fullscreen */}
                           <button
                             onClick={requestFullscreen}
                             className={[
@@ -619,7 +606,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                           </div>
                         </div>
 
-                        <div className="text-xs text-white/60">{event.title}</div>
+                        <div className="text-xs text-white/60">
+                          {currentEvent.title}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -630,15 +619,15 @@ export default function EventModal({ open, onClose, event, events }: Props) {
             {/* Text */}
             <div className="p-6 sm:p-8">
               <div className="text-sm text-zinc-400">
-                {event.date} • {event.venue}
+                {currentEvent.date} • {currentEvent.venue}
               </div>
 
               <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                {event.title}
+                {currentEvent.title}
               </h3>
 
               <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed">
-                {event.description}
+                {currentEvent.description}
               </p>
             </div>
           </div>
