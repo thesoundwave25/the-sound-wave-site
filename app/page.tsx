@@ -491,28 +491,33 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       </header>
 
       {/* 1) HERO */}
-      <section
-        id="hero"
-        className="pt-32 sm:pt-56 mx-auto w-full max-w-6xl px-4 sm:px-6 py-14 sm:py-20"
-      >
-        <div className="tsw-fade-up relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-6 sm:p-10 backdrop-blur">
+     <section
+  id="hero"
+  className="pt-20 sm:pt-56 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-20"
+>
+
+        <div className="tsw-fade-up relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-4 sm:p-10 backdrop-blur">
+
           <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
 
-          <div className="tsw-fade-up relative grid gap-8 sm:gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <div className="text-sm text-zinc-300/80">THE SOUND WAVE • DJ & ENTERTAINMENT</div>
+          <div className="tsw-fade-up relative grid gap-6 sm:gap-10 lg:grid-cols-2 lg:items-center">
+  <div className="flex flex-col items-center md:items-start text-center md:text-left">
+    <div className="text-sm text-zinc-300/80">THE SOUND WAVE • DJ & ENTERTAINMENT</div>
+
 
               <div className="relative">
                 <div aria-hidden className="absolute -inset-6 rounded-full bg-purple-500/20 blur-3xl" />
-                <h1 className="relative mt-4 text-3xl sm:text-5xl font-semibold tracking-tight">
-                  PLEASE DON'T STOP THE MUSIC
-                </h1>
+                <h1 className="relative mt-4 text-3xl sm:text-5xl font-semibold tracking-tight text-center md:text-left">
+  PLEASE DON'T STOP <br className="md:hidden" /> THE MUSIC
+</h1>
+
               </div>
 
-              <p className="mt-4 max-w-xl text-zinc-300">Dj Set ed Eventi che fanno vibrare il pubblico</p>
+             <p className="mt-4 max-w-xl mx-auto md:mx-0 text-zinc-300 text-center md:text-left">
+Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
-              <div className="mt-7 sm:mt-8 flex flex-wrap gap-3">
+              <div className="mt-7 sm:mt-8 flex flex-wrap justify-center md:justify-start gap-3">
                 <a
                   href="#format"
                   className={[

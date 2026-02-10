@@ -20,11 +20,12 @@ export default function HeroImage({ src, alt }: Props) {
       sizes="(max-width: 1280px) 100vw, 1280px"
       onLoad={() => setLoaded(true)}
       className={[
-        "object-cover scale-105",
-        "transition-opacity duration-900 ease-out delay-200",
+  "object-cover scale-[1.02] md:scale-105",
+  "transition-opacity duration-900 ease-out delay-200",
 
-        loaded ? "opacity-100" : "opacity-0",
-      ].join(" ")}
+  loaded ? "opacity-100" : "opacity-0",
+].join(" ")}
+
     />
   );
 }
