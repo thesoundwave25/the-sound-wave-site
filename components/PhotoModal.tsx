@@ -36,6 +36,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   // ✅ Track ref (Apple-like scroll on mobile)
   const trackRef = useRef<HTMLDivElement | null>(null);
+const scrollLockYRef = useRef(0);
 
   const currentPhoto: PhotoItem | null = useMemo(() => {
     if (safePhotos.length > 0) return safePhotos[index] ?? safePhotos[0] ?? null;
@@ -120,7 +121,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const prevTop = body.style.top;
     const prevWidth = body.style.width;
 
-    const scrollY = window.scrollY;
+   const scrollY = window.scrollY;
+scrollLockYRef.current = scrollY;
+
 
     body.style.overflow = "hidden";
     if (isMobile) {
@@ -130,18 +133,22 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     }
 
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
+  document.removeEventListener("keydown", onKeyDown);
 
-      body.style.overflow = prevOverflow;
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.width = prevWidth;
+  const restoreY = scrollLockYRef.current;
 
-      if (isMobile) {
-        const y = Math.abs(parseInt(body.style.top || "0", 10)) || scrollY;
-        window.scrollTo(0, y);
-      }
-    };
+  body.style.overflow = prevOverflow;
+  body.style.position = prevPosition;
+  body.style.top = prevTop;
+  body.style.width = prevWidth;
+
+  if (isMobile) {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, restoreY);
+    });
+  }
+};
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isMobile, canNavigate, safePhotos.length]);
 
