@@ -91,7 +91,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (!el) return;
 
     const child = el.querySelector<HTMLElement>(`[data-slide="${index}"]`);
-    child?.scrollIntoView({ behavior: "auto", inline: "center", block: "nearest" });
+    child?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }, [open, isMobile, canNavigate, index]);
 
   // ✅ ESC + body lock (iOS safe) + arrows desktop
