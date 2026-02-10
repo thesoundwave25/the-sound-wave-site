@@ -8,7 +8,9 @@ import HeroImage from "../components/HeroImage";
 import ServiceModal, { type ServiceItem } from "../components/ServiceModal";
 
 import FormatModal, { type FormatItem } from "../components/FormatModal";
-import PhotoModal, { type PhotoItem } from "../components/PhotoModal";
+import PhotoModal from "../components/PhotoModal";
+import type { PhotoItem } from "../components/PhotoModal";
+
 import PhotoDownloadModal, { type DownloadAlbum } from "../components/PhotoDownloadModal";
 
 import EventModal, { type EventItem } from "../components/EventModal";
