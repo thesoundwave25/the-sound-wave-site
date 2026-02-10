@@ -43,6 +43,17 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const [t, setT] = useState(0);
   const [muted, setMuted] = useState(false);
 
+  // ✅ MOBILE ONLY: abilita swipe (senza toccare desktop)
+  const [isMobile, setIsMobile] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  // gesture refs
+  const touchStartRef = useRef<{ x: number; y: number; t: number } | null>(
+    null
+  );
+  const gestureLockRef = useRef<"none" | "h" | "v">("none");
+  const animatingRef = useRef(false);
+
   const safeIndex = useMemo(() => {
     if (!event) return -1;
     return events.findIndex((e) => e.id === event.id);
@@ -97,6 +108,22 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   useEffect(() => {
     if (!open) return;
     setIsClosing(false);
+  }, [open]);
+
+  // ✅ detect mobile (solo quando modal è aperto)
+  useEffect(() => {
+    if (!open) return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    const apply = () => setIsMobile(!!mq.matches);
+    apply();
+    // safari compat
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", apply);
+      return () => mq.removeEventListener("change", apply);
+    } else {
+      mq.addListener(apply);
+      return () => mq.removeListener(apply);
+    }
   }, [open]);
 
   // ✅ Video: riparte sempre da 0 e prova autoplay con audio quando si apre
@@ -229,6 +256,165 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     }
   };
 
+  // ✅ MOBILE ONLY: swipe handlers (drag fluido + animazione)
+  const setModalTransform = (tx: number, ty: number, withTransition: boolean) => {
+    const el = modalRef.current;
+    if (!el) return;
+    el.style.transition = withTransition
+      ? "transform 260ms cubic-bezier(0.22,1,0.36,1), opacity 260ms ease"
+      : "none";
+    el.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+  };
+
+  const clearModalTransform = (withTransition: boolean) => {
+    const el = modalRef.current;
+    if (!el) return;
+    el.style.transition = withTransition
+      ? "transform 260ms cubic-bezier(0.22,1,0.36,1), opacity 260ms ease"
+      : "none";
+    el.style.transform = "";
+    el.style.opacity = "";
+  };
+
+  const shouldIgnoreGesture = (target: EventTarget | null) => {
+    const el = target as HTMLElement | null;
+    if (!el) return false;
+    // non rompere click su bottoni/controlli
+    if (el.closest("button, a, input, textarea, select, [role='button']"))
+      return true;
+    // lascia che la barra player/video funzioni senza “tirarla via”
+    if (el.closest(".tsw-no-swipe")) return true;
+    return false;
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    if (animatingRef.current) return;
+    if (shouldIgnoreGesture(e.target)) return;
+
+    const t0 = e.touches?.[0];
+    if (!t0) return;
+
+    touchStartRef.current = { x: t0.clientX, y: t0.clientY, t: Date.now() };
+    gestureLockRef.current = "none";
+    setModalTransform(0, 0, false);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    if (animatingRef.current) return;
+    if (!touchStartRef.current) return;
+
+    const t0 = e.touches?.[0];
+    if (!t0) return;
+
+    const dx = t0.clientX - touchStartRef.current.x;
+    const dy = t0.clientY - touchStartRef.current.y;
+
+    // lock direzione (prima intenzione dell'utente)
+    if (gestureLockRef.current === "none") {
+      const adx = Math.abs(dx);
+      const ady = Math.abs(dy);
+      if (adx > 10 || ady > 10) {
+        gestureLockRef.current = adx > ady ? "h" : "v";
+      }
+    }
+
+    // drag fluido
+    if (gestureLockRef.current === "h") {
+      // leggero damping
+      const damp = 0.95;
+      setModalTransform(dx * damp, 0, false);
+    } else if (gestureLockRef.current === "v") {
+      // solo swipe UP per chiudere (dy negativo)
+      const up = Math.min(0, dy);
+      const damp = 0.9;
+      setModalTransform(0, up * damp, false);
+    }
+  };
+
+  const onTouchEnd = () => {
+    if (!isMobile) return;
+    if (animatingRef.current) return;
+
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+
+    const el = modalRef.current;
+    if (!start || !el) {
+      clearModalTransform(true);
+      return;
+    }
+
+    // recupera transform corrente (approx) leggendo la style attuale
+    // (se vuota = 0)
+    const tr = el.style.transform || "";
+    const match = tr.match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px,/);
+    const tx = match ? Number(match[1]) : 0;
+    const ty = match ? Number(match[2]) : 0;
+
+    const elapsed = Math.max(1, Date.now() - start.t);
+
+    const absX = Math.abs(tx);
+    const absY = Math.abs(ty);
+
+    // soglie + “velocità” base
+    const swipeX = absX > 70 || (absX > 35 && absX / elapsed > 0.6);
+    const swipeUp = ty < -90 || (ty < -45 && absY / elapsed > 0.7);
+
+    if (gestureLockRef.current === "h" && swipeX) {
+      animatingRef.current = true;
+
+      const dir: -1 | 1 = tx < 0 ? 1 : -1; // trascino a sx => prossimo (dir +1)
+      const outX = tx < 0 ? -420 : 420;
+
+      // slide out
+      setModalTransform(outX, 0, true);
+
+      window.setTimeout(() => {
+        // naviga evento
+        go(dir);
+
+        // prepara da lato opposto
+        setModalTransform(-outX, 0, false);
+
+        // slide in
+        requestAnimationFrame(() => {
+          setModalTransform(0, 0, true);
+          window.setTimeout(() => {
+            animatingRef.current = false;
+            clearModalTransform(false);
+          }, 270);
+        });
+      }, 240);
+
+      return;
+    }
+
+    if (gestureLockRef.current === "v" && swipeUp) {
+      animatingRef.current = true;
+
+      // swipe up => chiudi con animazione
+      el.style.opacity = "1";
+      el.style.transition =
+        "transform 240ms cubic-bezier(0.22,1,0.36,1), opacity 240ms ease";
+      el.style.transform = `translate3d(0, -240px, 0)`;
+      el.style.opacity = "0";
+
+      window.setTimeout(() => {
+        animatingRef.current = false;
+        clearModalTransform(false);
+        requestClose();
+      }, 220);
+
+      return;
+    }
+
+    // snap back
+    clearModalTransform(true);
+    window.setTimeout(() => clearModalTransform(false), 280);
+  };
+
   // ✅ return null SOLO dopo gli hooks
   if (!open || !event) return null;
 
@@ -249,6 +435,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       <div className="absolute inset-0 flex items-center justify-center p-4">
         {/* ✅ popup più “portrait” (9:16 vibe) */}
         <div
+          ref={modalRef}
           className={[
             "relative w-full max-w-[560px] rounded-3xl tsw-event-glow",
             isClosing ? "tsw-modal-out" : "tsw-modal-in",
@@ -256,6 +443,10 @@ export default function EventModal({ open, onClose, event, events }: Props) {
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
+          // ✅ Swipe SOLO su mobile
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
             {/* Close */}
@@ -277,9 +468,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                 <div
                   className={[
                     "relative w-full",
-                    // 9:16 per locandine / reel
                     "aspect-[9/16]",
-                    // limite altezza per non “sfondare” lo schermo
                     "max-h-[76vh]",
                     "mx-auto",
                   ].join(" ")}
@@ -348,6 +537,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                       "px-5 pb-4 pt-2",
                       "transition-opacity duration-300",
                       hovering || isPlaying ? "opacity-100" : "opacity-0",
+                      "tsw-no-swipe", // ✅ evita che lo swipe “rubi” i tocchi al player
                     ].join(" ")}
                   >
                     <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur px-3 py-2">
@@ -429,9 +619,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                           </div>
                         </div>
 
-                        <div className="text-xs text-white/60">
-                          {event.title}
-                        </div>
+                        <div className="text-xs text-white/60">{event.title}</div>
                       </div>
                     </div>
                   </div>
