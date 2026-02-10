@@ -449,22 +449,23 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                 <div className="px-3 py-3">
                   <div className="grid gap-1">
                     {mobileLinks.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        onClick={() => setMobileNavOpen(false)}
-                        className={[
-                          "flex items-center justify-between",
-                          "rounded-xl px-3 py-3",
-                          "text-[15px] font-medium text-zinc-200",
-                          "bg-white/0 hover:bg-white/5 active:bg-white/10",
-                          "transition",
-                        ].join(" ")}
-                      >
-                        <span>{l.label}</span>
-                        <span className="text-zinc-500">→</span>
-                      </a>
-                    ))}
+  <a
+  key={l.href}
+  href={l.href}
+  onClick={() => setMobileNavOpen(false)}
+  className={[
+    "flex items-center justify-center text-center",
+    "rounded-xl px-3 py-3",
+    "text-[15px] font-medium text-zinc-200",
+    "bg-white/0 hover:bg-white/5 active:bg-white/10",
+    "transition",
+  ].join(" ")}
+>
+  <span>{l.label}</span>
+</a>
+
+))}
+
                   </div>
 
                   <div className="mt-3 h-px bg-white/10" />
