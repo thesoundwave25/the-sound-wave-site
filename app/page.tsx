@@ -83,24 +83,24 @@ export default function Home() {
   // --- FOTO GALLERY (cards + popup) ---
   const photos = useMemo<PhotoItem[]>(
     () => [
-      { id: "p1", src: "/gallery/1.jpg", alt: "Foto evento 01" },
-      { id: "p2", src: "/gallery/2.jpg", alt: "Foto evento 02" },
-      { id: "p3", src: "/gallery/3.jpg", alt: "Foto evento 03" },
-      { id: "p4", src: "/gallery/4.jpg", alt: "Foto evento 04" },
-      { id: "p5", src: "/gallery/5.jpg", alt: "Foto evento 05" },
-      { id: "p6", src: "/gallery/6.jpg", alt: "Foto evento 06" },
-      { id: "p7", src: "/gallery/7.jpg", alt: "Foto evento 07" },
-      { id: "p9", src: "/gallery/9.jpg", alt: "Foto evento 09" },
-      { id: "p10", src: "/gallery/10.jpg", alt: "Foto evento 10" },
-      { id: "p11", src: "/gallery/11.jpg", alt: "Foto evento 11" },
-      { id: "p12", src: "/gallery/12.jpg", alt: "Foto evento 12" },
-      { id: "p13", src: "/gallery/13.jpg", alt: "Foto evento 13" },
-      { id: "p14", src: "/gallery/14.jpg", alt: "Foto evento 14" },
-      { id: "p15", src: "/gallery/15.jpg", alt: "Foto evento 15" },
-      { id: "p16", src: "/gallery/16.jpg", alt: "Foto evento 16" },
-      { id: "p17", src: "/gallery/17.jpg", alt: "Foto evento 17" },
-      { id: "p18", src: "/gallery/18.jpg", alt: "Foto evento 18" },
-      { id: "p19", src: "/gallery/19.jpg", alt: "Foto evento 19" },
+      { id: "p1", src: "/gallery/1.webp", alt: "Foto evento 01" },
+      { id: "p2", src: "/gallery/2.webp", alt: "Foto evento 02" },
+      { id: "p3", src: "/gallery/3.webp", alt: "Foto evento 03" },
+      { id: "p4", src: "/gallery/4.webp", alt: "Foto evento 04" },
+      { id: "p5", src: "/gallery/5.webp", alt: "Foto evento 05" },
+      { id: "p6", src: "/gallery/6.webp", alt: "Foto evento 06" },
+      { id: "p7", src: "/gallery/7.webp", alt: "Foto evento 07" },
+      { id: "p9", src: "/gallery/9.webp", alt: "Foto evento 09" },
+      { id: "p10", src: "/gallery/10.webp", alt: "Foto evento 10" },
+      { id: "p11", src: "/gallery/11.webp", alt: "Foto evento 11" },
+      { id: "p12", src: "/gallery/12.webp", alt: "Foto evento 12" },
+      { id: "p13", src: "/gallery/13.webp", alt: "Foto evento 13" },
+      { id: "p14", src: "/gallery/14.webp", alt: "Foto evento 14" },
+      { id: "p15", src: "/gallery/15.webp", alt: "Foto evento 15" },
+      { id: "p16", src: "/gallery/16.webp", alt: "Foto evento 16" },
+      { id: "p17", src: "/gallery/17.webp", alt: "Foto evento 17" },
+      { id: "p18", src: "/gallery/18.webp", alt: "Foto evento 18" },
+      { id: "p19", src: "/gallery/19.webp", alt: "Foto evento 19" },
     ],
     []
   );
@@ -166,7 +166,7 @@ export default function Home() {
 che aggiunge un tocco unico alla performance con la sua voce,
 coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         mediaType: "image",
-        mediaSrc: "/brand/foto-servizi-duo-dj.jpg",
+        mediaSrc: "/brand/foto-servizi-duo-dj.webp",
       },
       {
         id: "organizzazione-eventi",
@@ -175,7 +175,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         detail:
           "Che sia una festa privata, un evento aziendale o una serata in discoteca, pianifichiamo ogni aspetto in base alle tue esigenze e desideri, garantendo un'organizzazione impeccabile.",
         mediaType: "image",
-        mediaSrc: "/brand/immagine-eventi.jpg",
+        mediaSrc: "/brand/immagine-eventi.webp",
       },
       {
         id: "audio-luci",
@@ -193,7 +193,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         detail:
           "Curiamo l'immagine dell'evento. Dalla creazione di locandine e materiali promozionali alla gestione della pubblicità, ci occupiamo di tutto per assicurare la massima visibilità.",
         mediaType: "image",
-        mediaSrc: "/brand/gestione-grafica.jpg",
+        mediaSrc: "/brand/gestione-grafica.webp",
       },
       {
         id: "social-pr",
@@ -202,7 +202,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         detail:
           "Social PR di The Sound Wave | Event PR & Audience Management. Connessioni reali, visibilità concreta, eventi che funzionano.",
         mediaType: "image",
-        mediaSrc: "/brand/logo-waven.jpg",
+        mediaSrc: "/brand/waven-servizi.webp",
         igUrl: "https://www.instagram.com/waven.social.pr/",
       },
       {
@@ -212,7 +212,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         detail:
           "Servizio foto, video e riprese drone ad alto impatto social. Contenuti professionali realizzati, editati e pubblicati in tempo reale durante l'evento.",
         mediaType: "image",
-        mediaSrc: "/brand/alemembrini.jpg",
+        mediaSrc: "/brand/alemembrini.webp",
         igUrl: "https://www.instagram.com/alemembriniph/",
         websiteUrl: "https://alessandromembriniph.com/index.html",
       },
@@ -364,7 +364,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
           {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
           <a href="#hero" className="flex items-center justify-center">
             <Image
-              src="/brand/tsw-logo.png"
+              src="/brand/tsw-logo.svg"
               alt="The Sound Wave"
               width={400}
               height={400}
@@ -545,7 +545,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-transparent to-blue-500/20" />
-                <HeroImage src="/brand/wallen-gianluk-home.jpg" alt="Wallen & Gianluk - The Sound Wave" />
+                <HeroImage src="/brand/wallen-gianluk-home.webp" alt="Wallen & Gianluk - The Sound Wave" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               </div>
             </div>
@@ -916,7 +916,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                 <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
                   <div className="relative aspect-[4/5] w-full">
                     <Image
-                      src="/brand/chi-siamo.jpg"
+                      src="/brand/chi-siamo.webp"
                       alt="The Sound Wave DJs"
                       fill
                       className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
@@ -1067,10 +1067,10 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
           <div className="mt-6 flex justify-center flex-wrap gap-5 sm:gap-6">
             <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/logo-gianluk.png" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
+              <Image src="/brand/gianluk-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
             </div>
             <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/logo-wallen.png" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
+              <Image src="/brand/wallen-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
             </div>
             <div className="relative h-14 sm:h-16 w-32 sm:w-36">
               <Image src="/brand/waven-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
