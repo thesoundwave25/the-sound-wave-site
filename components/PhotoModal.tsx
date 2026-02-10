@@ -78,21 +78,26 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (safePhotos.length > 0 && photo) {
       const found = safePhotos.findIndex((p) => p.id === photo.id);
       setIndex(found >= 0 ? found : 0);
+
+      // ✅ Se siamo su mobile, porta la track alla slide iniziale SOLO all’apertura
+      // (non durante lo swipe)
+      const el = trackRef.current;
+      if (el && isMobile) {
+        window.requestAnimationFrame(() => {
+          el.scrollLeft = el.clientWidth * (found >= 0 ? found : 0);
+        });
+      }
     } else {
       setIndex(0);
+      const el = trackRef.current;
+      if (el && isMobile) {
+        window.requestAnimationFrame(() => {
+          el.scrollLeft = 0;
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
-
-  // ✅ quando cambia index: scroll alla slide corretta (solo mobile)
-  useEffect(() => {
-    if (!open || !isMobile || !canNavigate) return;
-    const el = trackRef.current;
-    if (!el) return;
-
-    const child = el.querySelector<HTMLElement>(`[data-slide="${index}"]`);
-    child?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  }, [open, isMobile, canNavigate, index]);
 
   // ✅ ESC + body lock (iOS safe) + arrows desktop
   useEffect(() => {
@@ -140,7 +145,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isMobile, canNavigate, safePhotos.length]);
 
-  // ✅ sync index when user scroll-snaps on mobile
+  // ✅ aggiorna index durante scroll (solo per dots/indicator)
+  // (NON fa più scroll programmatico → swipe fluido)
   const onMobileScroll = () => {
     if (!isMobile || !canNavigate) return;
     const el = trackRef.current;
@@ -148,7 +154,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     const w = el.clientWidth || 1;
     const i = Math.round(el.scrollLeft / w);
-    if (i !== index) setIndex(Math.max(0, Math.min(i, safePhotos.length - 1)));
+    const next = Math.max(0, Math.min(i, safePhotos.length - 1));
+    if (next !== index) setIndex(next);
   };
 
   if (!open || !currentPhoto) return null;
@@ -236,17 +243,19 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   onScroll={onMobileScroll}
                   className={[
                     "tsw-hide-scrollbar",
-                    "flex overflow-x-auto scroll-smooth",
+                    "flex overflow-x-auto",
                     "snap-x snap-mandatory",
+                    "overscroll-x-contain",
                     "bg-black w-full",
                     "h-[70dvh]",
                   ].join(" ")}
+                  style={{ WebkitOverflowScrolling: "touch" as any }}
                 >
                   {safePhotos.map((p, i) => (
                     <div
                       key={p.id}
                       data-slide={i}
-                      className="snap-center shrink-0 w-full h-full relative"
+                      className="snap-center snap-always shrink-0 w-full h-full relative"
                     >
                       <Image
                         src={p.src}
