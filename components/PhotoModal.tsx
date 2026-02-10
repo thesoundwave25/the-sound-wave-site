@@ -36,7 +36,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   // ✅ Track ref (Apple-like scroll on mobile)
   const trackRef = useRef<HTMLDivElement | null>(null);
-const scrollLockYRef = useRef(0);
+
+  // ✅ store scroll while locked (avoid iOS jump)
+  const scrollLockYRef = useRef(0);
 
   const currentPhoto: PhotoItem | null = useMemo(() => {
     if (safePhotos.length > 0) return safePhotos[index] ?? safePhotos[0] ?? null;
@@ -80,8 +82,7 @@ const scrollLockYRef = useRef(0);
       const found = safePhotos.findIndex((p) => p.id === photo.id);
       setIndex(found >= 0 ? found : 0);
 
-      // ✅ Se siamo su mobile, porta la track alla slide iniziale SOLO all’apertura
-      // (non durante lo swipe)
+      // ✅ Mobile: porta la track alla slide iniziale SOLO all’apertura
       const el = trackRef.current;
       if (el && isMobile) {
         window.requestAnimationFrame(() => {
@@ -100,7 +101,7 @@ const scrollLockYRef = useRef(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // ✅ ESC + body lock (iOS safe) + arrows desktop
+  // ✅ ESC + body/html lock (iOS safe) + arrows desktop
   useEffect(() => {
     if (!open) return;
 
@@ -114,18 +115,28 @@ const scrollLockYRef = useRef(0);
 
     document.addEventListener("keydown", onKeyDown);
 
-    // iOS-safe lock: position fixed
     const body = document.body;
+    const html = document.documentElement;
+
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
     const prevWidth = body.style.width;
+    const prevHtmlOverflow = html.style.overflow;
 
-   const scrollY = window.scrollY;
-scrollLockYRef.current = scrollY;
+    // ✅ prevent Safari auto restoration
+    const prevScrollRestoration = window.history.scrollRestoration;
+    try {
+      window.history.scrollRestoration = "manual";
+    } catch {}
 
+    const scrollY = window.scrollY;
+    scrollLockYRef.current = scrollY;
 
+    // lock
     body.style.overflow = "hidden";
+    html.style.overflow = "hidden";
+
     if (isMobile) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
@@ -133,27 +144,40 @@ scrollLockYRef.current = scrollY;
     }
 
     return () => {
-  document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown);
 
-  const restoreY = scrollLockYRef.current;
+      // ✅ prevent focus-jump on close (iOS)
+      try {
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      } catch {}
 
-  body.style.overflow = prevOverflow;
-  body.style.position = prevPosition;
-  body.style.top = prevTop;
-  body.style.width = prevWidth;
+      const restoreY = scrollLockYRef.current;
 
-  if (isMobile) {
-    requestAnimationFrame(() => {
-      window.scrollTo(0, restoreY);
-    });
-  }
-};
+      // restore styles
+      body.style.overflow = prevOverflow;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.width = prevWidth;
+      html.style.overflow = prevHtmlOverflow;
 
+      // restore scroll restoration
+      try {
+        window.history.scrollRestoration = prevScrollRestoration;
+      } catch {}
+
+      // ✅ double rAF to avoid 1-frame jump
+      if (isMobile) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.scrollTo(0, restoreY);
+          });
+        });
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isMobile, canNavigate, safePhotos.length]);
 
   // ✅ aggiorna index durante scroll (solo per dots/indicator)
-  // (NON fa più scroll programmatico → swipe fluido)
   const onMobileScroll = () => {
     if (!isMobile || !canNavigate) return;
     const el = trackRef.current;
