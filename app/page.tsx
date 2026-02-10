@@ -760,12 +760,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
               >
                <div className="relative overflow-hidden rounded-2xl flex items-center justify-center bg-black">
 
-               <div className="relative aspect-[16/10] w-full">
+               <div className="relative w-full flex items-center justify-center h-[240px] sm:h-[280px] md:aspect-[16/10] md:h-auto">
+
  <Image
   src={p.src}
   alt={p.alt ?? "Foto evento"}
   fill
-  className="object-contain object-center p-2 md:p-0"
+  className="object-contain object-center p-3 sm:p-2 md:p-0"
   sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
 />
 
