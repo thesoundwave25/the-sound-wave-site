@@ -598,13 +598,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                   />
 
                   <div className="relative z-10">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="text-base font-semibold tracking-tight">{s.title}</div>
-                      <span className="text-zinc-400 transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5">
-                        →
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-zinc-300 line-clamp-1">{s.desc}</p>
+                    <div className="text-base font-semibold tracking-tight text-center md:text-left">
+  {s.title}
+</div>
+
+<p className="mt-2 text-sm text-zinc-300 line-clamp-1 text-center md:text-left">
+  {s.desc}
+</p>
+
                   </div>
                 </li>
               );

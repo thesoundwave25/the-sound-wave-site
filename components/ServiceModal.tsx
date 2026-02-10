@@ -114,7 +114,8 @@ const onTouchEnd = (e: React.TouchEvent) => {
   className={[
     "relative w-full max-w-3xl overflow-hidden border border-white/10",
 "rounded-t-3xl md:rounded-3xl",
-"h-[92vh] md:h-auto",
+"max-h-[80vh] md:h-auto",
+
 
     "bg-zinc-950/80 shadow-2xl",
     isClosing ? "tsw-modal-out" : "tsw-modal-in",
