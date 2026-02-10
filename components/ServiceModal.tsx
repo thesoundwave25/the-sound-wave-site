@@ -106,14 +106,15 @@ const onTouchEnd = (e: React.TouchEvent) => {
       />
 
       {/* Dialog */}
-   <div className="absolute inset-0 flex items-end md:items-center justify-center p-0 md:p-4">
+   <div className="absolute inset-0 flex items-center justify-center p-4 md:p-4">
+
 
         <div
   role="dialog"
   aria-modal="true"
   className={[
     "relative w-full max-w-3xl overflow-hidden border border-white/10",
-"rounded-t-3xl md:rounded-3xl",
+"rounded-3xl",
 "max-h-[80vh] md:h-auto",
 
 
@@ -145,7 +146,8 @@ const onTouchEnd = (e: React.TouchEvent) => {
   <div className="h-1.5 w-12 rounded-full bg-white/20" />
 </div>
           {/* Media */}
-          <div className="relative aspect-video w-full bg-black/40">
+          <div className="relative aspect-[16/9] md:aspect-video w-full bg-black/40">
+
             {service.mediaType === "video" && service.mediaSrc ? (
               <video
                 className="h-full w-full object-cover"
