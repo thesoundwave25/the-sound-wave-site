@@ -887,7 +887,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
   "active:translate-y-[1px] active:scale-[0.985]",
   "select-none",
   // card più piccola su mobile
-  "w-[72vw] sm:w-[36vw] md:w-[24%]",
+  "w-[62vw] sm:w-[36vw] md:w-[24%]",
 ].join(" ")}
 
               >
