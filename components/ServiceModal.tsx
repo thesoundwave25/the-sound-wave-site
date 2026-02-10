@@ -106,13 +106,7 @@ const onTouchEnd = (e: React.TouchEvent) => {
       />
 
       {/* Dialog */}
-      <div className="
-absolute inset-0
-flex
-items-end md:items-center
-justify-center
-p-0 md:p-4
-">
+   <div className="absolute inset-0 flex items-end md:items-center justify-center p-0 md:p-4">
 
         <div
   role="dialog"
