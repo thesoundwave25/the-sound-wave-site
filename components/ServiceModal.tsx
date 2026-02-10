@@ -24,6 +24,7 @@ type Props = {
 
 export default function ServiceModal({ open, onClose, service }: Props) {
   const [isClosing, setIsClosing] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 // ✅ Swipe up to close (mobile)
 const [touchStartY, setTouchStartY] = useState<number | null>(null);
 const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -115,7 +116,7 @@ const onTouchEnd = (e: React.TouchEvent) => {
   className={[
     "relative w-full max-w-3xl overflow-hidden border border-white/10",
 "rounded-3xl",
-"max-h-[80vh] md:h-auto",
+"max-h-[80vh] md:max-h-none",
 
 
     "bg-zinc-950/80 shadow-2xl",
@@ -171,9 +172,22 @@ const onTouchEnd = (e: React.TouchEvent) => {
 
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
           </div>
+          {/* Shadow when scrolled (mobile only) */}
+<div
+  className={[
+    "md:hidden",
+    "h-px w-full",
+    scrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.55)]" : "shadow-none",
+    "transition-shadow duration-300",
+  ].join(" ")}
+/>
+
 
           {/* Content */}
-          <div className="p-6 sm:p-8">
+<div
+  className="p-6 sm:p-8 max-h-[42vh] overflow-y-auto"
+  onScroll={(e) => setScrolled((e.currentTarget as HTMLDivElement).scrollTop > 6)}
+>
             <h3 className="text-2xl font-semibold tracking-tight text-zinc-100">
               {service.title}
             </h3>
