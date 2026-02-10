@@ -761,13 +761,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
    <div className="relative overflow-hidden rounded-2xl bg-black">
 
   {/* MOBILE (no fill → niente tagli) */}
-  <div className="md:hidden flex items-center justify-center px-3 py-4">
+  <div className="md:hidden flex items-center justify-center px-2 py-3">
     <Image
       src={p.src}
       alt={p.alt ?? "Foto evento"}
       width={1600}
       height={900}
-      className="w-full h-auto max-h-[240px] object-contain object-center"
+      className="w-full h-auto max-h-[220px] object-contain object-center"
       sizes="82vw"
     />
   </div>
@@ -878,15 +878,18 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
                 data-event-card={idx === 0 ? "1" : undefined}
                 onClick={() => setActiveEvent(ev)}
                 className={[
-                  "snap-start shrink-0 text-left",
-                  "group cursor-pointer relative overflow-hidden rounded-2xl",
-                  "border border-white/10 bg-white/5 p-4 sm:p-5",
-                  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  "hover:-translate-y-1 hover:border-white/20",
-                  "active:translate-y-[1px] active:scale-[0.985]",
-                  "select-none",
-                  "w-[84vw] sm:w-[46vw] md:w-[32%]",
-                ].join(" ")}
+  "snap-start shrink-0 text-left",
+  "group cursor-pointer relative rounded-2xl bg-black",
+  // bordo: quasi invisibile su mobile, identico su md+
+  "border border-white/5 md:border-white/10",
+  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+  "hover:-translate-y-1 hover:border-white/20",
+  "active:translate-y-[1px] active:scale-[0.985]",
+  "select-none",
+  // card più piccola su mobile
+  "w-[72vw] sm:w-[46vw] md:w-[24%]",
+].join(" ")}
+
               >
                 <div className="relative aspect-[2480/3508] w-full overflow-hidden rounded-xl border border-white/10 bg-black">
                   <Image
