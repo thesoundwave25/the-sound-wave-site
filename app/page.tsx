@@ -759,17 +759,25 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
                 ].join(" ")}
               >
                 <div className="relative overflow-hidden rounded-2xl">
-                  <div className="relative aspect-[16/10] w-full">
-                    <Image
-                      src={p.src}
-                      alt={p.alt ?? "Foto evento"}
-                      fill
-                      className="object-cover object-center"
-                      sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
-                      priority={false}
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
-                  </div>
+               <div className="relative aspect-[16/10] w-full">
+  <Image
+    src={p.src}
+    alt={p.alt ?? "Foto evento"}
+    fill
+    className="object-contain sm:object-cover object-center"
+    sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
+    priority={false}
+  />
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+
+  {/* Swipe hint (solo mobile) */}
+  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center sm:hidden">
+    <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
+      ← scorri →
+    </div>
+  </div>
+</div>
+
                 </div>
               </button>
             ))}
