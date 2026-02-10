@@ -314,7 +314,8 @@ export default function FormatModal({ open, onClose, format }: Props) {
 
           <div className="p-6 sm:p-8">
             <h3 className="text-2xl font-semibold tracking-tight text-zinc-100 text-center mx-auto">
-
+  {format.title}
+</h3>
             <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="text-sm text-zinc-200 font-semibold">Player audio</div>
 
