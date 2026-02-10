@@ -758,16 +758,17 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
                   "w-[82vw] sm:w-[46vw] md:w-[24%]",
                 ].join(" ")}
               >
-                <div className="relative overflow-hidden rounded-2xl">
+               <div className="relative overflow-hidden rounded-2xl flex items-center justify-center bg-black">
+
                <div className="relative aspect-[16/10] w-full">
-  <Image
-    src={p.src}
-    alt={p.alt ?? "Foto evento"}
-    fill
-    className="object-contain sm:object-cover object-center"
-    sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
-    priority={false}
-  />
+ <Image
+  src={p.src}
+  alt={p.alt ?? "Foto evento"}
+  fill
+  className="object-contain object-center p-2 md:p-0"
+  sizes="(max-width: 768px) 82vw, (max-width: 1024px) 46vw, 25vw"
+/>
+
   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
 
   {/* Swipe hint (solo mobile) */}
