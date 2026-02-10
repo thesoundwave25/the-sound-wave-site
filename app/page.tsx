@@ -282,7 +282,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
     () => [
       {
         id: "event-1",
-        title: "ITALIAN REMIX PARTY",
+        title: "ITALIAN REMIX",
         date: "20 FEBBRAIO 2026",
         venue: "'Loft Cafè - Rovato'",
         imageSrc: "/brand/italian-remix-logo.svg",
