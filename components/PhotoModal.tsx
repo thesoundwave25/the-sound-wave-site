@@ -34,13 +34,13 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   const [isMobile, setIsMobile] = useState(false);
 
-  // ✅ Track ref (Apple-like scroll on mobile)
+  // Track ref (scroll orizzontale su mobile)
   const trackRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ store scroll while locked (avoid iOS jump)
+  // store scroll while locked (avoid iOS jump)
   const scrollLockYRef = useRef(0);
 
-  // ✅ store the element that had focus when opening (usually the clicked card button)
+  // store the element that had focus when opening (usually the clicked card button)
   const lastActiveElRef = useRef<HTMLElement | null>(null);
 
   const currentPhoto: PhotoItem | null = useMemo(() => {
@@ -49,7 +49,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   }, [safePhotos, index, photo]);
 
   // ==========================
-  // ✅ Apple swipe-to-close (MOBILE ONLY)
+  // Apple swipe-to-close (MOBILE ONLY)
   // ==========================
   const [dragY, setDragY] = useState(0); // negativo = swipe up
   const [dragging, setDragging] = useState(false);
@@ -73,7 +73,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (isClosing) return;
     setIsClosing(true);
 
-    // ✅ blur ASAP to prevent focus-restore scroll jump
+    // blur ASAP to prevent focus-restore scroll jump
     try {
       (document.activeElement as HTMLElement | null)?.blur?.();
     } catch {}
@@ -95,7 +95,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     setIndex((i) => (i + 1) % safePhotos.length);
   };
 
-  // ✅ mobile watcher
+  // mobile watcher
   useEffect(() => {
     const update = () => setIsMobile(isMobileViewport());
     update();
@@ -103,7 +103,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // ✅ When modal opens: remove focus from the clicked thumbnail button (iOS jump fix)
+  // When modal opens: remove focus from the clicked thumbnail button (iOS jump fix)
   useEffect(() => {
     if (!open) return;
 
@@ -133,6 +133,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       const found = safePhotos.findIndex((p) => p.id === photo.id);
       setIndex(found >= 0 ? found : 0);
 
+      // Mobile: porta la track alla slide iniziale SOLO all’apertura
       const el = trackRef.current;
       if (el && isMobile) {
         window.requestAnimationFrame(() => {
@@ -151,7 +152,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // ✅ ESC + body/html lock (iOS safe) + arrows desktop
+  // ESC + body/html lock (iOS safe) + arrows desktop
   useEffect(() => {
     if (!open) return;
 
@@ -174,6 +175,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const prevWidth = body.style.width;
     const prevHtmlOverflow = html.style.overflow;
 
+    // prevent Safari auto restoration
     const prevScrollRestoration = window.history.scrollRestoration;
     try {
       window.history.scrollRestoration = "manual";
@@ -182,6 +184,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const scrollY = window.scrollY;
     scrollLockYRef.current = scrollY;
 
+    // lock
     body.style.overflow = "hidden";
     html.style.overflow = "hidden";
 
@@ -194,6 +197,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
+      // prevent focus-jump on close (iOS)
       try {
         (document.activeElement as HTMLElement | null)?.blur?.();
         lastActiveElRef.current?.blur?.();
@@ -201,16 +205,19 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
       const restoreY = scrollLockYRef.current;
 
+      // restore styles
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
+      // restore scroll restoration
       try {
         window.history.scrollRestoration = prevScrollRestoration;
       } catch {}
 
+      // double rAF to avoid 1-frame jump
       if (isMobile) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -222,7 +229,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isMobile, canNavigate, safePhotos.length]);
 
-  // ✅ aggiorna index durante scroll (solo per dots/indicator)
+  // aggiorna index durante scroll (solo per dots/indicator)
   const onMobileScroll = () => {
     if (!isMobile || !canNavigate) return;
     const el = trackRef.current;
@@ -234,11 +241,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (next !== index) setIndex(next);
   };
 
-  // ==========================
-  // ✅ Unified swipe handlers (mobile only)
+  // Unified swipe handlers (mobile only)
   // - Se orizzontale -> ignore (swipe foto)
   // - Se verticale -> drag (chiusura)
-  // ==========================
   const onSwipeTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
     const t = e.touches[0];
@@ -319,7 +324,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       <button
         aria-label="Chiudi"
         onClick={requestClose}
-        onMouseDown={(e) => e.preventDefault()}
+        onMouseDown={(e) => e.preventDefault()} // avoid focus
         style={backdropStyle}
         className={[
           "absolute inset-0 bg-black/60 backdrop-blur-md",
@@ -328,182 +333,191 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       />
 
       {/* Dialog */}
-      <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
-        {/* ✅ DRAG WRAPPER (solo mobile) */}
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        {/* MOBILE: drag wrapper */}
         <div className={snapBack ? "tsw-drag-snap" : ""} style={draggableStyle}>
-          {/* ✅ DESKTOP: identico al tuo (glow + rounded)
-              ✅ MOBILE: fullscreen (no “telefono nel telefono”) */}
-          <div
-            className={[
-              "relative w-full",
-              isMobile
-                ? "w-screen max-w-none h-[100dvh] rounded-none"
-                : "max-w-5xl rounded-3xl tsw-photo-glow",
-              isClosing ? "tsw-modal-out" : "tsw-modal-in",
-            ].join(" ")}
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* =======================
+              DESKTOP (INVARIATO)
+             ======================= */}
+          {!isMobile ? (
             <div
               className={[
-                "relative w-full overflow-hidden bg-black shadow-2xl",
-                isMobile
-                  ? "h-[100dvh] border-0 rounded-none"
-                  : "rounded-3xl border border-white/10 bg-zinc-950/85",
+                "relative w-full max-w-5xl rounded-3xl tsw-photo-glow",
+                isClosing ? "tsw-modal-out" : "tsw-modal-in",
               ].join(" ")}
-              style={{
-                paddingBottom: "env(safe-area-inset-bottom)" as any,
-              }}
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* ✅ SWIPE HANDLE (solo mobile, hint) */}
-              {isMobile && (
-                <div
-                  className="md:hidden"
-                  onTouchStart={onSwipeTouchStart}
-                  onTouchMove={onSwipeTouchMove}
-                  onTouchEnd={onSwipeTouchEnd}
-                >
-                  <div
-                    className="flex justify-center pt-3 pb-2"
-                    style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" as any }}
-                  >
-                    <div className="h-1.5 w-12 rounded-full bg-white/20" />
-                  </div>
-                </div>
-              )}
-
-              {/* Frecce SOLO desktop (invariato) */}
-              {canNavigate && !isMobile && (
-                <>
-                  <button
-                    aria-label="Foto precedente"
-                    onClick={goPrev}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={[
-                      "absolute left-4 top-1/2 -translate-y-1/2 z-20",
-                      "h-11 w-11 rounded-full",
-                      "border border-white/15 bg-black/55 backdrop-blur",
-                      "grid place-items-center text-white/90",
-                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                      "active:scale-[0.98]",
-                    ].join(" ")}
-                  >
-                    ‹
-                  </button>
-
-                  <button
-                    aria-label="Foto successiva"
-                    onClick={goNext}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={[
-                      "absolute right-4 top-1/2 -translate-y-1/2 z-20",
-                      "h-11 w-11 rounded-full",
-                      "border border-white/15 bg-black/55 backdrop-blur",
-                      "grid place-items-center text-white/90",
-                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                      "active:scale-[0.98]",
-                    ].join(" ")}
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-
-              {/* IMMAGINE / GALLERY */}
               <div
-                className="relative w-full"
-                onTouchStart={isMobile ? onSwipeTouchStart : undefined}
-                onTouchMove={isMobile ? onSwipeTouchMove : undefined}
-                onTouchEnd={isMobile ? onSwipeTouchEnd : undefined}
-                style={
-                  isMobile
-                    ? ({
-                        touchAction: canNavigate ? "pan-x" : "none",
-                      } as any)
-                    : undefined
-                }
+                className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl"
+                style={{ paddingBottom: "env(safe-area-inset-bottom)" as any }}
               >
-                {isMobile && canNavigate ? (
-                  <div
-                    ref={trackRef}
-                    tabIndex={-1}
-                    onScroll={onMobileScroll}
-                    className={[
-                      "tsw-hide-scrollbar",
-                      "flex overflow-x-auto",
-                      "snap-x snap-mandatory",
-                      "overscroll-x-contain",
-                      "bg-black w-full",
-                      // ✅ più grande: fullscreen meno “aria”
-                      "h-[86dvh]",
-                    ].join(" ")}
-                    style={{
-                      WebkitOverflowScrolling: "touch" as any,
-                      touchAction: "pan-x",
-                    }}
-                  >
-                    {safePhotos.map((p, i) => (
-                      <div
-                        key={p.id}
-                        data-slide={i}
-                        className="snap-center snap-always shrink-0 w-full h-full relative"
-                      >
-                        <Image
-                          src={p.src}
-                          alt={p.alt ?? "Foto evento"}
-                          fill
-                          // ✅ niente p-6 (era quello che rimpiccioliva tutto)
-                          className="object-contain object-center p-2"
-                          priority={i === index}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    className={[
-                      "relative w-full bg-black",
-                      isMobile ? "h-[86dvh]" : "h-[70vh]",
-                    ].join(" ")}
-                  >
-                    <Image
-                      src={currentPhoto.src}
-                      alt={currentPhoto.alt ?? "Foto evento"}
-                      fill
-                      className={isMobile ? "object-contain object-center p-2" : "object-contain object-center p-6"}
-                      priority
-                    />
-                  </div>
+                {/* Close (DESKTOP ok) */}
+                <button
+                  onClick={requestClose}
+                  onMouseDown={(e) => e.preventDefault()}
+                  className="absolute right-4 top-4 z-20 rounded-full border border-white/10 bg-black/70 px-3 py-2 text-sm text-zinc-100 hover:bg-black/80"
+                  style={{ top: "calc(1rem + env(safe-area-inset-top))" as any }}
+                >
+                  Chiudi ✕
+                </button>
+
+                {/* Frecce SOLO desktop */}
+                {canNavigate && (
+                  <>
+                    <button
+                      aria-label="Foto precedente"
+                      onClick={goPrev}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={[
+                        "absolute left-4 top-1/2 -translate-y-1/2 z-20",
+                        "h-11 w-11 rounded-full",
+                        "border border-white/15 bg-black/55 backdrop-blur",
+                        "grid place-items-center text-white/90",
+                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                        "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                        "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                        "active:scale-[0.98]",
+                      ].join(" ")}
+                    >
+                      ‹
+                    </button>
+
+                    <button
+                      aria-label="Foto successiva"
+                      onClick={goNext}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={[
+                        "absolute right-4 top-1/2 -translate-y-1/2 z-20",
+                        "h-11 w-11 rounded-full",
+                        "border border-white/15 bg-black/55 backdrop-blur",
+                        "grid place-items-center text-white/90",
+                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                        "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                        "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                        "active:scale-[0.98]",
+                      ].join(" ")}
+                    >
+                      ›
+                    </button>
+                  </>
                 )}
 
-                {/* gradient (ok, leggero) */}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
-              </div>
-
-              {/* dots (solo mobile) */}
-              {isMobile && canNavigate && (
-                <div
-                  className="pb-4 pt-3 flex items-center justify-center gap-2"
-                  style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" as any }}
-                >
-                  {safePhotos.map((_, i) => (
-                    <span
-                      key={i}
-                      className={[
-                        "h-1.5 w-1.5 rounded-full",
-                        i === index ? "bg-white/90" : "bg-white/30",
-                      ].join(" ")}
-                    />
-                  ))}
+                <div className="relative w-full bg-black h-[70vh]">
+                  <Image
+                    src={currentPhoto.src}
+                    alt={currentPhoto.alt ?? "Foto evento"}
+                    fill
+                    className="object-contain object-center p-6"
+                    priority
+                  />
                 </div>
-              )}
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+              </div>
             </div>
-          </div>
+          ) : (
+            /* =======================
+               MOBILE (fullscreen + swipe, NO Chiudi)
+             ======================= */
+            <div
+              className={[
+                "relative w-screen h-[100dvh] rounded-none",
+                isClosing ? "tsw-modal-out" : "tsw-modal-in",
+              ].join(" ")}
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={onSwipeTouchStart}
+              onTouchMove={onSwipeTouchMove}
+              onTouchEnd={onSwipeTouchEnd}
+              style={
+                {
+                  touchAction: canNavigate ? "pan-x" : "none",
+                } as any
+              }
+            >
+              <div
+                className="relative w-full h-[100dvh] overflow-hidden bg-black shadow-2xl"
+                style={{
+                  paddingTop: "env(safe-area-inset-top)" as any,
+                  paddingBottom: "env(safe-area-inset-bottom)" as any,
+                }}
+              >
+                {/* drag handle (mobile) */}
+                <div className="flex justify-center pt-3 pb-2">
+                  <div className="h-1.5 w-12 rounded-full bg-white/20" />
+                </div>
+
+                {/* Gallery / immagine */}
+                <div className="relative w-full">
+                  {canNavigate ? (
+                    <div
+                      ref={trackRef}
+                      tabIndex={-1}
+                      onScroll={onMobileScroll}
+                      className={[
+                        "tsw-hide-scrollbar",
+                        "flex overflow-x-auto",
+                        "snap-x snap-mandatory",
+                        "overscroll-x-contain",
+                        "bg-black w-full",
+                        "h-[86dvh]",
+                      ].join(" ")}
+                      style={{
+                        WebkitOverflowScrolling: "touch" as any,
+                        touchAction: "pan-x",
+                      }}
+                    >
+                      {safePhotos.map((p, i) => (
+                        <div
+                          key={p.id}
+                          data-slide={i}
+                          className="snap-center snap-always shrink-0 w-full h-full relative"
+                        >
+                          <Image
+                            src={p.src}
+                            alt={p.alt ?? "Foto evento"}
+                            fill
+                            className="object-contain object-center p-2"
+                            priority={i === index}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="relative w-full bg-black h-[86dvh]">
+                      <Image
+                        src={currentPhoto.src}
+                        alt={currentPhoto.alt ?? "Foto evento"}
+                        fill
+                        className="object-contain object-center p-2"
+                        priority
+                      />
+                    </div>
+                  )}
+
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+                </div>
+
+                {/* dots (mobile) */}
+                {canNavigate && (
+                  <div className="pb-4 pt-3 flex items-center justify-center gap-2">
+                    {safePhotos.map((_, i) => (
+                      <span
+                        key={i}
+                        className={[
+                          "h-1.5 w-1.5 rounded-full",
+                          i === index ? "bg-white/90" : "bg-white/30",
+                        ].join(" ")}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -516,7 +530,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           display: none;
         }
 
-        /* DESKTOP glow invariato */
+        /* DESKTOP glow invariato (come nel tuo primo PhotoModal) */
         .tsw-photo-glow::before {
           content: "";
           position: absolute;
@@ -532,6 +546,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           opacity: 0.25;
           filter: blur(16px);
         }
+
         .tsw-photo-glow::after {
           content: "";
           position: absolute;
