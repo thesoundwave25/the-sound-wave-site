@@ -56,9 +56,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [snapBack, setSnapBack] = useState(false);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [gestureLocked, setGestureLocked] = useState<
-    "none" | "drag" | "ignore"
-  >("none");
+  const [gestureLocked, setGestureLocked] = useState<"none" | "drag" | "ignore">(
+    "none"
+  );
 
   const resetDrag = () => {
     setDragY(0);
@@ -116,7 +116,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       lastActiveElRef.current = null;
     }
 
-    // focus neutro (Safari)
     window.requestAnimationFrame(() => {
       try {
         trackRef.current?.focus?.();
@@ -134,7 +133,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       const found = safePhotos.findIndex((p) => p.id === photo.id);
       setIndex(found >= 0 ? found : 0);
 
-      // ✅ Mobile: porta la track alla slide iniziale SOLO all’apertura
       const el = trackRef.current;
       if (el && isMobile) {
         window.requestAnimationFrame(() => {
@@ -176,7 +174,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const prevWidth = body.style.width;
     const prevHtmlOverflow = html.style.overflow;
 
-    // ✅ prevent Safari auto restoration
     const prevScrollRestoration = window.history.scrollRestoration;
     try {
       window.history.scrollRestoration = "manual";
@@ -185,7 +182,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const scrollY = window.scrollY;
     scrollLockYRef.current = scrollY;
 
-    // lock
     body.style.overflow = "hidden";
     html.style.overflow = "hidden";
 
@@ -198,7 +194,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
-      // ✅ prevent focus-jump on close (iOS)
       try {
         (document.activeElement as HTMLElement | null)?.blur?.();
         lastActiveElRef.current?.blur?.();
@@ -206,19 +201,16 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
       const restoreY = scrollLockYRef.current;
 
-      // restore styles
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
-      // restore scroll restoration
       try {
         window.history.scrollRestoration = prevScrollRestoration;
       } catch {}
 
-      // ✅ double rAF to avoid 1-frame jump
       if (isMobile) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -244,8 +236,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   // ==========================
   // ✅ Unified swipe handlers (mobile only)
-  // - Se l'intenzione è orizzontale -> ignore (lascia scorrere foto)
-  // - Se l'intenzione è verticale -> drag (chiusura)
+  // - Se orizzontale -> ignore (swipe foto)
+  // - Se verticale -> drag (chiusura)
   // ==========================
   const onSwipeTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
@@ -269,9 +261,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
 
-    // blocca l'intenzione SOLO una volta
     if (gestureLocked === "none") {
-      // preferiamo lasciare orizzontale quando è evidente
       if (absX > 14 && absX > absY) {
         setGestureLocked("ignore");
         return;
@@ -283,12 +273,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     if (gestureLocked === "ignore") return;
 
-    // durante drag verticale, impediamo che iOS “rubì” la gesture
     try {
       e.preventDefault();
     } catch {}
 
-    // solo swipe UP
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
   };
@@ -331,7 +319,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       <button
         aria-label="Chiudi"
         onClick={requestClose}
-        onMouseDown={(e) => e.preventDefault()} // ✅ avoid focus
+        onMouseDown={(e) => e.preventDefault()}
         style={backdropStyle}
         className={[
           "absolute inset-0 bg-black/60 backdrop-blur-md",
@@ -340,60 +328,71 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       />
 
       {/* Dialog */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        {/* ✅ DRAG WRAPPER (solo mobile) — desktop invariato */}
-        <div
-          className={["md:touch-auto", snapBack ? "tsw-drag-snap" : ""].join(
-            " "
-          )}
-          style={draggableStyle}
-        >
+      <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
+        {/* ✅ DRAG WRAPPER (solo mobile) */}
+        <div className={snapBack ? "tsw-drag-snap" : ""} style={draggableStyle}>
+          {/* ✅ DESKTOP: identico al tuo (glow + rounded)
+              ✅ MOBILE: fullscreen (no “telefono nel telefono”) */}
           <div
             className={[
-              "relative w-full max-w-5xl rounded-3xl tsw-photo-glow",
+              "relative w-full",
+              isMobile
+                ? "w-screen max-w-none h-[100dvh] rounded-none"
+                : "max-w-5xl rounded-3xl tsw-photo-glow",
               isClosing ? "tsw-modal-out" : "tsw-modal-in",
-              // mobile un filo più alto, desktop invariato
-              "max-h-[92svh] md:max-h-none",
             ].join(" ")}
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl"
-              style={{ paddingBottom: "env(safe-area-inset-bottom)" as any }}
+              className={[
+                "relative w-full overflow-hidden bg-black shadow-2xl",
+                isMobile
+                  ? "h-[100dvh] border-0 rounded-none"
+                  : "rounded-3xl border border-white/10 bg-zinc-950/85",
+              ].join(" ")}
+              style={{
+                paddingBottom: "env(safe-area-inset-bottom)" as any,
+              }}
             >
               {/* ✅ SWIPE HANDLE (solo mobile, hint) */}
-              <div
-                className="md:hidden"
-                onTouchStart={onSwipeTouchStart}
-                onTouchMove={onSwipeTouchMove}
-                onTouchEnd={onSwipeTouchEnd}
-              >
-                <div className="flex justify-center pt-3 pb-2">
-                  <div className="h-1.5 w-12 rounded-full bg-white/20" />
+              {isMobile && (
+                <div
+                  className="md:hidden"
+                  onTouchStart={onSwipeTouchStart}
+                  onTouchMove={onSwipeTouchMove}
+                  onTouchEnd={onSwipeTouchEnd}
+                >
+                  <div
+                    className="flex justify-center pt-3 pb-2"
+                    style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top))" as any }}
+                  >
+                    <div className="h-1.5 w-12 rounded-full bg-white/20" />
+                  </div>
                 </div>
-                {/* fascia “presa facile” */}
-                <div className="h-2" />
-              </div>
+              )}
 
               {/* Close */}
               <button
                 onClick={requestClose}
-                onMouseDown={(e) => e.preventDefault()} // ✅ avoid focus
-                className="absolute right-4 top-4 z-20 rounded-full border border-white/10 bg-black/70 px-3 py-2 text-sm text-zinc-100 hover:bg-black/80"
+                onMouseDown={(e) => e.preventDefault()}
+                className={[
+                  "absolute right-4 z-20 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
+                  isMobile ? "bg-black/70 hover:bg-black/80" : "bg-black/70 hover:bg-black/80",
+                ].join(" ")}
                 style={{ top: "calc(1rem + env(safe-area-inset-top))" as any }}
               >
                 Chiudi ✕
               </button>
 
-              {/* Frecce SOLO desktop */}
+              {/* Frecce SOLO desktop (invariato) */}
               {canNavigate && !isMobile && (
                 <>
                   <button
                     aria-label="Foto precedente"
                     onClick={goPrev}
-                    onMouseDown={(e) => e.preventDefault()} // ✅ avoid focus
+                    onMouseDown={(e) => e.preventDefault()}
                     className={[
                       "absolute left-4 top-1/2 -translate-y-1/2 z-20",
                       "h-11 w-11 rounded-full",
@@ -411,7 +410,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   <button
                     aria-label="Foto successiva"
                     onClick={goNext}
-                    onMouseDown={(e) => e.preventDefault()} // ✅ avoid focus
+                    onMouseDown={(e) => e.preventDefault()}
                     className={[
                       "absolute right-4 top-1/2 -translate-y-1/2 z-20",
                       "h-11 w-11 rounded-full",
@@ -428,9 +427,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                 </>
               )}
 
-              {/* ✅ Immagine / Gallery
-                  - mobile: qui agganciamo anche lo swipe-to-close, MA con intent detection
-                  - così lo swipe orizzontale tra foto resta perfetto */}
+              {/* IMMAGINE / GALLERY */}
               <div
                 className="relative w-full"
                 onTouchStart={isMobile ? onSwipeTouchStart : undefined}
@@ -439,7 +436,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                 style={
                   isMobile
                     ? ({
-                        // consenti pan-x (scorrere foto) ma non bloccare il browser: noi decidiamo con intent detection
                         touchAction: canNavigate ? "pan-x" : "none",
                       } as any)
                     : undefined
@@ -448,7 +444,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                 {isMobile && canNavigate ? (
                   <div
                     ref={trackRef}
-                    tabIndex={-1} // ✅ focus target to avoid focusing thumbnails under
+                    tabIndex={-1}
                     onScroll={onMobileScroll}
                     className={[
                       "tsw-hide-scrollbar",
@@ -456,11 +452,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                       "snap-x snap-mandatory",
                       "overscroll-x-contain",
                       "bg-black w-full",
-                      "h-[70dvh]",
+                      // ✅ più grande: fullscreen meno “aria”
+                      "h-[86dvh]",
                     ].join(" ")}
                     style={{
                       WebkitOverflowScrolling: "touch" as any,
-                      // lascia orizzontale fluido
                       touchAction: "pan-x",
                     }}
                   >
@@ -474,7 +470,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                           src={p.src}
                           alt={p.alt ?? "Foto evento"}
                           fill
-                          className="object-contain object-center p-6"
+                          // ✅ niente p-6 (era quello che rimpiccioliva tutto)
+                          className="object-contain object-center p-2"
                           priority={i === index}
                         />
                       </div>
@@ -484,25 +481,29 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   <div
                     className={[
                       "relative w-full bg-black",
-                      isMobile ? "h-[70dvh]" : "h-[70vh]",
+                      isMobile ? "h-[86dvh]" : "h-[70vh]",
                     ].join(" ")}
                   >
                     <Image
                       src={currentPhoto.src}
                       alt={currentPhoto.alt ?? "Foto evento"}
                       fill
-                      className="object-contain object-center p-6"
+                      className={isMobile ? "object-contain object-center p-2" : "object-contain object-center p-6"}
                       priority
                     />
                   </div>
                 )}
 
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+                {/* gradient (ok, leggero) */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
               </div>
 
               {/* dots (solo mobile) */}
               {isMobile && canNavigate && (
-                <div className="pb-4 pt-3 flex items-center justify-center gap-2">
+                <div
+                  className="pb-4 pt-3 flex items-center justify-center gap-2"
+                  style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" as any }}
+                >
                   {safePhotos.map((_, i) => (
                     <span
                       key={i}
@@ -528,6 +529,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           display: none;
         }
 
+        /* DESKTOP glow invariato */
         .tsw-photo-glow::before {
           content: "";
           position: absolute;
@@ -543,7 +545,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           opacity: 0.25;
           filter: blur(16px);
         }
-
         .tsw-photo-glow::after {
           content: "";
           position: absolute;
@@ -571,7 +572,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           animation: tswBackdropOut 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
-        /* ✅ snap-back (solo mobile wrapper) */
+        /* snap-back wrapper */
         .tsw-drag-snap {
           transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
         }
