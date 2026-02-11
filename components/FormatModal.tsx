@@ -408,33 +408,65 @@ export default function FormatModal({ open, onClose, format }: Props) {
               Chiudi ✕
             </button>
 
-            {/* ✅ Drag handle (SOLO MOBILE) */}
-            <div
-              className="flex justify-center pt-3 pb-2 md:hidden"
-              onTouchStart={onHandleTouchStart}
-              onTouchMove={onHandleTouchMove}
-              onTouchEnd={onHandleTouchEnd}
-            >
-              <div className="h-1.5 w-12 rounded-full bg-white/20" />
-            </div>
+            {/* ✅ SWIPE ZONE (SOLO MOBILE): BARRETTA + LOGO + TITOLO */}
+<div
+  className="md:hidden touch-none"
+  onTouchStart={onHandleTouchStart}
+  onTouchMove={onHandleTouchMove}
+  onTouchEnd={onHandleTouchEnd}
+>
+  {/* Barretta (hint) */}
+  <div className="flex justify-center pt-3 pb-2">
+    <div className="h-1.5 w-12 rounded-full bg-white/20" />
+  </div>
 
-            <div className="relative w-full bg-black/40">
-              <div className="relative h-[220px] sm:h-[320px] w-full">
-                <Image
-                  src={format.logoSrc}
-                  alt={format.title}
-                  fill
-                  className="object-contain object-center p-10"
-                  priority
-                />
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
-            </div>
+  {/* Logo */}
+  <div className="relative w-full bg-black/40">
+    <div className="relative h-[220px] w-full">
+      <Image
+        src={format.logoSrc}
+        alt={format.title}
+        fill
+        className="object-contain object-center p-10"
+        priority
+      />
+    </div>
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+  </div>
 
-            <div className="p-6 sm:p-8">
-              <h3 className="text-2xl font-semibold tracking-tight text-zinc-100 text-center mx-auto">
-                {format.title}
-              </h3>
+  {/* Titolo (mobile) */}
+  <h3 className="px-6 py-4 text-2xl font-semibold tracking-tight text-zinc-100 text-center">
+    {format.title}
+  </h3>
+</div>
+
+{/* ✅ DESKTOP: drag handle identico (solo visivo) */}
+<div className="hidden md:flex justify-center pt-3 pb-2">
+  <div className="h-1.5 w-12 rounded-full bg-white/20" />
+</div>
+
+{/* ✅ DESKTOP: logo identico */}
+<div className="hidden md:block relative w-full bg-black/40">
+  <div className="relative h-[220px] sm:h-[320px] w-full">
+    <Image
+      src={format.logoSrc}
+      alt={format.title}
+      fill
+      className="object-contain object-center p-10"
+      priority
+    />
+  </div>
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+</div>
+
+<div className="p-6 sm:p-8">
+  {/* ✅ Titolo SOLO desktop (mobile è già sopra nella swipe zone) */}
+  <h3 className="hidden md:block text-2xl font-semibold tracking-tight text-zinc-100 text-center mx-auto">
+    {format.title}
+  </h3>
+
+  <div className="hidden md:block mt-5" />
+
 
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
                 <div className="text-sm text-zinc-200 font-semibold">
