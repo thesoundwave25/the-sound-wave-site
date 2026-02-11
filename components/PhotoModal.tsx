@@ -508,6 +508,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       </div>
 
       <style jsx global>{`
+      /* Fallback: se il browser non supporta dvh, usiamo vh */
+.tsw-h100 { height: 100vh; height: 100dvh; }
+.tsw-h86 { height: 86vh; height: 86dvh; }
         .tsw-hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
