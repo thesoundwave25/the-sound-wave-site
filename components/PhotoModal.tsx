@@ -373,19 +373,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                 </div>
               )}
 
-              {/* Close */}
-              <button
-                onClick={requestClose}
-                onMouseDown={(e) => e.preventDefault()}
-                className={[
-                  "absolute right-4 z-20 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
-                  isMobile ? "bg-black/70 hover:bg-black/80" : "bg-black/70 hover:bg-black/80",
-                ].join(" ")}
-                style={{ top: "calc(1rem + env(safe-area-inset-top))" as any }}
-              >
-                Chiudi ✕
-              </button>
-
               {/* Frecce SOLO desktop (invariato) */}
               {canNavigate && !isMobile && (
                 <>
