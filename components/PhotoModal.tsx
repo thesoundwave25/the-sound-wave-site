@@ -18,13 +18,18 @@ type Props = {
 
 function isMobileSoft() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(pointer: coarse)")?.matches || window.innerWidth < 768;
+  return (
+    window.matchMedia?.("(pointer: coarse)")?.matches || window.innerWidth < 768
+  );
 }
 
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [isClosing, setIsClosing] = useState(false);
 
-  const safePhotos = useMemo(() => (Array.isArray(photos) ? photos : []), [photos]);
+  const safePhotos = useMemo(
+    () => (Array.isArray(photos) ? photos : []),
+    [photos]
+  );
   const [index, setIndex] = useState(0);
   const canNavigate = safePhotos.length > 1;
 
@@ -50,7 +55,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [snapBack, setSnapBack] = useState(false);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [gestureLocked, setGestureLocked] = useState<"none" | "drag" | "ignore">("none");
+  const [gestureLocked, setGestureLocked] = useState<"none" | "drag" | "ignore">(
+    "none"
+  );
 
   const resetDrag = () => {
     setDragY(0);
@@ -99,7 +106,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       lastActiveElRef.current = null;
     }
 
+    // ✅ focus SOLO su mobile (su desktop può dare “linee”/indicatori strani)
     window.requestAnimationFrame(() => {
+      if (!isMobileSoft()) return;
       try {
         trackRef.current?.focus?.();
       } catch {}
@@ -161,6 +170,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const prevWidth = body.style.width;
     const prevHtmlOverflow = html.style.overflow;
 
+    // prevent Safari auto restoration
     const prevScrollRestoration = window.history.scrollRestoration;
     try {
       window.history.scrollRestoration = "manual";
@@ -224,7 +234,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   // Unified swipe handlers (mobile only)
   const onSwipeTouchStart = (e: React.TouchEvent) => {
-    // SOLO mobile reale
     if (!isMobileSoft()) return;
 
     const t = e.touches[0];
@@ -299,6 +308,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     ? { opacity: 1 - progress * 0.25 }
     : {};
 
+  const isMobile = isMobileSoft();
+
   return (
     <div className="fixed inset-0 z-[9999]">
       {/* Backdrop */}
@@ -317,148 +328,166 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
         {/* drag wrapper (si muove solo su mobile reale) */}
         <div className={snapBack ? "tsw-drag-snap" : ""} style={draggableStyle}>
-          <div
-            className={[
-              "relative w-full",
-              // Desktop card / Mobile fullscreen, deciso SOLO da CSS
-              "w-screen h-[100dvh] rounded-none md:w-full md:h-auto md:max-w-5xl md:rounded-3xl md:tsw-photo-glow",
-              isClosing ? "tsw-modal-out" : "tsw-modal-in",
-            ].join(" ")}
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* =======================
+              ✅ DESKTOP RIPRISTINATO
+             ======================= */}
+          {!isMobile ? (
             <div
               className={[
-                "relative w-full overflow-hidden shadow-2xl",
-                "bg-black md:rounded-3xl md:border md:border-white/10 md:bg-zinc-950/85",
+                "relative w-full max-w-5xl rounded-3xl tsw-photo-glow",
+                isClosing ? "tsw-modal-out" : "tsw-modal-in",
               ].join(" ")}
-              style={{
-                paddingTop: "env(safe-area-inset-top)" as any,
-                paddingBottom: "env(safe-area-inset-bottom)" as any,
-              }}
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* ✅ DESKTOP: bottone chiudi + frecce (visibili solo da md in su) */}
-              <button
-                onClick={requestClose}
-                onMouseDown={(e) => e.preventDefault()}
-                className="hidden md:block absolute right-4 top-4 z-20 rounded-full border border-white/10 bg-black/70 px-3 py-2 text-sm text-zinc-100 hover:bg-black/80"
-                style={{ top: "calc(1rem + env(safe-area-inset-top))" as any }}
-              >
-                Chiudi ✕
-              </button>
-
-              {canNavigate && (
-                <>
-                  <button
-                    aria-label="Foto precedente"
-                    onClick={goPrev}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={[
-                      "hidden md:grid",
-                      "absolute left-4 top-1/2 -translate-y-1/2 z-20",
-                      "h-11 w-11 rounded-full",
-                      "border border-white/15 bg-black/55 backdrop-blur",
-                      "place-items-center text-white/90",
-                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                      "active:scale-[0.98]",
-                    ].join(" ")}
-                  >
-                    ‹
-                  </button>
-
-                  <button
-                    aria-label="Foto successiva"
-                    onClick={goNext}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={[
-                      "hidden md:grid",
-                      "absolute right-4 top-1/2 -translate-y-1/2 z-20",
-                      "h-11 w-11 rounded-full",
-                      "border border-white/15 bg-black/55 backdrop-blur",
-                      "place-items-center text-white/90",
-                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                      "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
-                      "active:scale-[0.98]",
-                    ].join(" ")}
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-
-              {/* ✅ MOBILE: swipe handle (solo < md) */}
               <div
-                className="md:hidden"
-                onTouchStart={onSwipeTouchStart}
-                onTouchMove={onSwipeTouchMove}
-                onTouchEnd={onSwipeTouchEnd}
+                className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl"
+                style={{ paddingBottom: "env(safe-area-inset-bottom)" as any }}
+              >
+                <button
+                  onClick={requestClose}
+                  onMouseDown={(e) => e.preventDefault()}
+                  className="absolute right-4 top-4 z-20 rounded-full border border-white/10 bg-black/70 px-3 py-2 text-sm text-zinc-100 hover:bg-black/80"
+                  style={{ top: "calc(1rem + env(safe-area-inset-top))" as any }}
+                >
+                  Chiudi ✕
+                </button>
+
+                {canNavigate && (
+                  <>
+                    <button
+                      aria-label="Foto precedente"
+                      onClick={goPrev}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={[
+                        "absolute left-4 top-1/2 -translate-y-1/2 z-20",
+                        "h-11 w-11 rounded-full",
+                        "border border-white/15 bg-black/55 backdrop-blur",
+                        "grid place-items-center text-white/90",
+                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                        "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                        "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                        "active:scale-[0.98]",
+                      ].join(" ")}
+                    >
+                      ‹
+                    </button>
+
+                    <button
+                      aria-label="Foto successiva"
+                      onClick={goNext}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={[
+                        "absolute right-4 top-1/2 -translate-y-1/2 z-20",
+                        "h-11 w-11 rounded-full",
+                        "border border-white/15 bg-black/55 backdrop-blur",
+                        "grid place-items-center text-white/90",
+                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                        "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                        "hover:shadow-[0_0_22px_rgba(255,255,255,0.22)]",
+                        "active:scale-[0.98]",
+                      ].join(" ")}
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+
+                <div className="relative w-full bg-black h-[70vh]">
+                  <Image
+                    src={currentPhoto.src}
+                    alt={currentPhoto.alt ?? "Foto evento"}
+                    fill
+                    className="object-contain object-center p-6"
+                    priority
+                  />
+                </div>
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+              </div>
+            </div>
+          ) : (
+            /* =======================
+               ✅ MOBILE INVARIATO
+             ======================= */
+            <div
+              className={[
+                "relative w-screen h-[100dvh] rounded-none",
+                isClosing ? "tsw-modal-out" : "tsw-modal-in",
+              ].join(" ")}
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={onSwipeTouchStart}
+              onTouchMove={onSwipeTouchMove}
+              onTouchEnd={onSwipeTouchEnd}
+              style={
+                {
+                  touchAction: canNavigate ? "pan-x" : "none",
+                } as any
+              }
+            >
+              <div
+                className="relative w-full h-[100dvh] overflow-hidden bg-black shadow-2xl"
+                style={{
+                  paddingTop: "env(safe-area-inset-top)" as any,
+                  paddingBottom: "env(safe-area-inset-bottom)" as any,
+                }}
               >
                 <div className="flex justify-center pt-3 pb-2">
                   <div className="h-1.5 w-12 rounded-full bg-white/20" />
                 </div>
-              </div>
 
-              {/* ✅ MOBILE gallery (solo < md) */}
-              <div
-                className="relative w-full md:hidden"
-                onTouchStart={onSwipeTouchStart}
-                onTouchMove={onSwipeTouchMove}
-                onTouchEnd={onSwipeTouchEnd}
-                style={
-                  {
-                    touchAction: canNavigate ? "pan-x" : "none",
-                  } as any
-                }
-              >
-                {canNavigate ? (
-                  <div
-                    ref={trackRef}
-                    tabIndex={-1}
-                    onScroll={onMobileScroll}
-                    className={[
-                      "tsw-hide-scrollbar",
-                      "flex overflow-x-auto",
-                      "snap-x snap-mandatory",
-                      "overscroll-x-contain",
-                      "bg-black w-full",
-                      "h-[86dvh]",
-                    ].join(" ")}
-                    style={{
-                      WebkitOverflowScrolling: "touch" as any,
-                      touchAction: "pan-x",
-                    }}
-                  >
-                    {safePhotos.map((p, i) => (
-                      <div key={p.id} className="snap-center snap-always shrink-0 w-full h-full relative">
-                        <Image
-                          src={p.src}
-                          alt={p.alt ?? "Foto evento"}
-                          fill
-                          className="object-contain object-center p-2"
-                          priority={i === index}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="relative w-full bg-black h-[86dvh]">
-                    <Image
-                      src={currentPhoto.src}
-                      alt={currentPhoto.alt ?? "Foto evento"}
-                      fill
-                      className="object-contain object-center p-2"
-                      priority
-                    />
-                  </div>
-                )}
+                <div className="relative w-full">
+                  {canNavigate ? (
+                    <div
+                      ref={trackRef}
+                      tabIndex={-1}
+                      onScroll={onMobileScroll}
+                      className={[
+                        "tsw-hide-scrollbar",
+                        "flex overflow-x-auto",
+                        "snap-x snap-mandatory",
+                        "overscroll-x-contain",
+                        "bg-black w-full",
+                        "h-[86dvh]",
+                      ].join(" ")}
+                      style={{
+                        WebkitOverflowScrolling: "touch" as any,
+                        touchAction: "pan-x",
+                      }}
+                    >
+                      {safePhotos.map((p, i) => (
+                        <div
+                          key={p.id}
+                          className="snap-center snap-always shrink-0 w-full h-full relative"
+                        >
+                          <Image
+                            src={p.src}
+                            alt={p.alt ?? "Foto evento"}
+                            fill
+                            className="object-contain object-center p-2"
+                            priority={i === index}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="relative w-full bg-black h-[86dvh]">
+                      <Image
+                        src={currentPhoto.src}
+                        alt={currentPhoto.alt ?? "Foto evento"}
+                        fill
+                        className="object-contain object-center p-2"
+                        priority
+                      />
+                    </div>
+                  )}
 
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+                </div>
 
-                {/* dots (mobile) */}
                 {canNavigate && (
                   <div className="pb-4 pt-3 flex items-center justify-center gap-2">
                     {safePhotos.map((_, i) => (
@@ -473,20 +502,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   </div>
                 )}
               </div>
-
-              {/* ✅ DESKTOP image (solo md+) */}
-              <div className="relative w-full bg-black h-[70vh] hidden md:block">
-                <Image
-                  src={currentPhoto.src}
-                  alt={currentPhoto.alt ?? "Foto evento"}
-                  fill
-                  className="object-contain object-center p-6"
-                  priority
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
-              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
