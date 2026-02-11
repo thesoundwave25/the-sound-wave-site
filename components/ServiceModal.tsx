@@ -24,20 +24,17 @@ type Props = {
 export default function ServiceModal({ open, onClose, service }: Props) {
   const [isClosing, setIsClosing] = useState(false);
 
-  // ✅ mobile detection “safe” (niente matchMedia listener)
+  // ✅ mobile detection safe
   const [isMobile, setIsMobile] = useState(false);
-
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const update = () => setIsMobile(window.innerWidth < 768); // md
     update();
-
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // ✅ swipe/drag state (solo mobile)
+  // ✅ drag state
   const [dragY, setDragY] = useState(0); // negativo = verso l’alto
   const [dragging, setDragging] = useState(false);
   const [snapBack, setSnapBack] = useState(false);
@@ -51,7 +48,6 @@ export default function ServiceModal({ open, onClose, service }: Props) {
 
     window.setTimeout(() => {
       setIsClosing(false);
-      // reset drag
       setDragY(0);
       setDragging(false);
       setSnapBack(false);
@@ -59,7 +55,7 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     }, 340);
   };
 
-  // ESC + blocco scroll body (quando è aperto)
+  // ESC + blocco scroll body
   useEffect(() => {
     if (!open) return;
 
@@ -78,7 +74,7 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Reset closing + drag se cambia servizio
+  // Reset su apertura / cambio servizio
   useEffect(() => {
     if (!open) return;
     setIsClosing(false);
@@ -89,11 +85,11 @@ export default function ServiceModal({ open, onClose, service }: Props) {
 
   if (!open || !service) return null;
 
-  // progress 0..1 in base al drag (per alleggerire backdrop)
   const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
 
+  // ✅ touch handlers (solo mobile)
   const onTouchStart = (e: React.TouchEvent) => {
-    if (!isMobile) return; // ✅ desktop invariato
+    if (!isMobile) return;
     const t = e.touches[0];
     setTouchStartY(t.clientY);
     setTouchStartX(t.clientX);
@@ -110,10 +106,9 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     const deltaY = t.clientY - touchStartY; // negativo = swipe up
     const deltaX = Math.abs(t.clientX - touchStartX);
 
-    // Se si muove troppo in orizzontale, ignora (evita “false swipe”)
     if (deltaX > 80) return;
 
-    // Solo swipe UP: clamp tra -260 e 0
+    // clamp solo UP
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
   };
@@ -122,9 +117,8 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     if (!isMobile) return;
     if (!dragging) return;
 
-    const SWIPE_UP_THRESHOLD = 140;
-
-    if (dragY < -SWIPE_UP_THRESHOLD) {
+    const TH = 140;
+    if (dragY < -TH) {
       requestClose();
     } else {
       setSnapBack(true);
@@ -137,9 +131,11 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     setTouchStartX(null);
   };
 
-  // ✅ Applichiamo la trasformazione solo su mobile
-  const mobileDragStyle: React.CSSProperties = isMobile
-    ? { transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})` }
+  // ✅ Il DRAG sta sul WRAPPER (NON sul dialog animato)
+  const draggableStyle: React.CSSProperties = isMobile
+    ? {
+        transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})`,
+      }
     : {};
 
   const backdropStyle: React.CSSProperties = isMobile
@@ -159,122 +155,130 @@ export default function ServiceModal({ open, onClose, service }: Props) {
         ].join(" ")}
       />
 
-      {/* Dialog */}
+      {/* Centering container */}
       <div className="absolute inset-0 flex items-center justify-center p-4 md:p-4">
+        {/* ✅ DRAGGABLE WRAPPER (mobile only) */}
         <div
-          role="dialog"
-          aria-modal="true"
           className={[
-            "relative w-full max-w-3xl overflow-hidden border border-white/10",
-            "rounded-3xl",
-            // ✅ MOBILE più alto (niente scroll), DESKTOP invariato
-            "max-h-[92svh] md:max-h-none",
-            "bg-zinc-950/80 shadow-2xl",
-            isClosing ? "tsw-modal-out" : "tsw-modal-in",
+            // touch-none = fondamentale per far “seguire” il dito (Safari/Android)
+            "touch-none md:touch-auto",
             snapBack ? "tsw-drag-snap" : "",
           ].join(" ")}
-          style={mobileDragStyle}
-          onClick={(e) => e.stopPropagation()}
+          style={draggableStyle}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* Close */}
-          <button
-            onClick={requestClose}
+          {/* ✅ DIALOG vero (desktop identico), con animazioni */}
+          <div
+            role="dialog"
+            aria-modal="true"
             className={[
-              "absolute right-4 top-4 z-10 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
-              "bg-black/80 hover:bg-black/90",
-              "md:bg-white/5 md:hover:bg-white/10",
-              "backdrop-blur",
+              "relative w-full max-w-3xl overflow-hidden border border-white/10",
+              "rounded-3xl",
+              "max-h-[92svh] md:max-h-none",
+              "bg-zinc-950/80 shadow-2xl",
+              isClosing ? "tsw-modal-out" : "tsw-modal-in",
             ].join(" ")}
+            onClick={(e) => e.stopPropagation()}
           >
-            Chiudi ✕
-          </button>
+            {/* Close */}
+            <button
+              onClick={requestClose}
+              className={[
+                "absolute right-4 top-4 z-10 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
+                "bg-black/80 hover:bg-black/90",
+                "md:bg-white/5 md:hover:bg-white/10",
+                "backdrop-blur",
+              ].join(" ")}
+            >
+              Chiudi ✕
+            </button>
 
-          {/* Drag handle (solo mobile) */}
-          <div className="flex justify-center pt-3 pb-2 md:hidden">
-            <div className="h-1.5 w-12 rounded-full bg-white/20" />
-          </div>
-
-          {/* Media */}
-          <div className="relative aspect-[16/9] md:aspect-video w-full bg-black/40">
-            {service.mediaType === "video" && service.mediaSrc ? (
-              <video
-                className="h-full w-full object-cover"
-                src={service.mediaSrc}
-                controls
-                playsInline
-              />
-            ) : service.mediaSrc ? (
-              <Image
-                src={service.mediaSrc}
-                alt={service.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-zinc-400">
-                Media (immagine/video) qui
-              </div>
-            )}
-
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-          </div>
-
-          {/* Content (NO SCROLL) */}
-          <div className="p-6 sm:p-8 overflow-hidden">
-            <h3 className="text-2xl font-semibold tracking-tight text-zinc-100">
-              {service.title}
-            </h3>
-            <p className="mt-2 text-sm text-zinc-300">{service.desc}</p>
-
-            {(service.igUrl || service.websiteUrl) && (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                {service.igUrl && (
-                  <a
-                    href={service.igUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
-                  >
-                    <Image
-                      src="/brand/ig-icon.png"
-                      alt="Instagram"
-                      width={18}
-                      height={18}
-                      className="opacity-90"
-                    />
-                    <span>Instagram</span>
-                  </a>
-                )}
-
-                {service.websiteUrl && (
-                  <a
-                    href={service.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
-                  >
-                    <span className="text-zinc-300">🌐</span>
-                    <span>Sito web</span>
-                  </a>
-                )}
-              </div>
-            )}
-
-            <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-zinc-200">
-              <p className="text-sm leading-relaxed">{service.detail}</p>
+            {/* Drag handle (solo mobile) */}
+            <div className="flex justify-center pt-3 pb-2 md:hidden">
+              <div className="h-1.5 w-12 rounded-full bg-white/20" />
             </div>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={requestClose}
-                className="inline-flex w-fit items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-100 hover:bg-white/10"
-              >
-                Torna ai servizi
-              </button>
+            {/* Media */}
+            <div className="relative aspect-[16/9] md:aspect-video w-full bg-black/40">
+              {service.mediaType === "video" && service.mediaSrc ? (
+                <video
+                  className="h-full w-full object-cover"
+                  src={service.mediaSrc}
+                  controls
+                  playsInline
+                />
+              ) : service.mediaSrc ? (
+                <Image
+                  src={service.mediaSrc}
+                  alt={service.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-zinc-400">
+                  Media (immagine/video) qui
+                </div>
+              )}
+
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+            </div>
+
+            {/* Content (NO SCROLL) */}
+            <div className="p-6 sm:p-8 overflow-hidden">
+              <h3 className="text-2xl font-semibold tracking-tight text-zinc-100">
+                {service.title}
+              </h3>
+              <p className="mt-2 text-sm text-zinc-300">{service.desc}</p>
+
+              {(service.igUrl || service.websiteUrl) && (
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {service.igUrl && (
+                    <a
+                      href={service.igUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+                    >
+                      <Image
+                        src="/brand/ig-icon.png"
+                        alt="Instagram"
+                        width={18}
+                        height={18}
+                        className="opacity-90"
+                      />
+                      <span>Instagram</span>
+                    </a>
+                  )}
+
+                  {service.websiteUrl && (
+                    <a
+                      href={service.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+                    >
+                      <span className="text-zinc-300">🌐</span>
+                      <span>Sito web</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-zinc-200">
+                <p className="text-sm leading-relaxed">{service.detail}</p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={requestClose}
+                  className="inline-flex w-fit items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-100 hover:bg-white/10"
+                >
+                  Torna ai servizi
+                </button>
+              </div>
             </div>
           </div>
         </div>
