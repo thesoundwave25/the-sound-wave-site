@@ -18,8 +18,9 @@ type Props = {
 
 function isMobileViewport() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(max-width: 767px)").matches; // < md
+  return window.innerWidth < 768; // desktop = sempre desktop da md in su
 }
+
 
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [isClosing, setIsClosing] = useState(false);
@@ -96,12 +97,13 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   };
 
   // mobile watcher
-  useEffect(() => {
-    const update = () => setIsMobile(isMobileViewport());
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+ useEffect(() => {
+  const update = () => setIsMobile(window.innerWidth < 768);
+  update();
+  window.addEventListener("resize", update, { passive: true } as any);
+  return () => window.removeEventListener("resize", update as any);
+}, []);
+
 
   // When modal opens: remove focus from the clicked thumbnail button (iOS jump fix)
   useEffect(() => {
