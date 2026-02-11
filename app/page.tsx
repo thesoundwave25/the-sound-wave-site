@@ -747,63 +747,56 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
               "snap-x snap-mandatory",
             ].join(" ")}
           >
-            {photos.map((p, idx) => (
-              <button
-                key={p.id}
-                data-photo-card={idx === 0 ? "1" : undefined}
-                // Previene il salto dello scroll su iOS
-                onPointerDown={(e) => {
-                  if (window.innerWidth < 768) e.preventDefault();
-                }}
-                onClick={(e) => {
-                  (e.currentTarget as HTMLButtonElement).blur();
-                  setActivePhoto(p);
-                }}
-                className={[
-                  "snap-start shrink-0 text-left",
-                  "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
-                  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  "hover:-translate-y-1 hover:border-white/20",
-                  "active:translate-y-[1px] active:scale-[0.985]",
-                  "select-none",
-                  "w-[82vw] sm:w-[46vw] md:w-[24%]",
-                ].join(" ")}
-              >
-   <div className="relative overflow-hidden rounded-2xl bg-black">
-
-  {/* MOBILE (no fill → niente tagli) */}
-  <div className="md:hidden flex items-center justify-center px-2 py-3">
-    <Image
-      src={p.src}
-      alt={p.alt ?? "Foto evento"}
-      width={1600}
-      height={900}
-      className="w-full h-auto max-h-[220px] object-contain object-center"
-      sizes="82vw"
-    />
-  </div>
-
-  {/* DESKTOP (invariato come prima) */}
-  <div className="hidden md:block relative aspect-[16/10] w-full">
-    <Image
-      src={p.src}
-      alt={p.alt ?? "Foto evento"}
-      fill
-      className="object-cover object-center"
-      sizes="(max-width: 1024px) 46vw, 25vw"
-    />
-    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
-  </div>
-
-  {/* Swipe hint (solo mobile) */}
-  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
-    <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
-      ← scorri →
+          {photos.map((p, idx) => (
+  <button
+    key={p.id}
+    type="button"
+    data-photo-card={idx === 0 ? "1" : undefined}
+    // FIX: e.preventDefault() e blur() impediscono il salto della pagina
+    onClick={(e) => {
+      e.preventDefault();
+      e.currentTarget.blur();
+      setActivePhoto(p);
+    }}
+    className={[
+      "snap-start shrink-0 text-left",
+      "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
+      "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "hover:-translate-y-1 hover:border-white/20",
+      "active:translate-y-[1px] active:scale-[0.985]",
+      "select-none",
+      "w-[82vw] sm:w-[46vw] md:w-[24%]",
+    ].join(" ")}
+  >
+    <div className="relative overflow-hidden rounded-2xl bg-black">
+      {/* MOBILE */}
+      <div className="md:hidden flex items-center justify-center px-2 py-3">
+        <Image
+          src={p.src}
+          alt={p.alt ?? "Foto evento"}
+          width={800} // Ridotto per performance mobile
+          height={450}
+          className="w-full h-auto max-h-[220px] object-contain"
+        />
+      </div>
+      {/* DESKTOP */}
+      <div className="hidden md:block relative aspect-[16/10] w-full">
+        <Image
+          src={p.src}
+          alt={p.alt ?? "Foto evento"}
+          fill
+          className="object-cover"
+          sizes="25vw"
+        />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
+        <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
+          ← scorri →
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-              </button>
-            ))}
+  </button>
+))}
           </div>
         </div>
 
