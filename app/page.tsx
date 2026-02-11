@@ -747,13 +747,16 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           >
             {photos.map((p, idx) => (
               <button
-                key={p.id}
-                data-photo-card={idx === 0 ? "1" : undefined}
-               onClick={(e) => {
-  // iOS/Safari: evita focus sulla card che causa il “saltino” quando chiudi il PhotoModal
-  (e.currentTarget as HTMLButtonElement).blur();
-  setActivePhoto(p);
-}}
+  key={p.id}
+  data-photo-card={idx === 0 ? "1" : undefined}
+  onClick={(e) => {
+    // 1. Togliamo il focus immediato
+    (e.currentTarget as HTMLButtonElement).blur();
+    // 2. Apriamo la foto
+    setActivePhoto(p);
+  }}
+  // Impedisce al browser di scrollare qui quando il modal si chiude
+  onPointerDown={(e) => e.preventDefault}
                 className={[
                   "snap-start shrink-0 text-left",
                   "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
