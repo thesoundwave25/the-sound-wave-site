@@ -18,10 +18,9 @@ type Props = {
 
 function isMobileSoft() {
   if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia?.("(pointer: coarse)")?.matches || window.innerWidth < 768
-  );
+  return window.matchMedia("(max-width: 767px)").matches; // < md
 }
+
 
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [isClosing, setIsClosing] = useState(false);
