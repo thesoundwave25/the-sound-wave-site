@@ -11,7 +11,6 @@ export type ServiceItem = {
   mediaType?: "image" | "video";
   mediaSrc?: string;
 
-  // ✅ aggiunti per Social PR / Fotografo
   igUrl?: string;
   websiteUrl?: string;
 };
@@ -25,7 +24,24 @@ type Props = {
 export default function ServiceModal({ open, onClose, service }: Props) {
   const [isClosing, setIsClosing] = useState(false);
 
-  // ✅ Swipe up to close (mobile)
+  // ✅ mobile detection “safe” (niente matchMedia listener)
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const update = () => setIsMobile(window.innerWidth < 768); // md
+    update();
+
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // ✅ swipe/drag state (solo mobile)
+  const [dragY, setDragY] = useState(0); // negativo = verso l’alto
+  const [dragging, setDragging] = useState(false);
+  const [snapBack, setSnapBack] = useState(false);
+
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
@@ -35,36 +51,12 @@ export default function ServiceModal({ open, onClose, service }: Props) {
 
     window.setTimeout(() => {
       setIsClosing(false);
+      // reset drag
+      setDragY(0);
+      setDragging(false);
+      setSnapBack(false);
       onClose();
     }, 340);
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    setTouchStartY(t.clientY);
-    setTouchStartX(t.clientX);
-  };
-
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY === null || touchStartX === null) return;
-
-    const t = e.changedTouches[0];
-    const endY = t.clientY;
-    const endX = t.clientX;
-
-    const deltaY = endY - touchStartY; // negativo = swipe up
-    const deltaX = Math.abs(endX - touchStartX);
-
-    // soglie anti-chiusura accidentale
-    const SWIPE_UP_THRESHOLD = 120; // px
-    const MAX_SIDEWAYS = 60; // px
-
-    if (deltaY < -SWIPE_UP_THRESHOLD && deltaX < MAX_SIDEWAYS) {
-      requestClose();
-    }
-
-    setTouchStartY(null);
-    setTouchStartX(null);
   };
 
   // ESC + blocco scroll body (quando è aperto)
@@ -86,12 +78,73 @@ export default function ServiceModal({ open, onClose, service }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Reset closing se cambia servizio (es. click veloce su un'altra card)
+  // Reset closing + drag se cambia servizio
   useEffect(() => {
-    if (open) setIsClosing(false);
+    if (!open) return;
+    setIsClosing(false);
+    setDragY(0);
+    setDragging(false);
+    setSnapBack(false);
   }, [open, service?.id]);
 
   if (!open || !service) return null;
+
+  // progress 0..1 in base al drag (per alleggerire backdrop)
+  const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return; // ✅ desktop invariato
+    const t = e.touches[0];
+    setTouchStartY(t.clientY);
+    setTouchStartX(t.clientX);
+    setDragging(true);
+    setSnapBack(false);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    if (!dragging) return;
+    if (touchStartY === null || touchStartX === null) return;
+
+    const t = e.touches[0];
+    const deltaY = t.clientY - touchStartY; // negativo = swipe up
+    const deltaX = Math.abs(t.clientX - touchStartX);
+
+    // Se si muove troppo in orizzontale, ignora (evita “false swipe”)
+    if (deltaX > 80) return;
+
+    // Solo swipe UP: clamp tra -260 e 0
+    const clamped = Math.max(-260, Math.min(0, deltaY));
+    setDragY(clamped);
+  };
+
+  const onTouchEnd = () => {
+    if (!isMobile) return;
+    if (!dragging) return;
+
+    const SWIPE_UP_THRESHOLD = 140;
+
+    if (dragY < -SWIPE_UP_THRESHOLD) {
+      requestClose();
+    } else {
+      setSnapBack(true);
+      setDragY(0);
+      window.setTimeout(() => setSnapBack(false), 260);
+    }
+
+    setDragging(false);
+    setTouchStartY(null);
+    setTouchStartX(null);
+  };
+
+  // ✅ Applichiamo la trasformazione solo su mobile
+  const mobileDragStyle: React.CSSProperties = isMobile
+    ? { transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})` }
+    : {};
+
+  const backdropStyle: React.CSSProperties = isMobile
+    ? { opacity: 1 - progress * 0.25 }
+    : {};
 
   return (
     <div className="fixed inset-0 z-[9999]">
@@ -99,6 +152,7 @@ export default function ServiceModal({ open, onClose, service }: Props) {
       <button
         aria-label="Chiudi"
         onClick={requestClose}
+        style={backdropStyle}
         className={[
           "absolute inset-0 bg-black/60 backdrop-blur-md",
           isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
@@ -113,13 +167,16 @@ export default function ServiceModal({ open, onClose, service }: Props) {
           className={[
             "relative w-full max-w-3xl overflow-hidden border border-white/10",
             "rounded-3xl",
-            // ✅ MOBILE: più alto (niente scroll dentro), DESKTOP: invariato
+            // ✅ MOBILE più alto (niente scroll), DESKTOP invariato
             "max-h-[92svh] md:max-h-none",
             "bg-zinc-950/80 shadow-2xl",
             isClosing ? "tsw-modal-out" : "tsw-modal-in",
+            snapBack ? "tsw-drag-snap" : "",
           ].join(" ")}
+          style={mobileDragStyle}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
           {/* Close */}
@@ -127,9 +184,7 @@ export default function ServiceModal({ open, onClose, service }: Props) {
             onClick={requestClose}
             className={[
               "absolute right-4 top-4 z-10 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
-              // mobile: più visibile
               "bg-black/80 hover:bg-black/90",
-              // desktop (md+): identico a prima
               "md:bg-white/5 md:hover:bg-white/10",
               "backdrop-blur",
             ].join(" ")}
@@ -168,16 +223,13 @@ export default function ServiceModal({ open, onClose, service }: Props) {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
           </div>
 
-          {/* Content */}
-          {/* ✅ MOBILE: niente scroll (evita conflitto con swipe) */}
-          {/* ✅ DESKTOP: visivamente invariato (solo rimosso scroll mobile) */}
+          {/* Content (NO SCROLL) */}
           <div className="p-6 sm:p-8 overflow-hidden">
             <h3 className="text-2xl font-semibold tracking-tight text-zinc-100">
               {service.title}
             </h3>
             <p className="mt-2 text-sm text-zinc-300">{service.desc}</p>
 
-            {/* ✅ Link sotto descrizione (solo se presenti) */}
             {(service.igUrl || service.websiteUrl) && (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 {service.igUrl && (
@@ -216,7 +268,6 @@ export default function ServiceModal({ open, onClose, service }: Props) {
               <p className="text-sm leading-relaxed">{service.detail}</p>
             </div>
 
-            {/* ✅ tolto "Contattaci" (rimane solo chiusura) */}
             <div className="mt-6 flex gap-3">
               <button
                 onClick={requestClose}
@@ -229,7 +280,7 @@ export default function ServiceModal({ open, onClose, service }: Props) {
         </div>
       </div>
 
-      {/* Animazioni IN/OUT (cinema) */}
+      {/* Animazioni + snap */}
       <style jsx global>{`
         .tsw-modal-in {
           animation: tswModalIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -248,6 +299,10 @@ export default function ServiceModal({ open, onClose, service }: Props) {
         .tsw-backdrop-out {
           animation: tswBackdropOut 0.34s cubic-bezier(0.22, 1, 0.36, 1)
             both;
+        }
+
+        .tsw-drag-snap {
+          transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         @keyframes tswModalIn {
