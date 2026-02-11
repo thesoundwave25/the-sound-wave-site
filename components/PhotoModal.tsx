@@ -326,7 +326,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       {/* Dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
         {/* drag wrapper (si muove solo su mobile reale) */}
-        <div className={snapBack ? "tsw-drag-snap" : ""} style={draggableStyle}>
+       <div 
+          className={`${snapBack ? "tsw-drag-snap" : ""} ${!isMobile ? "w-full flex justify-center" : ""}`} 
+          style={draggableStyle}
+        >
           {/* =======================
               ✅ DESKTOP RIPRISTINATO
              ======================= */}
