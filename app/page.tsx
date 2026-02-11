@@ -18,6 +18,7 @@ import EventModal, { type EventItem } from "../components/EventModal";
 export default function Home() {
   // ✅ MOBILE NAV
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [activePhoto, setActivePhoto] = useState<PhotoItem | null>(null);
 
   // Chiudi menu se passo a desktop
   useEffect(() => {
@@ -38,17 +39,18 @@ export default function Home() {
     };
   }, [mobileNavOpen]);
   // ✅ Chiudi menu mobile quando l’utente scrolla (solo < md)
+  // Modificato per evitare salti di scroll quando apri le foto
   useEffect(() => {
-    if (!mobileNavOpen) return;
+    if (!mobileNavOpen || activePhoto) return; 
     if (typeof window === "undefined") return;
 
-    const isMobile = () => window.innerWidth < 768; // md
+    const isMobile = () => window.innerWidth < 768; 
     if (!isMobile()) return;
 
     let ticking = false;
 
     const onScroll = () => {
-      if (!isMobile()) return;
+      if (!isMobile() || activePhoto) return; 
       if (ticking) return;
       ticking = true;
 
@@ -60,7 +62,7 @@ export default function Home() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [mobileNavOpen]);
+  }, [mobileNavOpen, activePhoto]);
 
   // Animazione sezione Servizi (entra/esce)
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function Home() {
     []
   );
 
-  const [activePhoto, setActivePhoto] = useState<PhotoItem | null>(null);
+  
 
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
@@ -747,16 +749,16 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           >
             {photos.map((p, idx) => (
               <button
-  key={p.id}
-  data-photo-card={idx === 0 ? "1" : undefined}
-  onClick={(e) => {
-    // 1. Togliamo il focus immediato
-    (e.currentTarget as HTMLButtonElement).blur();
-    // 2. Apriamo la foto
-    setActivePhoto(p);
-  }}
-  // Impedisce al browser di scrollare qui quando il modal si chiude
-  onPointerDown={(e) => e.preventDefault}
+                key={p.id}
+                data-photo-card={idx === 0 ? "1" : undefined}
+                // Previene il salto dello scroll su iOS
+                onPointerDown={(e) => {
+                  if (window.innerWidth < 768) e.preventDefault();
+                }}
+                onClick={(e) => {
+                  (e.currentTarget as HTMLButtonElement).blur();
+                  setActivePhoto(p);
+                }}
                 className={[
                   "snap-start shrink-0 text-left",
                   "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
@@ -818,6 +820,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
               "select-none",
             ].join(" ")}
             onClick={() => setOpenDownloads(true)}
+            
           >
             <span
               aria-hidden
