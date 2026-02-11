@@ -4,7 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 export type FormatTrack = { title: string; src: string };
-export type FormatItem = { id: string; title: string; logoSrc: string; tracks?: FormatTrack[] };
+export type FormatItem = {
+  id: string;
+  title: string;
+  logoSrc: string;
+  tracks?: FormatTrack[];
+};
 
 type Props = { open: boolean; onClose: () => void; format: FormatItem | null };
 
@@ -19,13 +24,30 @@ function fmtTime(sec: number) {
 }
 
 // Mobile detection “soft” (non perfetto, ma ok per autoplay)
-function isMobile() {
+function isMobileSoft() {
   if (typeof window === "undefined") return false;
   return window.matchMedia?.("(pointer: coarse)")?.matches || window.innerWidth < 768;
 }
 
 export default function FormatModal({ open, onClose, format }: Props) {
   const [isClosing, setIsClosing] = useState(false);
+
+  // ✅ MOBILE ONLY (per swipe apple)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => setIsMobile(window.innerWidth < 768); // md
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  // ✅ Apple swipe (solo mobile)
+  const [dragY, setDragY] = useState(0); // negativo = verso l’alto
+  const [dragging, setDragging] = useState(false);
+  const [snapBack, setSnapBack] = useState(false);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -37,7 +59,10 @@ export default function FormatModal({ open, onClose, format }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
 
-  const activeSrc = useMemo(() => format?.tracks?.[0]?.src ?? "", [format?.id, format?.tracks]);
+  const activeSrc = useMemo(
+    () => format?.tracks?.[0]?.src ?? "",
+    [format?.id, format?.tracks]
+  );
 
   const clearFadeTimer = () => {
     if (fadeTimerRef.current) {
@@ -91,7 +116,9 @@ export default function FormatModal({ open, onClose, format }: Props) {
     if (id === "emotion") {
       const glow = "rgba(255, 0, 0, 0.85)";
       return {
-        glowL: glow, glowC: glow, glowR: glow,
+        glowL: glow,
+        glowC: glow,
+        glowR: glow,
         ledBar: "linear-gradient(90deg, rgba(255,0,0,1), rgba(255,0,0,1))",
         ledGlow: "rgba(255, 0, 0, 0.85)",
       };
@@ -130,6 +157,12 @@ export default function FormatModal({ open, onClose, format }: Props) {
     window.setTimeout(() => {
       stopAndReset();
       setIsClosing(false);
+
+      // reset drag (mobile)
+      setDragY(0);
+      setDragging(false);
+      setSnapBack(false);
+
       onClose();
     }, 340);
   };
@@ -192,6 +225,11 @@ export default function FormatModal({ open, onClose, format }: Props) {
     setCurrent(0);
     setDuration(0);
 
+    // reset drag (mobile)
+    setDragY(0);
+    setDragging(false);
+    setSnapBack(false);
+
     const el = audioRef.current;
     if (!el) return;
 
@@ -205,12 +243,10 @@ export default function FormatModal({ open, onClose, format }: Props) {
       el.preload = "auto";
     } catch {}
 
-    // Autoplay: su mobile spesso è bloccato o causa instabilità → proviamo ma senza stress
-    const allowAutoplay = !isMobile();
+    const allowAutoplay = !isMobileSoft();
 
     const tryPlay = async () => {
       if (!allowAutoplay) {
-        // su mobile lasciamo pronto, volume ok
         el.volume = muted ? 0 : clamp(volume);
         return;
       }
@@ -266,13 +302,70 @@ export default function FormatModal({ open, onClose, format }: Props) {
     setCurrent(el.currentTime);
   };
 
+  // ✅ Apple swipe handlers: SOLO su mobile e SOLO dalla “barretta”
+  const onHandleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    const t = e.touches[0];
+    setTouchStartY(t.clientY);
+    setTouchStartX(t.clientX);
+    setDragging(true);
+    setSnapBack(false);
+  };
+
+  const onHandleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    if (!dragging) return;
+    if (touchStartY === null || touchStartX === null) return;
+
+    const t = e.touches[0];
+    const deltaY = t.clientY - touchStartY; // negativo = swipe up
+    const deltaX = Math.abs(t.clientX - touchStartX);
+
+    // evita gesti laterali
+    if (deltaX > 80) return;
+
+    // solo swipe UP
+    const clamped = Math.max(-260, Math.min(0, deltaY));
+    setDragY(clamped);
+  };
+
+  const onHandleTouchEnd = () => {
+    if (!isMobile) return;
+    if (!dragging) return;
+
+    const TH = 140;
+
+    if (dragY < -TH) {
+      requestClose();
+    } else {
+      setSnapBack(true);
+      setDragY(0);
+      window.setTimeout(() => setSnapBack(false), 260);
+    }
+
+    setDragging(false);
+    setTouchStartY(null);
+    setTouchStartX(null);
+  };
+
   if (!open || !format) return null;
+
+  const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
+
+  const draggableStyle: React.CSSProperties = isMobile
+    ? { transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})` }
+    : {};
+
+  const backdropStyle: React.CSSProperties = isMobile
+    ? { opacity: 1 - progress * 0.25 }
+    : {};
 
   return (
     <div className="fixed inset-0 z-[9999]">
       <button
         aria-label="Chiudi"
         onClick={requestClose}
+        style={backdropStyle}
         className={[
           "absolute inset-0 bg-black/60 backdrop-blur-md",
           isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
@@ -280,212 +373,309 @@ export default function FormatModal({ open, onClose, format }: Props) {
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
+        {/* ✅ DRAG WRAPPER (solo mobile) — desktop invariato */}
         <div
-          role="dialog"
-          aria-modal="true"
           className={[
-            "relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10",
-            "bg-zinc-950/80 shadow-2xl",
-            "tsw-shell",
-            isClosing ? "tsw-modal-out" : "tsw-modal-in",
+            "touch-none md:touch-auto",
+            snapBack ? "tsw-drag-snap" : "",
           ].join(" ")}
-          style={
-            {
-              ["--glowL" as any]: theme.glowL,
-              ["--glowC" as any]: theme.glowC,
-              ["--glowR" as any]: theme.glowR,
-            } as React.CSSProperties
-          }
-          onClick={(e) => e.stopPropagation()}
+          style={draggableStyle}
         >
-          <button
-            onClick={requestClose}
-            className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+          <div
+            role="dialog"
+            aria-modal="true"
+            className={[
+              "relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10",
+              "bg-zinc-950/80 shadow-2xl",
+              "tsw-shell",
+              // ✅ MOBILE: più alto senza toccare desktop
+              "max-h-[92svh] md:max-h-none",
+              isClosing ? "tsw-modal-out" : "tsw-modal-in",
+            ].join(" ")}
+            style={
+              {
+                ["--glowL" as any]: theme.glowL,
+                ["--glowC" as any]: theme.glowC,
+                ["--glowR" as any]: theme.glowR,
+              } as React.CSSProperties
+            }
+            onClick={(e) => e.stopPropagation()}
           >
-            Chiudi ✕
-          </button>
+            <button
+              onClick={requestClose}
+              className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+            >
+              Chiudi ✕
+            </button>
 
-          <div className="relative w-full bg-black/40">
-            <div className="relative h-[220px] sm:h-[320px] w-full">
-              <Image src={format.logoSrc} alt={format.title} fill className="object-contain object-center p-10" priority />
+            {/* ✅ Drag handle (SOLO MOBILE) */}
+            <div
+              className="flex justify-center pt-3 pb-2 md:hidden"
+              onTouchStart={onHandleTouchStart}
+              onTouchMove={onHandleTouchMove}
+              onTouchEnd={onHandleTouchEnd}
+            >
+              <div className="h-1.5 w-12 rounded-full bg-white/20" />
             </div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
-          </div>
 
-          <div className="p-6 sm:p-8">
-            <h3 className="text-2xl font-semibold tracking-tight text-zinc-100 text-center mx-auto">
-  {format.title}
-</h3>
-            <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-200 font-semibold">Player audio</div>
+            <div className="relative w-full bg-black/40">
+              <div className="relative h-[220px] sm:h-[320px] w-full">
+                <Image
+                  src={format.logoSrc}
+                  alt={format.title}
+                  fill
+                  className="object-contain object-center p-10"
+                  priority
+                />
+              </div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+            </div>
 
-              {activeSrc ? <audio ref={audioRef} src={activeSrc} preload="auto" /> : <div className="mt-3 text-sm text-zinc-400">Nessuna traccia disponibile</div>}
+            <div className="p-6 sm:p-8">
+              <h3 className="text-2xl font-semibold tracking-tight text-zinc-100 text-center mx-auto">
+                {format.title}
+              </h3>
 
-              {activeSrc && (
-                <div className="mt-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={togglePlay}
-                      className={[
-                        "h-10 w-10 shrink-0 rounded-full",
-                        "border border-white/10 bg-white/5",
-                        "grid place-items-center",
-                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "hover:bg-white/10 active:scale-[0.98]",
-                      ].join(" ")}
-                      aria-label={isPlaying ? "Pausa" : "Play"}
-                    >
-                      {isPlaying ? (
-                        <span className="block h-4 w-4">
-                          <span className="inline-block h-4 w-[4px] bg-white rounded-sm mr-[3px]" />
-                          <span className="inline-block h-4 w-[4px] bg-white rounded-sm" />
-                        </span>
-                      ) : (
-                        <span
-                          className="block"
-                          style={{
-                            width: 0,
-                            height: 0,
-                            borderTop: "7px solid transparent",
-                            borderBottom: "7px solid transparent",
-                            borderLeft: "11px solid white",
-                            marginLeft: "2px",
-                          }}
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-sm text-zinc-200 font-semibold">
+                  Player audio
+                </div>
+
+                {activeSrc ? (
+                  <audio ref={audioRef} src={activeSrc} preload="auto" />
+                ) : (
+                  <div className="mt-3 text-sm text-zinc-400">
+                    Nessuna traccia disponibile
+                  </div>
+                )}
+
+                {activeSrc && (
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-black/35 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={togglePlay}
+                        className={[
+                          "h-10 w-10 shrink-0 rounded-full",
+                          "border border-white/10 bg-white/5",
+                          "grid place-items-center",
+                          "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                          "hover:bg-white/10 active:scale-[0.98]",
+                        ].join(" ")}
+                        aria-label={isPlaying ? "Pausa" : "Play"}
+                      >
+                        {isPlaying ? (
+                          <span className="block h-4 w-4">
+                            <span className="inline-block h-4 w-[4px] bg-white rounded-sm mr-[3px]" />
+                            <span className="inline-block h-4 w-[4px] bg-white rounded-sm" />
+                          </span>
+                        ) : (
+                          <span
+                            className="block"
+                            style={{
+                              width: 0,
+                              height: 0,
+                              borderTop: "7px solid transparent",
+                              borderBottom: "7px solid transparent",
+                              borderLeft: "11px solid white",
+                              marginLeft: "2px",
+                            }}
+                          />
+                        )}
+                      </button>
+
+                      <div className="flex-1">
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(1, duration)}
+                          step={0.01}
+                          value={Math.min(current, duration || 0)}
+                          onChange={(e) => seekTo(Number(e.target.value))}
+                          className="tsw-range w-full"
+                          aria-label="Progresso"
                         />
-                      )}
-                    </button>
+                        <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-300/80 tabular-nums">
+                          <span>{fmtTime(current)}</span>
+                          <span>{fmtTime(duration)}</span>
+                        </div>
+                      </div>
 
-                    <div className="flex-1">
-                      <input
-                        type="range"
-                        min={0}
-                        max={Math.max(1, duration)}
-                        step={0.01}
-                        value={Math.min(current, duration || 0)}
-                        onChange={(e) => seekTo(Number(e.target.value))}
-                        className="tsw-range w-full"
-                        aria-label="Progresso"
-                      />
-                      <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-300/80 tabular-nums">
-                        <span>{fmtTime(current)}</span>
-                        <span>{fmtTime(duration)}</span>
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => setMuted((m) => !m)}
+                          className="h-9 w-9 rounded-full border border-white/10 bg-white/5 grid place-items-center hover:bg-white/10"
+                          aria-label={muted ? "Attiva audio" : "Silenzia"}
+                        >
+                          <span className="text-white text-sm">
+                            {muted ? "🔇" : "🔊"}
+                          </span>
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center">
-  <button
-    onClick={() => setMuted((m) => !m)}
-    className="h-9 w-9 rounded-full border border-white/10 bg-white/5 grid place-items-center hover:bg-white/10"
-    aria-label={muted ? "Attiva audio" : "Silenzia"}
-  >
-    <span className="text-white text-sm">{muted ? "🔇" : "🔊"}</span>
-  </button>
-</div>
-
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="mt-4">
-                <div className="relative w-full">
-                  <div
-                    aria-hidden
-                    className="absolute inset-x-0 -inset-y-2 rounded-full blur-[10px] opacity-90"
-                    style={{
-                      background:
-                        (theme as any).ledGlow2 && (theme as any).ledGlow3
-                          ? `linear-gradient(90deg, ${(theme as any).ledGlow2} 0%, ${(theme as any).ledGlow} 50%, ${(theme as any).ledGlow3} 100%)`
-                          : (theme as any).ledGlow,
-                    }}
-                  />
-                  <div
-                    className="relative h-[6px] w-full rounded-full"
-                    style={{
-                      background: (theme as any).ledBar,
-                      boxShadow:
-                        (theme as any).ledGlow2 && (theme as any).ledGlow3
-                          ? `0 0 10px ${(theme as any).ledGlow}, 0 0 16px ${(theme as any).ledGlow2}, 0 0 16px ${(theme as any).ledGlow3}`
-                          : `0 0 12px ${(theme as any).ledGlow}, 0 0 18px ${(theme as any).ledGlow}`,
-                    }}
-                  />
+                <div className="mt-4">
+                  <div className="relative w-full">
+                    <div
+                      aria-hidden
+                      className="absolute inset-x-0 -inset-y-2 rounded-full blur-[10px] opacity-90"
+                      style={{
+                        background:
+                          (theme as any).ledGlow2 && (theme as any).ledGlow3
+                            ? `linear-gradient(90deg, ${(theme as any).ledGlow2} 0%, ${(theme as any).ledGlow} 50%, ${(theme as any).ledGlow3} 100%)`
+                            : (theme as any).ledGlow,
+                      }}
+                    />
+                    <div
+                      className="relative h-[6px] w-full rounded-full"
+                      style={{
+                        background: (theme as any).ledBar,
+                        boxShadow:
+                          (theme as any).ledGlow2 && (theme as any).ledGlow3
+                            ? `0 0 10px ${(theme as any).ledGlow}, 0 0 16px ${(theme as any).ledGlow2}, 0 0 16px ${(theme as any).ledGlow3}`
+                            : `0 0 12px ${(theme as any).ledGlow}, 0 0 18px ${(theme as any).ledGlow}`,
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+
+            <style jsx global>{`
+              .tsw-shell {
+                position: relative;
+              }
+              .tsw-shell::before {
+                content: "";
+                position: absolute;
+                inset: -2px;
+                border-radius: 24px;
+                pointer-events: none;
+                background: radial-gradient(
+                    120% 130% at 0% 0%,
+                    var(--glowL) 0%,
+                    transparent 62%
+                  ),
+                  radial-gradient(
+                    150% 140% at 50% 0%,
+                    var(--glowC) 0%,
+                    transparent 64%
+                  ),
+                  radial-gradient(
+                    120% 130% at 100% 0%,
+                    var(--glowR) 0%,
+                    transparent 62%
+                  );
+                opacity: 0.55;
+                filter: blur(14px);
+              }
+              .tsw-shell::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 24px;
+                pointer-events: none;
+                box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+                  0 0 26px var(--glowC), 0 0 34px var(--glowL),
+                  0 0 34px var(--glowR);
+                opacity: 0.38;
+              }
+
+              .tsw-range {
+                -webkit-appearance: none;
+                appearance: none;
+                height: 6px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.14);
+                outline: none;
+              }
+              .tsw-range::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 14px;
+                height: 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+                cursor: pointer;
+              }
+              .tsw-range::-moz-range-thumb {
+                width: 14px;
+                height: 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.95);
+                border: none;
+                box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+                cursor: pointer;
+              }
+
+              .tsw-modal-in {
+                animation: tswModalIn 0.26s cubic-bezier(0.22, 1, 0.36, 1)
+                  both;
+                transform-origin: 50% 45%;
+              }
+              .tsw-modal-out {
+                animation: tswModalOut 0.34s cubic-bezier(0.22, 1, 0.36, 1)
+                  both;
+                transform-origin: 50% 45%;
+              }
+              .tsw-backdrop-in {
+                animation: tswBackdropIn 0.26s cubic-bezier(0.22, 1, 0.36, 1)
+                  both;
+              }
+              .tsw-backdrop-out {
+                animation: tswBackdropOut 0.34s cubic-bezier(0.22, 1, 0.36, 1)
+                  both;
+              }
+
+              /* ✅ snap-back (solo mobile wrapper) */
+              .tsw-drag-snap {
+                transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+              }
+
+              @keyframes tswModalIn {
+                from {
+                  opacity: 0;
+                  transform: translateY(14px) scale(0.98);
+                  filter: blur(6px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0) scale(1);
+                  filter: blur(0px);
+                }
+              }
+              @keyframes tswModalOut {
+                from {
+                  opacity: 1;
+                  transform: translateY(0) scale(1);
+                  filter: blur(0px);
+                }
+                to {
+                  opacity: 0;
+                  transform: translateY(18px) scale(0.975);
+                  filter: blur(10px);
+                }
+              }
+              @keyframes tswBackdropIn {
+                from {
+                  opacity: 0;
+                }
+                to {
+                  opacity: 1;
+                }
+              }
+              @keyframes tswBackdropOut {
+                from {
+                  opacity: 1;
+                }
+                to {
+                  opacity: 0;
+                }
+              }
+            `}</style>
           </div>
-
-          <style jsx global>{`
-            .tsw-shell { position: relative; }
-            .tsw-shell::before {
-              content: "";
-              position: absolute;
-              inset: -2px;
-              border-radius: 24px;
-              pointer-events: none;
-              background:
-                radial-gradient(120% 130% at 0% 0%, var(--glowL) 0%, transparent 62%),
-                radial-gradient(150% 140% at 50% 0%, var(--glowC) 0%, transparent 64%),
-                radial-gradient(120% 130% at 100% 0%, var(--glowR) 0%, transparent 62%);
-              opacity: 0.55;
-              filter: blur(14px);
-            }
-            .tsw-shell::after {
-              content: "";
-              position: absolute;
-              inset: 0;
-              border-radius: 24px;
-              pointer-events: none;
-              box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-                0 0 26px var(--glowC),
-                0 0 34px var(--glowL),
-                0 0 34px var(--glowR);
-              opacity: 0.38;
-            }
-
-            .tsw-range {
-              -webkit-appearance: none;
-              appearance: none;
-              height: 6px;
-              border-radius: 999px;
-              background: rgba(255, 255, 255, 0.14);
-              outline: none;
-            }
-            .tsw-range::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              appearance: none;
-              width: 14px;
-              height: 14px;
-              border-radius: 999px;
-              background: rgba(255, 255, 255, 0.95);
-              box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
-              cursor: pointer;
-            }
-            .tsw-range::-moz-range-thumb {
-              width: 14px;
-              height: 14px;
-              border-radius: 999px;
-              background: rgba(255, 255, 255, 0.95);
-              border: none;
-              box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
-              cursor: pointer;
-            }
-
-            .tsw-modal-in { animation: tswModalIn 0.26s cubic-bezier(0.22,1,0.36,1) both; transform-origin: 50% 45%; }
-            .tsw-modal-out { animation: tswModalOut 0.34s cubic-bezier(0.22,1,0.36,1) both; transform-origin: 50% 45%; }
-            .tsw-backdrop-in { animation: tswBackdropIn 0.26s cubic-bezier(0.22,1,0.36,1) both; }
-            .tsw-backdrop-out { animation: tswBackdropOut 0.34s cubic-bezier(0.22,1,0.36,1) both; }
-
-            @keyframes tswModalIn {
-              from { opacity: 0; transform: translateY(14px) scale(0.98); filter: blur(6px); }
-              to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
-            }
-            @keyframes tswModalOut {
-              from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
-              to { opacity: 0; transform: translateY(18px) scale(0.975); filter: blur(10px); }
-            }
-            @keyframes tswBackdropIn { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes tswBackdropOut { from { opacity: 1; } to { opacity: 0; } }
-          `}</style>
         </div>
       </div>
     </div>
