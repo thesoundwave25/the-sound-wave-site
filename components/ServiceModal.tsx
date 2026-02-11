@@ -24,40 +24,11 @@ type Props = {
 
 export default function ServiceModal({ open, onClose, service }: Props) {
   const [isClosing, setIsClosing] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-// ✅ Swipe up to close (mobile)
-const [touchStartY, setTouchStartY] = useState<number | null>(null);
-const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-const onTouchStart = (e: React.TouchEvent) => {
-  const t = e.touches[0];
-  setTouchStartY(t.clientY);
-  setTouchStartX(t.clientX);
-};
+  // ✅ Swipe up to close (mobile)
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-const onTouchEnd = (e: React.TouchEvent) => {
-  if (touchStartY === null || touchStartX === null) return;
-
-  const t = e.changedTouches[0];
-  const endY = t.clientY;
-  const endX = t.clientX;
-
-  const deltaY = endY - touchStartY; // negativo = swipe up
-  const deltaX = Math.abs(endX - touchStartX);
-
-  // soglie anti-chiusura accidentale
-  const SWIPE_UP_THRESHOLD = 120; // px
-  const MAX_SIDEWAYS = 60; // px
-
-  if (deltaY < -SWIPE_UP_THRESHOLD && deltaX < MAX_SIDEWAYS) {
-    requestClose();
-  }
-
-  setTouchStartY(null);
-  setTouchStartX(null);
-};
-
-  // Chiudi con animazione (cinema)
   const requestClose = () => {
     if (isClosing) return;
     setIsClosing(true);
@@ -66,6 +37,34 @@ const onTouchEnd = (e: React.TouchEvent) => {
       setIsClosing(false);
       onClose();
     }, 340);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    setTouchStartY(t.clientY);
+    setTouchStartX(t.clientX);
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY === null || touchStartX === null) return;
+
+    const t = e.changedTouches[0];
+    const endY = t.clientY;
+    const endX = t.clientX;
+
+    const deltaY = endY - touchStartY; // negativo = swipe up
+    const deltaX = Math.abs(endX - touchStartX);
+
+    // soglie anti-chiusura accidentale
+    const SWIPE_UP_THRESHOLD = 120; // px
+    const MAX_SIDEWAYS = 60; // px
+
+    if (deltaY < -SWIPE_UP_THRESHOLD && deltaX < MAX_SIDEWAYS) {
+      requestClose();
+    }
+
+    setTouchStartY(null);
+    setTouchStartX(null);
   };
 
   // ESC + blocco scroll body (quando è aperto)
@@ -107,48 +106,44 @@ const onTouchEnd = (e: React.TouchEvent) => {
       />
 
       {/* Dialog */}
-   <div className="absolute inset-0 flex items-center justify-center p-4 md:p-4">
-
-
+      <div className="absolute inset-0 flex items-center justify-center p-4 md:p-4">
         <div
-  role="dialog"
-  aria-modal="true"
-  className={[
-    "relative w-full max-w-3xl overflow-hidden border border-white/10",
-"rounded-3xl",
-"max-h-[80vh] md:max-h-none",
-
-
-    "bg-zinc-950/80 shadow-2xl",
-    isClosing ? "tsw-modal-out" : "tsw-modal-in",
-  ].join(" ")}
-  onClick={(e) => e.stopPropagation()}
-  onTouchStart={onTouchStart}
-  onTouchEnd={onTouchEnd}
->
-
+          role="dialog"
+          aria-modal="true"
+          className={[
+            "relative w-full max-w-3xl overflow-hidden border border-white/10",
+            "rounded-3xl",
+            // ✅ MOBILE: più alto (niente scroll dentro), DESKTOP: invariato
+            "max-h-[92svh] md:max-h-none",
+            "bg-zinc-950/80 shadow-2xl",
+            isClosing ? "tsw-modal-out" : "tsw-modal-in",
+          ].join(" ")}
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           {/* Close */}
           <button
-  onClick={requestClose}
-  className={[
-    "absolute right-4 top-4 z-10 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
-    // mobile: più visibile
-    "bg-black/80 hover:bg-black/90",
-    // desktop (md+): identico a prima
-    "md:bg-white/5 md:hover:bg-white/10",
-    "backdrop-blur",
-  ].join(" ")}
->
-  Chiudi ✕
-</button>
+            onClick={requestClose}
+            className={[
+              "absolute right-4 top-4 z-10 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-100",
+              // mobile: più visibile
+              "bg-black/80 hover:bg-black/90",
+              // desktop (md+): identico a prima
+              "md:bg-white/5 md:hover:bg-white/10",
+              "backdrop-blur",
+            ].join(" ")}
+          >
+            Chiudi ✕
+          </button>
 
-{/* Drag handle (solo mobile) */}
-<div className="flex justify-center pt-3 pb-2 md:hidden">
-  <div className="h-1.5 w-12 rounded-full bg-white/20" />
-</div>
+          {/* Drag handle (solo mobile) */}
+          <div className="flex justify-center pt-3 pb-2 md:hidden">
+            <div className="h-1.5 w-12 rounded-full bg-white/20" />
+          </div>
+
           {/* Media */}
           <div className="relative aspect-[16/9] md:aspect-video w-full bg-black/40">
-
             {service.mediaType === "video" && service.mediaSrc ? (
               <video
                 className="h-full w-full object-cover"
@@ -172,22 +167,11 @@ const onTouchEnd = (e: React.TouchEvent) => {
 
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
           </div>
-          {/* Shadow when scrolled (mobile only) */}
-<div
-  className={[
-    "md:hidden",
-    "h-px w-full",
-    scrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.55)]" : "shadow-none",
-    "transition-shadow duration-300",
-  ].join(" ")}
-/>
-
 
           {/* Content */}
-<div
-  className="p-6 sm:p-8 max-h-[42vh] overflow-y-auto"
-  onScroll={(e) => setScrolled((e.currentTarget as HTMLDivElement).scrollTop > 6)}
->
+          {/* ✅ MOBILE: niente scroll (evita conflitto con swipe) */}
+          {/* ✅ DESKTOP: visivamente invariato (solo rimosso scroll mobile) */}
+          <div className="p-6 sm:p-8 overflow-hidden">
             <h3 className="text-2xl font-semibold tracking-tight text-zinc-100">
               {service.title}
             </h3>
