@@ -333,7 +333,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       />
 
       {/* Dialog */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center p-0 md:p-4">
+      <div className="absolute inset-0 flex items-center justify-center p-4">
         {/* MOBILE: drag wrapper */}
         <div className={snapBack ? "tsw-drag-snap" : ""} style={draggableStyle}>
           {/* =======================
