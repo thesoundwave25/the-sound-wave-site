@@ -802,18 +802,12 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
         <div className="mt-7 sm:mt-8 flex justify-center">
           <button
-            className={[
-              "group relative inline-flex items-center justify-center",
-              "overflow-hidden rounded-2xl",
-              "border border-white/20 bg-white px-7 py-3 font-semibold text-black",
-              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:-translate-y-0.5 hover:border-white/40",
-              "hover:shadow-[0_0_30px_rgba(255,255,255,0.45)]",
-              "active:translate-y-[1px] active:scale-[0.985]",
-              "select-none",
-            ].join(" ")}
-            onClick={() => setOpenDownloads(true)}
-            
+            type="button"
+            className="group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white px-7 py-3 font-semibold text-black transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:border-white/40 hover:shadow-[0_0_30px_rgba(255,255,255,0.45)] active:translate-y-[1px] active:scale-[0.985] select-none"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpenDownloads(true);
+            }}
           >
             <span
               aria-hidden
