@@ -21,7 +21,6 @@ function isMobileSoft() {
   return window.matchMedia("(max-width: 767px)").matches; // < md
 }
 
-
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -40,6 +39,20 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   // store the element that had focus when opening (usually the clicked card button)
   const lastActiveElRef = useRef<HTMLElement | null>(null);
+
+  // ✅ NEW: restore focus without triggering scroll to the gallery
+  const restoreFocusNoScroll = () => {
+    const el = lastActiveElRef.current;
+    if (!el) return;
+    try {
+      // focus without scroll (modern browsers)
+      (el as any).focus?.({ preventScroll: true });
+    } catch {
+      try {
+        el.focus?.();
+      } catch {}
+    }
+  };
 
   const currentPhoto: PhotoItem | null = useMemo(() => {
     if (safePhotos.length > 0) return safePhotos[index] ?? safePhotos[0] ?? null;
@@ -193,19 +206,26 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
-      // Ripristiniamo la posizione dello scroll immediatamente senza delay eccessivi
+      // ✅ MODIFICA: ripristina scroll + focus senza scroll (evita jump alla sezione foto)
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
-        // Doppio check per Safari Mobile
+
         requestAnimationFrame(() => {
           window.scrollTo(0, scrollLockYRef.current);
+
+          // 🔥 evita che il browser "rifocalizzi" la card e scrolli alla gallery
+          restoreFocusNoScroll();
+
+          try {
+            (document.activeElement as HTMLElement | null)?.blur?.();
+          } catch {}
         });
+      } else {
+        restoreFocusNoScroll();
+        try {
+          (document.activeElement as HTMLElement | null)?.blur?.();
+        } catch {}
       }
-      
-      // Rimuoviamo il focus residuo che causa lo scroll involontario del browser
-      try {
-        (document.activeElement as HTMLElement | null)?.blur?.();
-      } catch {}
     };
   }, [open, canNavigate, safePhotos.length]);
 
@@ -316,8 +336,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       {/* Dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
         {/* drag wrapper (si muove solo su mobile reale) */}
-       <div 
-          className={`${snapBack ? "tsw-drag-snap" : ""} ${!isMobile ? "w-full flex justify-center" : ""}`} 
+        <div
+          className={`${snapBack ? "tsw-drag-snap" : ""} ${
+            !isMobile ? "w-full flex justify-center" : ""
+          }`}
           style={draggableStyle}
         >
           {/* =======================
@@ -500,9 +522,15 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       </div>
 
       <style jsx global>{`
-      /* Fallback: se il browser non supporta dvh, usiamo vh */
-.tsw-h100 { height: 100vh; height: 100dvh; }
-.tsw-h86 { height: 86vh; height: 86dvh; }
+        /* Fallback: se il browser non supporta dvh, usiamo vh */
+        .tsw-h100 {
+          height: 100vh;
+          height: 100dvh;
+        }
+        .tsw-h86 {
+          height: 86vh;
+          height: 86dvh;
+        }
         .tsw-hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
