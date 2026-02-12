@@ -242,13 +242,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     setGestureLocked("none");
   };
 
-  const onSwipeTouchMove = (e: React.TouchEvent) => {
-    if (!isMobileSoft()) return;
-    if (!dragging) return;
-    if (touchStartY === null || touchStartX === null) return;
+const onSwipeTouchMove = (e: React.TouchEvent) => {
+    if (!isMobileSoft() || !dragging || touchStartY === null || touchStartX === null) return;
 
     const t = e.touches[0];
-    const deltaY = t.clientY - touchStartY; // negativo = swipe up
+    const deltaY = t.clientY - touchStartY;
     const deltaX = t.clientX - touchStartX;
 
     const absX = Math.abs(deltaX);
@@ -266,9 +264,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     if (gestureLocked === "ignore") return;
 
-    try {
+    // Fix per l'errore in console: blocca lo scroll solo se l'evento è cancellabile
+    if (e.cancelable) {
       e.preventDefault();
-    } catch {}
+    }
 
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
