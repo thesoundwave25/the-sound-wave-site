@@ -891,7 +891,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 ].join(" ")}
 
               >
-                <div className="relative aspect-[2480/3508] w-full overflow-hidden rounded-xl border border-white/10 bg-black">
+                <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
                   <Image
                     src={ev.imageSrc}
                     alt={ev.title}
