@@ -246,17 +246,22 @@ export default function EventModal({ open, onClose, event, events }: Props) {
         ].join(" ")}
       />
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
+      <div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
         {/* ✅ popup più “portrait” (9:16 vibe) */}
         <div
-          className={[
-            "relative w-full max-w-[560px] rounded-3xl tsw-event-glow",
-            isClosing ? "tsw-modal-out" : "tsw-modal-in",
-          ].join(" ")}
-          role="dialog"
-          aria-modal="true"
-          onClick={(e) => e.stopPropagation()}
-        >
+  className={[
+    // mobile: leggermente più piccola e “staccata” dai bordi
+    "relative w-[92vw] max-w-[520px]",
+    // limita l’altezza per lasciare aria sopra/sotto su desktop
+    "max-h-[92vh]",
+    "rounded-3xl tsw-event-glow",
+    isClosing ? "tsw-modal-out" : "tsw-modal-in",
+  ].join(" ")}
+  role="dialog"
+  aria-modal="true"
+  onClick={(e) => e.stopPropagation()}
+>
+
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
             {/* Close */}
             <button
@@ -280,7 +285,8 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                     // 9:16 per locandine / reel
                     "aspect-[9/16]",
                     // limite altezza per non “sfondare” lo schermo
-                    "max-h-[76vh]",
+                    "max-h-[60vh] md:max-h-[58vh]",
+
                     "mx-auto",
                   ].join(" ")}
                 >
