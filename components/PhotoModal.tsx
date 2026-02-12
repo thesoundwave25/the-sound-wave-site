@@ -40,11 +40,12 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   // store the element that had focus when opening (usually the clicked card button)
   const lastActiveElRef = useRef<HTMLElement | null>(null);
 
-  // ✅ restore focus without triggering scroll
+  // ✅ NEW: restore focus without triggering scroll to the gallery
   const restoreFocusNoScroll = () => {
     const el = lastActiveElRef.current;
     if (!el) return;
     try {
+      // focus without scroll (modern browsers)
       (el as any).focus?.({ preventScroll: true });
     } catch {
       try {
@@ -83,9 +84,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (isClosing) return;
     setIsClosing(true);
 
-    try {
-      (document.activeElement as HTMLElement | null)?.blur?.();
-    } catch {}
+    // Rimuoviamo il focus da qualsiasi elemento attivo per evitare "salti" verso bottoni della gallery
+    if (typeof document !== "undefined") {
+      (document.activeElement as HTMLElement)?.blur();
+    }
 
     window.setTimeout(() => {
       setIsClosing(false);
@@ -107,6 +109,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   // When modal opens: remove focus from the clicked thumbnail button (iOS jump fix)
   useEffect(() => {
     if (!open) return;
+    
 
     resetDrag();
 
@@ -117,6 +120,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       lastActiveElRef.current = null;
     }
 
+    // ✅ focus SOLO su mobile (su desktop può dare “linee”/indicatori strani)
     window.requestAnimationFrame(() => {
       if (!isMobileSoft()) return;
       try {
@@ -136,6 +140,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       const nextIndex = found >= 0 ? found : 0;
       setIndex(nextIndex);
 
+      // Mobile: porta la track alla slide iniziale SOLO all’apertura
       const el = trackRef.current;
       if (el && isMobileSoft()) {
         window.requestAnimationFrame(() => {
@@ -154,8 +159,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // Gestione ESC, Frecce e Blocco Scroll
-  useEffect(() => {
+  // Gestione ESC, Frecce e Blocco Scroll (Fix per evitare il salto alla chiusura)
+ useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -175,12 +180,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
     const prevWidth = body.style.width;
-    const prevHtmlOverflow = html.style.overflow;
 
     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollLockYRef.current = scrollY;
 
-    html.style.overflow = "hidden";
     if (isMobileSoft()) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
@@ -189,32 +192,37 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     } else {
       body.style.overflow = "hidden";
     }
+    html.style.overflow = "hidden";
 
-    return () => {
+   return () => {
       document.removeEventListener("keydown", onKeyDown);
 
+      // Ripristino stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      html.style.overflow = prevHtmlOverflow;
+      html.style.overflow = "";
 
+      // Ripristino scroll IMMEDIATO forzando 'instat'
       if (isMobileSoft()) {
-        window.scrollTo(0, scrollLockYRef.current);
-
-        requestAnimationFrame(() => {
-          window.scrollTo(0, scrollLockYRef.current);
-          restoreFocusNoScroll();
-          try {
-            (document.activeElement as HTMLElement | null)?.blur?.();
-          } catch {}
+        window.scrollTo({
+          top: scrollLockYRef.current,
+          behavior: 'instant' // <--- Forza il salto immediato ignorando il CSS
         });
-      } else {
-        restoreFocusNoScroll();
-        try {
-          (document.activeElement as HTMLElement | null)?.blur?.();
-        } catch {}
+        
+        // Doppio check per Safari Mobile
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: scrollLockYRef.current,
+            behavior: 'instant'
+          });
+        });
       }
+      
+      try {
+        (document.activeElement as HTMLElement)?.blur();
+      } catch {}
     };
   }, [open, canNavigate, safePhotos.length]);
 
@@ -242,13 +250,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     setGestureLocked("none");
   };
 
-  const onSwipeTouchMove = (e: React.TouchEvent) => {
-    if (!isMobileSoft()) return;
-    if (!dragging) return;
-    if (touchStartY === null || touchStartX === null) return;
+const onSwipeTouchMove = (e: React.TouchEvent) => {
+    if (!isMobileSoft() || !dragging || touchStartY === null || touchStartX === null) return;
 
     const t = e.touches[0];
-    const deltaY = t.clientY - touchStartY; // negativo = swipe up
+    const deltaY = t.clientY - touchStartY;
     const deltaX = t.clientX - touchStartX;
 
     const absX = Math.abs(deltaX);
@@ -266,9 +272,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     if (gestureLocked === "ignore") return;
 
-    try {
+    // Fix per l'errore in console: blocca lo scroll solo se l'evento è cancellabile
+    if (e.cancelable) {
       e.preventDefault();
-    } catch {}
+    }
 
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
@@ -324,15 +331,15 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
       {/* Dialog */}
       <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
-        {/* drag wrapper */}
+        {/* drag wrapper (si muove solo su mobile reale) */}
         <div
           className={`${snapBack ? "tsw-drag-snap" : ""} ${
-            !isMobile ? "w-full flex justify-center" : "w-full flex justify-center"
+            !isMobile ? "w-full flex justify-center" : ""
           }`}
           style={draggableStyle}
         >
           {/* =======================
-              ✅ DESKTOP (invariato)
+              ✅ DESKTOP RIPRISTINATO
              ======================= */}
           {!isMobile ? (
             <div
@@ -412,16 +419,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
             </div>
           ) : (
             /* =======================
-               ✅ MOBILE: solo GRAFICA Apple-style (swipe invariato)
-               - NO bottoni chiudi
-               - NO frecce
-               - swipe e barretta rimangono
+               ✅ MOBILE INVARIATO
              ======================= */
             <div
               className={[
-                // ✅ card centrata apple-style (NON full-screen piatto)
-                "relative w-[94vw] max-w-[980px]",
-                "h-[92svh] rounded-3xl tsw-photo-glow",
+                "relative w-screen h-[100dvh] rounded-none",
                 isClosing ? "tsw-modal-out" : "tsw-modal-in",
               ].join(" ")}
               role="dialog"
@@ -437,24 +439,17 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
               }
             >
               <div
-                className={[
-                  "relative w-full h-full overflow-hidden",
-                  "rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl",
-                  // layout a colonna per far crescere la gallery senza fixed heights
-                  "flex flex-col",
-                ].join(" ")}
+                className="relative w-full h-[100dvh] overflow-hidden bg-black shadow-2xl"
                 style={{
                   paddingTop: "env(safe-area-inset-top)" as any,
                   paddingBottom: "env(safe-area-inset-bottom)" as any,
                 }}
               >
-                {/* barretta (invariata) */}
                 <div className="flex justify-center pt-3 pb-2">
                   <div className="h-1.5 w-12 rounded-full bg-white/20" />
                 </div>
 
-                {/* contenuto */}
-                <div className="relative w-full flex-1">
+                <div className="relative w-full">
                   {canNavigate ? (
                     <div
                       ref={trackRef}
@@ -465,7 +460,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                         "flex overflow-x-auto",
                         "snap-x snap-mandatory",
                         "overscroll-x-contain",
-                        "bg-black w-full h-full",
+                        "bg-black w-full",
+                        "h-[86dvh]",
                       ].join(" ")}
                       style={{
                         WebkitOverflowScrolling: "touch" as any,
@@ -481,29 +477,27 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                             src={p.src}
                             alt={p.alt ?? "Foto evento"}
                             fill
-                            className="object-contain object-center p-3"
+                            className="object-contain object-center p-2"
                             priority={i === index}
                           />
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="relative w-full h-full bg-black">
+                    <div className="relative w-full bg-black h-[86dvh]">
                       <Image
                         src={currentPhoto.src}
                         alt={currentPhoto.alt ?? "Foto evento"}
                         fill
-                        className="object-contain object-center p-3"
+                        className="object-contain object-center p-2"
                         priority
                       />
                     </div>
                   )}
 
-                  {/* overlay gradient apple-style */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
                 </div>
 
-                {/* dots (invariati) */}
                 {canNavigate && (
                   <div className="pb-4 pt-3 flex items-center justify-center gap-2">
                     {safePhotos.map((_, i) => (
@@ -524,6 +518,15 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       </div>
 
       <style jsx global>{`
+        /* Fallback: se il browser non supporta dvh, usiamo vh */
+        .tsw-h100 {
+          height: 100vh;
+          height: 100dvh;
+        }
+        .tsw-h86 {
+          height: 86vh;
+          height: 86dvh;
+        }
         .tsw-hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
