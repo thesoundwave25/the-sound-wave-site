@@ -532,117 +532,133 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
       </div>
 
       <style jsx global>{`
-        /* Fallback: se il browser non supporta dvh, usiamo vh */
-        .tsw-h100 {
-          height: 100vh;
-          height: 100dvh;
-        }
-        .tsw-h86 {
-          height: 86vh;
-          height: 86dvh;
-        }
-        .tsw-hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .tsw-hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
+  /* Fallback: se il browser non supporta dvh, usiamo vh */
+  .tsw-h100 {
+    height: 100vh;
+    height: 100dvh;
+  }
 
-        .tsw-photo-glow::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 26px;
-  pointer-events: none;
+  .tsw-h86 {
+    height: 86vh;
+    height: 86dvh;
+  }
 
-  /* glow più morbido → elimina linee blu edge iOS */
-  background: radial-gradient(
-    120% 120% at 50% 20%,
-    rgba(255,255,255,0.18) 0%,
-    transparent 70%
-  );
+  .tsw-hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-  opacity: 0.25;
-  filter: blur(22px);
-}
+  .tsw-hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-.tsw-photo-glow::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  pointer-events: none;
+  /* Glow card desktop (stile Apple) */
+  .tsw-photo-glow::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 26px;
+    pointer-events: none;
+    background: radial-gradient(
+      120% 120% at 50% 0%,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.25) 35%,
+      transparent 70%
+    );
+    opacity: 0.25;
+    filter: blur(16px);
+  }
 
-  /* niente highlight edge → niente righe blu */
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.10) inset,
-    0 0 18px rgba(255,255,255,0.12);
+  .tsw-photo-glow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+      0 0 16px rgba(255, 255, 255, 0.24),
+      0 0 34px rgba(255, 255, 255, 0.16);
+    opacity: 0.6;
+  }
 
-  opacity: 0.5;
-}
+  /* Animazioni modal */
+  .tsw-modal-in {
+    animation: tswModalIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: 50% 45%;
+  }
 
+  .tsw-modal-out {
+    animation: tswModalOut 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: 50% 45%;
+  }
 
-        .tsw-modal-in {
-          animation: tswModalIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
-          transform-origin: 50% 45%;
-        }
-        .tsw-modal-out {
-          animation: tswModalOut 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-          transform-origin: 50% 45%;
-        }
-        .tsw-backdrop-in {
-          animation: tswBackdropIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .tsw-backdrop-out {
-          animation: tswBackdropOut 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
+  .tsw-backdrop-in {
+    animation: tswBackdropIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 
-        .tsw-drag-snap {
-          transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-        }
+  .tsw-backdrop-out {
+    animation: tswBackdropOut 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 
-        @keyframes tswModalIn {
-          from {
-            opacity: 0;
-            transform: translateY(14px) scale(0.98);
-            filter: blur(6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0px);
-          }
-        }
-        @keyframes tswModalOut {
-          from {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0px);
-          }
-          to {
-            opacity: 0;
-            transform: translateY(18px) scale(0.975);
-            filter: blur(10px);
-          }
-        }
-        @keyframes tswBackdropIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes tswBackdropOut {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-          }
-        }
-      `}</style>
+  .tsw-drag-snap {
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes tswModalIn {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+  }
+
+  @keyframes tswModalOut {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0px);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(18px) scale(0.975);
+      filter: blur(10px);
+    }
+  }
+
+  @keyframes tswBackdropIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tswBackdropOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* 🔥 FIX iOS: elimina linee blu focus (senza toccare scroll/swipe) */
+  .tsw-photo-track,
+  .tsw-photo-track:focus,
+  .tsw-photo-track:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+`}</style>
+
     </div>
   );
 }
