@@ -419,100 +419,111 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
             </div>
           ) : (
             /* =======================
-               ✅ MOBILE INVARIATO
-             ======================= */
+   ✅ MOBILE: STILE APPLE (solo grafica)
+ ======================= */
+<div
+  className={[
+    // invece di full screen edge-to-edge -> card centrata con padding
+    "relative mx-auto w-[calc(100vw-24px)] h-[calc(100dvh-24px)]",
+    "rounded-3xl tsw-photo-glow",
+    isClosing ? "tsw-modal-out" : "tsw-modal-in",
+  ].join(" ")}
+  role="dialog"
+  aria-modal="true"
+  onClick={(e) => e.stopPropagation()}
+  onTouchStart={onSwipeTouchStart}
+  onTouchMove={onSwipeTouchMove}
+  onTouchEnd={onSwipeTouchEnd}
+  style={
+    {
+      touchAction: canNavigate ? "pan-x" : "none",
+    } as any
+  }
+>
+  <div
+    className={[
+      // shell “apple”
+      "relative w-full h-full overflow-hidden rounded-3xl",
+      "border border-white/10 bg-zinc-950/85 shadow-2xl",
+      "flex flex-col",
+    ].join(" ")}
+    style={{
+      paddingTop: "env(safe-area-inset-top)" as any,
+      paddingBottom: "env(safe-area-inset-bottom)" as any,
+    }}
+  >
+    {/* barretta (rimane) */}
+    <div className="flex justify-center pt-3 pb-2">
+      <div className="h-1.5 w-12 rounded-full bg-white/20" />
+    </div>
+
+    {/* area foto: diventa flex-1 così non usiamo più 86dvh fissi */}
+    <div className="relative w-full flex-1">
+      {canNavigate ? (
+        <div
+          ref={trackRef}
+          tabIndex={-1}
+          onScroll={onMobileScroll}
+          className={[
+            "tsw-hide-scrollbar",
+            "flex overflow-x-auto",
+            "snap-x snap-mandatory",
+            "overscroll-x-contain",
+            "w-full h-full",
+          ].join(" ")}
+          style={{
+            WebkitOverflowScrolling: "touch" as any,
+            touchAction: "pan-x",
+          }}
+        >
+          {safePhotos.map((p, i) => (
             <div
-              className={[
-                "relative w-screen h-[100dvh] rounded-none",
-                isClosing ? "tsw-modal-out" : "tsw-modal-in",
-              ].join(" ")}
-              role="dialog"
-              aria-modal="true"
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={onSwipeTouchStart}
-              onTouchMove={onSwipeTouchMove}
-              onTouchEnd={onSwipeTouchEnd}
-              style={
-                {
-                  touchAction: canNavigate ? "pan-x" : "none",
-                } as any
-              }
+              key={p.id}
+              className="snap-center snap-always shrink-0 w-full h-full relative"
             >
-              <div
-                className="relative w-full h-[100dvh] overflow-hidden bg-black shadow-2xl"
-                style={{
-                  paddingTop: "env(safe-area-inset-top)" as any,
-                  paddingBottom: "env(safe-area-inset-bottom)" as any,
-                }}
-              >
-                <div className="flex justify-center pt-3 pb-2">
-                  <div className="h-1.5 w-12 rounded-full bg-white/20" />
-                </div>
-
-                <div className="relative w-full">
-                  {canNavigate ? (
-                    <div
-                      ref={trackRef}
-                      tabIndex={-1}
-                      onScroll={onMobileScroll}
-                      className={[
-                        "tsw-hide-scrollbar",
-                        "flex overflow-x-auto",
-                        "snap-x snap-mandatory",
-                        "overscroll-x-contain",
-                        "bg-black w-full",
-                        "h-[86dvh]",
-                      ].join(" ")}
-                      style={{
-                        WebkitOverflowScrolling: "touch" as any,
-                        touchAction: "pan-x",
-                      }}
-                    >
-                      {safePhotos.map((p, i) => (
-                        <div
-                          key={p.id}
-                          className="snap-center snap-always shrink-0 w-full h-full relative"
-                        >
-                          <Image
-                            src={p.src}
-                            alt={p.alt ?? "Foto evento"}
-                            fill
-                            className="object-contain object-center p-2"
-                            priority={i === index}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="relative w-full bg-black h-[86dvh]">
-                      <Image
-                        src={currentPhoto.src}
-                        alt={currentPhoto.alt ?? "Foto evento"}
-                        fill
-                        className="object-contain object-center p-2"
-                        priority
-                      />
-                    </div>
-                  )}
-
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
-                </div>
-
-                {canNavigate && (
-                  <div className="pb-4 pt-3 flex items-center justify-center gap-2">
-                    {safePhotos.map((_, i) => (
-                      <span
-                        key={i}
-                        className={[
-                          "h-1.5 w-1.5 rounded-full",
-                          i === index ? "bg-white/90" : "bg-white/30",
-                        ].join(" ")}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Image
+                src={p.src}
+                alt={p.alt ?? "Foto evento"}
+                fill
+                className="object-contain object-center p-3"
+                priority={i === index}
+              />
             </div>
+          ))}
+        </div>
+      ) : (
+        <div className="relative w-full h-full">
+          <Image
+            src={currentPhoto.src}
+            alt={currentPhoto.alt ?? "Foto evento"}
+            fill
+            className="object-contain object-center p-3"
+            priority
+          />
+        </div>
+      )}
+
+      {/* gradient come desktop */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+    </div>
+
+    {/* dots (rimangono) */}
+    {canNavigate && (
+      <div className="pb-4 pt-3 flex items-center justify-center gap-2">
+        {safePhotos.map((_, i) => (
+          <span
+            key={i}
+            className={[
+              "h-1.5 w-1.5 rounded-full",
+              i === index ? "bg-white/90" : "bg-white/30",
+            ].join(" ")}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
           )}
         </div>
       </div>
