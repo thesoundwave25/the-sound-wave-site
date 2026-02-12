@@ -27,9 +27,105 @@ type Props = {
   event: EventItem | null;
   events: EventItem[];
 };
+function isMobileSoft() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches; // < md
+}
+
 
 export default function EventModal({ open, onClose, event, events }: Props) {
   const [isClosing, setIsClosing] = useState(false);
+
+  // ==========================
+  // ✅ MOBILE GESTURES (ONLY)
+  // - swipe left/right: navigate events
+  // - swipe up: close
+  // ==========================
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [gestureLocked, setGestureLocked] = useState<"none" | "h" | "v">("none");
+  const [dragging, setDragging] = useState(false);
+
+  const resetGesture = () => {
+    setTouchStartX(null);
+    setTouchStartY(null);
+    setGestureLocked("none");
+    setDragging(false);
+  };
+
+  const isInteractiveTarget = (t: EventTarget | null) => {
+    const el = t as HTMLElement | null;
+    if (!el) return false;
+    return !!el.closest(
+      "button,a,input,textarea,select,video,[role='slider'],[data-no-swipe]"
+    );
+  };
+
+  const onSwipeTouchStart = (e: React.TouchEvent) => {
+    if (!isMobileSoft()) return;
+    if (isInteractiveTarget(e.target)) return;
+
+    const t = e.touches[0];
+    setTouchStartX(t.clientX);
+    setTouchStartY(t.clientY);
+    setGestureLocked("none");
+    setDragging(true);
+  };
+
+  const onSwipeTouchMove = (e: React.TouchEvent) => {
+    if (!isMobileSoft()) return;
+    if (!dragging) return;
+    if (touchStartX === null || touchStartY === null) return;
+
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    if (gestureLocked === "none") {
+      if (absX > 14 && absX > absY) setGestureLocked("h");
+      else if (absY > 10 && absY > absX) setGestureLocked("v");
+    }
+
+    // blocca scroll pagina solo se stiamo facendo swipe UP (close)
+    if (gestureLocked === "v" && e.cancelable) e.preventDefault();
+  };
+
+  const onSwipeTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobileSoft()) return;
+    if (!dragging) return;
+    if (touchStartX === null || touchStartY === null) return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    const H_TH = 60;   // soglia swipe L/R
+    const V_TH = 110;  // soglia swipe UP per chiudere
+
+    // swipe UP => close
+    if (absY > absX && dy < -V_TH) {
+      resetGesture();
+      requestClose();
+      return;
+    }
+
+    // swipe L/R => navigate
+    if (absX > absY && absX > H_TH) {
+      resetGesture();
+      if (dx < 0) go(1); // swipe left => next
+      else go(-1);       // swipe right => prev
+      return;
+    }
+
+    resetGesture();
+  };
+
 
   // --- Video refs/states (devono esistere SEMPRE per non rompere l'ordine degli hooks)
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -246,17 +342,20 @@ export default function EventModal({ open, onClose, event, events }: Props) {
         ].join(" ")}
       />
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        {/* ✅ popup più “portrait” (9:16 vibe) */}
-        <div
-          className={[
-            "relative w-full max-w-[560px] rounded-3xl tsw-event-glow",
-            isClosing ? "tsw-modal-out" : "tsw-modal-in",
-          ].join(" ")}
-          role="dialog"
-          aria-modal="true"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div
+  className={[
+    "relative w-full max-w-[560px] rounded-3xl tsw-event-glow",
+    isClosing ? "tsw-modal-out" : "tsw-modal-in",
+  ].join(" ")}
+  role="dialog"
+  aria-modal="true"
+  onClick={(e) => e.stopPropagation()}
+  onTouchStart={onSwipeTouchStart}
+  onTouchMove={onSwipeTouchMove}
+  onTouchEnd={onSwipeTouchEnd}
+  style={isMobileSoft() ? ({ touchAction: "pan-x" } as any) : undefined}
+>
+
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
             {/* Close */}
             <button
