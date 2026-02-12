@@ -144,14 +144,12 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // ESC + body/html lock (iOS safe) + arrows desktop
+  // Gestione ESC, Frecce e Blocco Scroll (Fix per evitare il salto alla chiusura)
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose();
-
-      // desktop arrows
       if (!isMobileSoft() && canNavigate) {
         if (e.key === "ArrowLeft") goPrev();
         if (e.key === "ArrowRight") goNext();
@@ -163,60 +161,52 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
+    // Memorizziamo lo stato precedente per ripristinarlo fedelmente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
     const prevWidth = body.style.width;
     const prevHtmlOverflow = html.style.overflow;
 
-    // prevent Safari auto restoration
-    const prevScrollRestoration = window.history.scrollRestoration;
-    try {
-      window.history.scrollRestoration = "manual";
-    } catch {}
-
-    const scrollY = window.scrollY;
+    // Leggiamo la posizione attuale dello scroll
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollLockYRef.current = scrollY;
 
-    body.style.overflow = "hidden";
+    // Blocchiamo lo scroll
     html.style.overflow = "hidden";
-
-    // iOS: lock “fixed”
     if (isMobileSoft()) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
       body.style.width = "100%";
+      body.style.overflow = "hidden";
+    } else {
+      body.style.overflow = "hidden";
     }
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
-      try {
-        (document.activeElement as HTMLElement | null)?.blur?.();
-        lastActiveElRef.current?.blur?.();
-      } catch {}
-
-      const restoreY = scrollLockYRef.current;
-
+      // Ripristiniamo gli stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
-      try {
-        window.history.scrollRestoration = prevScrollRestoration;
-      } catch {}
-
+      // Ripristiniamo la posizione dello scroll immediatamente senza delay eccessivi
       if (isMobileSoft()) {
+        window.scrollTo(0, scrollLockYRef.current);
+        // Doppio check per Safari Mobile
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            window.scrollTo(0, restoreY);
-          });
+          window.scrollTo(0, scrollLockYRef.current);
         });
       }
+      
+      // Rimuoviamo il focus residuo che causa lo scroll involontario del browser
+      try {
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      } catch {}
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, canNavigate, safePhotos.length]);
 
   // aggiorna index durante scroll (solo per dots/indicator)
