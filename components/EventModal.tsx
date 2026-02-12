@@ -49,6 +49,11 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     "none"
   );
 
+  // ✅ RAF throttle per swipe (più fluido)
+const dragYRef = useRef(0);
+const dragRafRef = useRef<number | null>(null);
+
+
   const resetDrag = () => {
     setDragY(0);
     setDragging(false);
@@ -94,28 +99,45 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     // evita scroll pagina solo se cancellabile
     if (e.cancelable) e.preventDefault();
 
-    // solo swipe UP (valori negativi)
-    const clamped = Math.max(-260, Math.min(0, deltaY));
-    setDragY(clamped);
+   // solo swipe UP (valori negativi)
+const clamped = Math.max(-260, Math.min(0, deltaY));
+
+// ✅ aggiorna in modo fluido (max 60fps)
+dragYRef.current = clamped;
+
+if (dragRafRef.current == null) {
+  dragRafRef.current = window.requestAnimationFrame(() => {
+    dragRafRef.current = null;
+    setDragY(dragYRef.current);
+  });
+}
+
   };
 
   const onSwipeTouchEnd = () => {
-    if (!isMobileSoft() || !dragging) return;
+  if (!isMobileSoft() || !dragging) return;
 
-    const TH = 140;
-    if (dragY < -TH) {
-      requestClose();
-    } else {
-      setSnapBack(true);
-      setDragY(0);
-      window.setTimeout(() => setSnapBack(false), 260);
-    }
+  // ✅ se c’è un frame ancora in coda, lo annulliamo
+  if (dragRafRef.current) {
+    cancelAnimationFrame(dragRafRef.current);
+    dragRafRef.current = null;
+  }
 
-    setDragging(false);
-    setTouchStartY(null);
-    setTouchStartX(null);
-    setGestureLocked("none");
-  };
+  const TH = 140;
+  if (dragY < -TH) {
+    requestClose();
+  } else {
+    setSnapBack(true);
+    setDragY(0);
+    window.setTimeout(() => setSnapBack(false), 260);
+  }
+
+  setDragging(false);
+  setTouchStartY(null);
+  setTouchStartX(null);
+  setGestureLocked("none");
+};
+
 
 
   // --- Video refs/states (devono esistere SEMPRE per non rompere l'ordine degli hooks)
@@ -325,8 +347,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
 
   const draggableStyle: React.CSSProperties = isMobileSoft()
-    ? { transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})` }
-    : {};
+  ? { transform: `translate3d(0, ${dragY}px, 0) scale(${1 - progress * 0.01})` }
+  : {};
+
 
   const backdropStyle: React.CSSProperties = isMobileSoft()
     ? { opacity: 1 - progress * 0.25 }
@@ -353,7 +376,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   {/* drag wrapper: si muove solo su mobile */}
   <div
     className={snapBack ? "tsw-drag-snap" : ""}
-    style={draggableStyle}
+    style={{ ...draggableStyle, willChange: "transform" }}
   >
     {/* ✅ popup */}
     <div
