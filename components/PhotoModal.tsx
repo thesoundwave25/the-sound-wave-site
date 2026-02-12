@@ -109,6 +109,22 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   useEffect(() => {
     if (!open) return;
 
+    // DEBUG TEMPORANEO — capire chi prende il focus dopo la chiusura
+useEffect(() => {
+  if (!open) return;
+
+  const onFocusIn = (e: any) => {
+    console.log("FOCUSIN:", e?.target);
+  };
+
+  document.addEventListener("focusin", onFocusIn);
+
+  return () => {
+    document.removeEventListener("focusin", onFocusIn);
+  };
+}, [open]);
+
+
     resetDrag();
 
     try {
