@@ -176,6 +176,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
+    // Salviamo lo stato precedente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
@@ -184,6 +185,8 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollLockYRef.current = scrollY;
 
+    // Applichiamo il blocco rigoroso
+    html.style.overflow = "hidden";
     if (isMobileSoft()) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
@@ -192,29 +195,25 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     } else {
       body.style.overflow = "hidden";
     }
-    html.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
+      // Ripristino stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      html.style.overflow = ""; // Lasciamo che torni al default
+      html.style.overflow = "";
 
+      // Ripristino scroll immediato
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
-        // Fix per Safari: ripristino forzato nel frame successivo
-        requestAnimationFrame(() => {
+        // Forza il ripristino per Safari
+        setTimeout(() => {
           window.scrollTo(0, scrollLockYRef.current);
-        });
+        }, 0);
       }
-      
-      // Pulizia focus finale
-      try {
-        (document.activeElement as HTMLElement)?.blur();
-      } catch {}
     };
   }, [open, canNavigate, safePhotos.length]);
 
@@ -247,30 +246,23 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
 
     const t = e.touches[0];
     const deltaY = t.clientY - touchStartY;
-    const deltaX = t.clientX - touchStartX;
-
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
-
+    
+    // Se stiamo trascinando verso il basso (swipe to close)
+    if (gestureLocked === "drag" && deltaY > 0) {
+      if (e.cancelable) e.preventDefault(); // Risolve l'errore passive listener
+      const clamped = Math.max(0, Math.min(260, deltaY)); // Trascina verso il basso
+      setDragY(clamped);
+    }
+    
+    // Gestione lock del gesto (semplificata)
     if (gestureLocked === "none") {
-      if (absX > 14 && absX > absY) {
-        setGestureLocked("ignore");
-        return;
-      }
-      if (absY > 10 && absY > absX) {
+      const deltaX = t.clientX - touchStartX;
+      if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
         setGestureLocked("drag");
+      } else if (Math.abs(deltaX) > 10) {
+        setGestureLocked("ignore");
       }
     }
-
-    if (gestureLocked === "ignore") return;
-
-    // Fix per l'errore in console: blocca lo scroll solo se l'evento è cancellabile
-    if (e.cancelable) {
-      e.preventDefault();
-    }
-
-    const clamped = Math.max(-260, Math.min(0, deltaY));
-    setDragY(clamped);
   };
 
   const onSwipeTouchEnd = () => {
