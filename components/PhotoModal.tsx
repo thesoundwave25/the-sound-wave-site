@@ -246,23 +246,30 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
 
     const t = e.touches[0];
     const deltaY = t.clientY - touchStartY;
-    
-    // Se stiamo trascinando verso il basso (swipe to close)
-    if (gestureLocked === "drag" && deltaY > 0) {
-      if (e.cancelable) e.preventDefault(); // Risolve l'errore passive listener
-      const clamped = Math.max(0, Math.min(260, deltaY)); // Trascina verso il basso
-      setDragY(clamped);
-    }
-    
-    // Gestione lock del gesto (semplificata)
+    const deltaX = t.clientX - touchStartX;
+
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
     if (gestureLocked === "none") {
-      const deltaX = t.clientX - touchStartX;
-      if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-        setGestureLocked("drag");
-      } else if (Math.abs(deltaX) > 10) {
+      if (absX > 14 && absX > absY) {
         setGestureLocked("ignore");
+        return;
+      }
+      if (absY > 10 && absY > absX) {
+        setGestureLocked("drag");
       }
     }
+
+    if (gestureLocked === "ignore") return;
+
+    // Fix per l'errore in console: blocca lo scroll solo se l'evento è cancellabile
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    const clamped = Math.max(-260, Math.min(0, deltaY));
+    setDragY(clamped);
   };
 
   const onSwipeTouchEnd = () => {
