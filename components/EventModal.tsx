@@ -28,8 +28,95 @@ type Props = {
   events: EventItem[];
 };
 
+function isMobileSoft() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches; // < md
+}
+
+
 export default function EventModal({ open, onClose, event, events }: Props) {
   const [isClosing, setIsClosing] = useState(false);
+
+    // ==========================
+  // Swipe UP to close (MOBILE ONLY)
+  // ==========================
+  const [dragY, setDragY] = useState(0); // negativo = swipe up
+  const [dragging, setDragging] = useState(false);
+  const [snapBack, setSnapBack] = useState(false);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [gestureLocked, setGestureLocked] = useState<"none" | "drag" | "ignore">(
+    "none"
+  );
+
+  const resetDrag = () => {
+    setDragY(0);
+    setDragging(false);
+    setSnapBack(false);
+    setTouchStartY(null);
+    setTouchStartX(null);
+    setGestureLocked("none");
+  };
+
+  const onSwipeTouchStart = (e: React.TouchEvent) => {
+    if (!isMobileSoft()) return;
+    const t = e.touches[0];
+    setTouchStartY(t.clientY);
+    setTouchStartX(t.clientX);
+    setDragging(true);
+    setSnapBack(false);
+    setGestureLocked("none");
+  };
+
+  const onSwipeTouchMove = (e: React.TouchEvent) => {
+    if (!isMobileSoft() || !dragging || touchStartY === null || touchStartX === null) return;
+
+    const t = e.touches[0];
+    const deltaY = t.clientY - touchStartY; // negativo = up
+    const deltaX = t.clientX - touchStartX;
+
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    // decide gesto (evita conflitti con swipe orizzontale)
+    if (gestureLocked === "none") {
+      if (absX > 14 && absX > absY) {
+        setGestureLocked("ignore"); // orizzontale -> ignora drag
+        return;
+      }
+      if (absY > 10 && absY > absX) {
+        setGestureLocked("drag"); // verticale -> drag
+      }
+    }
+
+    if (gestureLocked === "ignore") return;
+
+    // evita scroll pagina solo se cancellabile
+    if (e.cancelable) e.preventDefault();
+
+    // solo swipe UP (valori negativi)
+    const clamped = Math.max(-260, Math.min(0, deltaY));
+    setDragY(clamped);
+  };
+
+  const onSwipeTouchEnd = () => {
+    if (!isMobileSoft() || !dragging) return;
+
+    const TH = 140;
+    if (dragY < -TH) {
+      requestClose();
+    } else {
+      setSnapBack(true);
+      setDragY(0);
+      window.setTimeout(() => setSnapBack(false), 260);
+    }
+
+    setDragging(false);
+    setTouchStartY(null);
+    setTouchStartX(null);
+    setGestureLocked("none");
+  };
+
 
   // --- Video refs/states (devono esistere SEMPRE per non rompere l'ordine degli hooks)
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -95,9 +182,12 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   }, [open, safeIndex, events]);
 
   useEffect(() => {
-    if (!open) return;
-    setIsClosing(false);
-  }, [open]);
+  if (!open) return;
+  setIsClosing(false);
+  resetDrag();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [open]);
+
 
   // ✅ Video: riparte sempre da 0 e prova autoplay con audio quando si apre
   useEffect(() => {
@@ -232,35 +322,59 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   // ✅ return null SOLO dopo gli hooks
   if (!open || !event) return null;
 
+    const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
+
+  const draggableStyle: React.CSSProperties = isMobileSoft()
+    ? { transform: `translateY(${dragY}px) scale(${1 - progress * 0.01})` }
+    : {};
+
+  const backdropStyle: React.CSSProperties = isMobileSoft()
+    ? { opacity: 1 - progress * 0.25 }
+    : {};
+
+
   const isVideo = mt === "video";
 
   return (
     <div className="fixed inset-0 z-[9999]">
       {/* Backdrop */}
       <button
-        aria-label="Chiudi"
-        onClick={requestClose}
-        className={[
-          "absolute inset-0 bg-black/60 backdrop-blur-md",
-          isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
-        ].join(" ")}
-      />
-
-      <div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
-        {/* ✅ popup più “portrait” (9:16 vibe) */}
-        <div
+  aria-label="Chiudi"
+  onClick={requestClose}
+  style={backdropStyle}
   className={[
-    // mobile: leggermente più piccola e “staccata” dai bordi
-    "relative w-[92vw] max-w-[520px]",
-    // limita l’altezza per lasciare aria sopra/sotto su desktop
-    "max-h-[92vh]",
-    "rounded-3xl tsw-event-glow",
-    isClosing ? "tsw-modal-out" : "tsw-modal-in",
+    "absolute inset-0 bg-black/60 backdrop-blur-md",
+    isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
   ].join(" ")}
-  role="dialog"
-  aria-modal="true"
-  onClick={(e) => e.stopPropagation()}
->
+/>
+
+
+<div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
+  {/* drag wrapper: si muove solo su mobile */}
+  <div
+    className={snapBack ? "tsw-drag-snap" : ""}
+    style={draggableStyle}
+  >
+    {/* ✅ popup */}
+    <div
+      className={[
+        // mobile: leggermente più piccola e “staccata” dai bordi
+        "relative w-[92vw] max-w-[520px]",
+        // limita l’altezza per lasciare aria sopra/sotto su desktop
+        "max-h-[92vh]",
+        "rounded-3xl tsw-event-glow",
+        isClosing ? "tsw-modal-out" : "tsw-modal-in",
+      ].join(" ")}
+      role="dialog"
+      aria-modal="true"
+      onClick={(e) => e.stopPropagation()}
+      // ✅ gesture SOLO su mobile
+      onTouchStart={isMobileSoft() ? onSwipeTouchStart : undefined}
+      onTouchMove={isMobileSoft() ? onSwipeTouchMove : undefined}
+      onTouchEnd={isMobileSoft() ? onSwipeTouchEnd : undefined}
+      style={isMobileSoft() ? ({ touchAction: "pan-x" } as any) : undefined}
+    >
+
 
           <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
             {/* Close */}
@@ -491,6 +605,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
           `}</style>
         </div>
       </div>
+    </div>
     </div>
   );
 }
