@@ -18,7 +18,11 @@ type Props = {
 
 function isMobileSoft() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(max-width: 767px)").matches; // < md
+  try {
+    return !!window.matchMedia?.("(max-width: 767px)")?.matches; // < md
+  } catch {
+    return window.innerWidth < 768;
+  }
 }
 
 export default function PhotoModal({ open, onClose, photo, photos }: Props) {
@@ -40,12 +44,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   // store the element that had focus when opening (usually the clicked card button)
   const lastActiveElRef = useRef<HTMLElement | null>(null);
 
-  // ✅ NEW: restore focus without triggering scroll to the gallery
+  // ✅ restore focus without triggering scroll to the gallery
   const restoreFocusNoScroll = () => {
     const el = lastActiveElRef.current;
     if (!el) return;
     try {
-      // focus without scroll (modern browsers)
       (el as any).focus?.({ preventScroll: true });
     } catch {
       try {
@@ -108,7 +111,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   // When modal opens: remove focus from the clicked thumbnail button (iOS jump fix)
   useEffect(() => {
     if (!open) return;
-    
 
     resetDrag();
 
@@ -119,7 +121,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       lastActiveElRef.current = null;
     }
 
-    // ✅ focus SOLO su mobile (su desktop può dare “linee”/indicatori strani)
+    // ✅ focus SOLO su mobile
     window.requestAnimationFrame(() => {
       if (!isMobileSoft()) return;
       try {
@@ -158,7 +160,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // Gestione ESC, Frecce e Blocco Scroll (Fix per evitare il salto alla chiusura)
+  // Gestione ESC, Frecce e Blocco Scroll
   useEffect(() => {
     if (!open) return;
 
@@ -175,7 +177,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
-    // Memorizziamo lo stato precedente per ripristinarlo fedelmente
+    // Memorizziamo lo stato precedente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
@@ -207,16 +209,13 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
-      // ✅ MODIFICA: ripristina scroll + focus senza scroll (evita jump alla sezione foto)
+      // ripristina scroll + focus senza scroll
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
 
         requestAnimationFrame(() => {
           window.scrollTo(0, scrollLockYRef.current);
-
-          // 🔥 evita che il browser "rifocalizzi" la card e scrolli alla gallery
           restoreFocusNoScroll();
-
           try {
             (document.activeElement as HTMLElement | null)?.blur?.();
           } catch {}
@@ -242,7 +241,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (next !== index) setIndex(next);
   };
 
-  // Unified swipe handlers (mobile only)
+  // Unified swipe handlers (mobile only) — NOW attached ONLY to the handle bar
   const onSwipeTouchStart = (e: React.TouchEvent) => {
     if (!isMobileSoft()) return;
 
@@ -278,9 +277,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     if (gestureLocked === "ignore") return;
 
-    try {
-      e.preventDefault();
-    } catch {}
+    // ❌ IMPORTANT: no preventDefault here (avoids passive listener error)
 
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
@@ -434,9 +431,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
               role="dialog"
               aria-modal="true"
               onClick={(e) => e.stopPropagation()}
-              onTouchStart={onSwipeTouchStart}
-              onTouchMove={onSwipeTouchMove}
-              onTouchEnd={onSwipeTouchEnd}
               style={
                 {
                   touchAction: canNavigate ? "pan-x" : "none",
@@ -450,7 +444,14 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   paddingBottom: "env(safe-area-inset-bottom)" as any,
                 }}
               >
-                <div className="flex justify-center pt-3 pb-2">
+                {/* ✅ Swipe-to-close handle (only here) */}
+                <div
+                  className="flex justify-center pt-3 pb-2"
+                  onTouchStart={onSwipeTouchStart}
+                  onTouchMove={onSwipeTouchMove}
+                  onTouchEnd={onSwipeTouchEnd}
+                  style={{ touchAction: "none" as any }}
+                >
                   <div className="h-1.5 w-12 rounded-full bg-white/20" />
                 </div>
 
