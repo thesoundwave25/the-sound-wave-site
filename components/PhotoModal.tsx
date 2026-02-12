@@ -465,12 +465,15 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
           tabIndex={-1}
           onScroll={onMobileScroll}
           className={[
-            "tsw-hide-scrollbar",
-            "flex overflow-x-auto",
-            "snap-x snap-mandatory",
-            "overscroll-x-contain",
-            "w-full h-full",
-          ].join(" ")}
+  "tsw-photo-track",
+  "tsw-hide-scrollbar",
+  "flex overflow-x-auto",
+  "snap-x snap-mandatory",
+  "overscroll-x-contain",
+  "bg-black w-full",
+  "h-[86dvh]",
+].join(" ")}
+
           style={{
             WebkitOverflowScrolling: "touch" as any,
             touchAction: "pan-x",
