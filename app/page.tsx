@@ -902,26 +902,32 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
                   />
                 </div>
 
-                <div className="mt-4">
-                  <div className="text-xs text-zinc-400">
-                    {ev.date} • {ev.venue}
-                  </div>
-                  <div className="mt-1 text-lg font-semibold tracking-tight text-white">{ev.title}</div>
-                  <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
+                <div className="relative px-4 pt-4 pb-5">
+  <div className="text-xs text-zinc-400">
+    {ev.date} • {ev.venue}
+  </div>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <div />
-                    <span
-                      className={[
-                        "text-zinc-400",
-                        "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "group-hover:translate-x-1",
-                      ].join(" ")}
-                    >
-                      →
-                    </span>
-                  </div>
-                </div>
+  <div className="mt-1 text-lg font-semibold tracking-tight text-white">
+    {ev.title}
+  </div>
+
+  <p className="mt-2 text-sm text-zinc-300">
+    {ev.cta}
+  </p>
+
+  {/* Freccia dentro, allineata Apple-style */}
+  <span
+    className={[
+      "absolute bottom-4 right-4",
+      "text-zinc-400",
+      "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+      "group-hover:translate-x-1 group-hover:text-white/70",
+    ].join(" ")}
+  >
+    →
+  </span>
+</div>
+
               </button>
             ))}
           </div>
