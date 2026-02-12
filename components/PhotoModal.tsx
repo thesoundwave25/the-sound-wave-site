@@ -194,24 +194,32 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     }
     html.style.overflow = "hidden";
 
-    return () => {
+   return () => {
       document.removeEventListener("keydown", onKeyDown);
 
+      // Ripristino stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      html.style.overflow = ""; // Lasciamo che torni al default
+      html.style.overflow = "";
 
+      // Ripristino scroll IMMEDIATO forzando 'instat'
       if (isMobileSoft()) {
-        window.scrollTo(0, scrollLockYRef.current);
-        // Fix per Safari: ripristino forzato nel frame successivo
+        window.scrollTo({
+          top: scrollLockYRef.current,
+          behavior: 'instant' // <--- Forza il salto immediato ignorando il CSS
+        });
+        
+        // Doppio check per Safari Mobile
         requestAnimationFrame(() => {
-          window.scrollTo(0, scrollLockYRef.current);
+          window.scrollTo({
+            top: scrollLockYRef.current,
+            behavior: 'instant'
+          });
         });
       }
       
-      // Pulizia focus finale
       try {
         (document.activeElement as HTMLElement)?.blur();
       } catch {}
