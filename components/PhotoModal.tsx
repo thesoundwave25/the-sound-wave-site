@@ -84,7 +84,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (isClosing) return;
     setIsClosing(true);
 
-    // Rimuoviamo il focus da qualsiasi elemento attivo per evitare "salti" verso bottoni della gallery
+    // Rimuoviamo il focus per evitare che il browser "salti" all'elemento che ha aperto il modal
     if (typeof document !== "undefined") {
       (document.activeElement as HTMLElement)?.blur();
     }
@@ -93,7 +93,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       setIsClosing(false);
       resetDrag();
       onClose();
-    }, 340);
+    }, 300); // Ridotto leggermente per maggiore reattività
   };
 
   const goPrev = () => {
