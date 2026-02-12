@@ -176,7 +176,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
-    // Salviamo lo stato precedente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
@@ -185,8 +184,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollLockYRef.current = scrollY;
 
-    // Applichiamo il blocco rigoroso
-    html.style.overflow = "hidden";
     if (isMobileSoft()) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
@@ -195,25 +192,29 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     } else {
       body.style.overflow = "hidden";
     }
+    html.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
-      // Ripristino stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      html.style.overflow = "";
+      html.style.overflow = ""; // Lasciamo che torni al default
 
-      // Ripristino scroll immediato
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
-        // Forza il ripristino per Safari
-        setTimeout(() => {
+        // Fix per Safari: ripristino forzato nel frame successivo
+        requestAnimationFrame(() => {
           window.scrollTo(0, scrollLockYRef.current);
-        }, 0);
+        });
       }
+      
+      // Pulizia focus finale
+      try {
+        (document.activeElement as HTMLElement)?.blur();
+      } catch {}
     };
   }, [open, canNavigate, safePhotos.length]);
 
