@@ -584,6 +584,5 @@ export default function EventModal({ open, onClose, event, events }: Props) {
           `}</style>
         </div>
       </div>
-    </div>
   );
 }
