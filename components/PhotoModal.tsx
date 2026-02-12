@@ -160,7 +160,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   }, [open, photo?.id, safePhotos.length]);
 
   // Gestione ESC, Frecce e Blocco Scroll (Fix per evitare il salto alla chiusura)
-  useEffect(() => {
+ useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -176,19 +176,14 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
-    // Memorizziamo lo stato precedente per ripristinarlo fedelmente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
     const prevWidth = body.style.width;
-    const prevHtmlOverflow = html.style.overflow;
 
-    // Leggiamo la posizione attuale dello scroll
     const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     scrollLockYRef.current = scrollY;
 
-    // Blocchiamo lo scroll
-    html.style.overflow = "hidden";
     if (isMobileSoft()) {
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
@@ -197,37 +192,29 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     } else {
       body.style.overflow = "hidden";
     }
+    html.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
 
-      // Ripristiniamo gli stili
       body.style.overflow = prevOverflow;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      html.style.overflow = prevHtmlOverflow;
+      html.style.overflow = ""; // Lasciamo che torni al default
 
-      // ✅ MODIFICA: ripristina scroll + focus senza scroll (evita jump alla sezione foto)
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
-
+        // Fix per Safari: ripristino forzato nel frame successivo
         requestAnimationFrame(() => {
           window.scrollTo(0, scrollLockYRef.current);
-
-          // 🔥 evita che il browser "rifocalizzi" la card e scrolli alla gallery
-          restoreFocusNoScroll();
-
-          try {
-            (document.activeElement as HTMLElement | null)?.blur?.();
-          } catch {}
         });
-      } else {
-        restoreFocusNoScroll();
-        try {
-          (document.activeElement as HTMLElement | null)?.blur?.();
-        } catch {}
       }
+      
+      // Pulizia focus finale
+      try {
+        (document.activeElement as HTMLElement)?.blur();
+      } catch {}
     };
   }, [open, canNavigate, safePhotos.length]);
 
