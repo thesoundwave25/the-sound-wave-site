@@ -44,7 +44,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
   // store the element that had focus when opening (usually the clicked card button)
   const lastActiveElRef = useRef<HTMLElement | null>(null);
 
-  // ✅ NEW: restore focus without triggering scroll to the gallery
+  // ✅ restore focus without triggering scroll to the gallery
   const restoreFocusNoScroll = () => {
     const el = lastActiveElRef.current;
     if (!el) return;
@@ -74,9 +74,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     "none"
   );
 
-  // ✅ se il touch parte dentro la track orizzontale, NON facciamo swipe-to-close
-  const startedOnTrackRef = useRef(false);
-
   const resetDrag = () => {
     setDragY(0);
     setDragging(false);
@@ -84,7 +81,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     setTouchStartY(null);
     setTouchStartX(null);
     setGestureLocked("none");
-    startedOnTrackRef.current = false;
   };
 
   const requestClose = () => {
@@ -125,7 +121,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       lastActiveElRef.current = null;
     }
 
-    // ✅ focus SOLO su mobile (su desktop può dare “linee”/indicatori strani)
+    // ✅ focus SOLO su mobile
     window.requestAnimationFrame(() => {
       if (!isMobileSoft()) return;
       try {
@@ -164,7 +160,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, photo?.id, safePhotos.length]);
 
-  // Gestione ESC, Frecce e Blocco Scroll (Fix per evitare il salto alla chiusura)
+  // Gestione ESC, Frecce e Blocco Scroll
   useEffect(() => {
     if (!open) return;
 
@@ -181,7 +177,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     const body = document.body;
     const html = document.documentElement;
 
-    // Memorizziamo lo stato precedente per ripristinarlo fedelmente
+    // Memorizziamo lo stato precedente
     const prevOverflow = body.style.overflow;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
@@ -213,7 +209,7 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       body.style.width = prevWidth;
       html.style.overflow = prevHtmlOverflow;
 
-      // ✅ ripristina scroll + focus senza scroll (evita jump alla sezione foto)
+      // ripristina scroll + focus senza scroll
       if (isMobileSoft()) {
         window.scrollTo(0, scrollLockYRef.current);
 
@@ -245,15 +241,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (next !== index) setIndex(next);
   };
 
-  // Unified swipe handlers (mobile only)
+  // Unified swipe handlers (mobile only) — NOW attached ONLY to the handle bar
   const onSwipeTouchStart = (e: React.TouchEvent) => {
     if (!isMobileSoft()) return;
-
-    const target = e.target as Node | null;
-    startedOnTrackRef.current = !!(target && trackRef.current?.contains(target));
-
-    // se parte sulla track, lasciamo lavorare lo swipe orizzontale
-    if (startedOnTrackRef.current) return;
 
     const t = e.touches[0];
     setTouchStartY(t.clientY);
@@ -265,7 +255,6 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
   const onSwipeTouchMove = (e: React.TouchEvent) => {
     if (!isMobileSoft()) return;
-    if (startedOnTrackRef.current) return;
     if (!dragging) return;
     if (touchStartY === null || touchStartX === null) return;
 
@@ -288,19 +277,14 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
 
     if (gestureLocked === "ignore") return;
 
-    // ❌ niente preventDefault → niente errori “passive listener”
+    // ❌ IMPORTANT: no preventDefault here (avoids passive listener error)
+
     const clamped = Math.max(-260, Math.min(0, deltaY));
     setDragY(clamped);
   };
 
   const onSwipeTouchEnd = () => {
     if (!isMobileSoft()) return;
-
-    if (startedOnTrackRef.current) {
-      startedOnTrackRef.current = false;
-      return;
-    }
-
     if (!dragging) return;
 
     const TH = 140;
@@ -356,8 +340,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
           }`}
           style={draggableStyle}
         >
+          {/* =======================
+              ✅ DESKTOP RIPRISTINATO
+             ======================= */}
           {!isMobile ? (
-            /* DESKTOP INVARIATO */
             <div
               className={[
                 "relative w-full max-w-5xl rounded-3xl tsw-photo-glow",
@@ -434,7 +420,9 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
               </div>
             </div>
           ) : (
-            /* MOBILE */
+            /* =======================
+               ✅ MOBILE INVARIATO
+             ======================= */
             <div
               className={[
                 "relative w-screen h-[100dvh] rounded-none",
@@ -443,10 +431,11 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
               role="dialog"
               aria-modal="true"
               onClick={(e) => e.stopPropagation()}
-              onTouchStart={onSwipeTouchStart}
-              onTouchMove={onSwipeTouchMove}
-              onTouchEnd={onSwipeTouchEnd}
-              style={{ touchAction: "none" as any }}
+              style={
+                {
+                  touchAction: canNavigate ? "pan-x" : "none",
+                } as any
+              }
             >
               <div
                 className="relative w-full h-[100dvh] overflow-hidden bg-black shadow-2xl"
@@ -455,7 +444,14 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
                   paddingBottom: "env(safe-area-inset-bottom)" as any,
                 }}
               >
-                <div className="flex justify-center pt-3 pb-2">
+                {/* ✅ Swipe-to-close handle (only here) */}
+                <div
+                  className="flex justify-center pt-3 pb-2"
+                  onTouchStart={onSwipeTouchStart}
+                  onTouchMove={onSwipeTouchMove}
+                  onTouchEnd={onSwipeTouchEnd}
+                  style={{ touchAction: "none" as any }}
+                >
                   <div className="h-1.5 w-12 rounded-full bg-white/20" />
                 </div>
 
@@ -528,6 +524,15 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
       </div>
 
       <style jsx global>{`
+        /* Fallback: se il browser non supporta dvh, usiamo vh */
+        .tsw-h100 {
+          height: 100vh;
+          height: 100dvh;
+        }
+        .tsw-h86 {
+          height: 86vh;
+          height: 86dvh;
+        }
         .tsw-hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
