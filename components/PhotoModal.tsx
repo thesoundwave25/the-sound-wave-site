@@ -547,32 +547,38 @@ const onSwipeTouchMove = (e: React.TouchEvent) => {
         }
 
         .tsw-photo-glow::before {
-          content: "";
-          position: absolute;
-          inset: -3px;
-          border-radius: 26px;
-          pointer-events: none;
-          background: radial-gradient(
-            120% 120% at 50% 0%,
-            rgba(255, 255, 255, 0.85) 0%,
-            rgba(255, 255, 255, 0.25) 35%,
-            transparent 70%
-          );
-          opacity: 0.25;
-          filter: blur(16px);
-        }
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 26px;
+  pointer-events: none;
 
-        .tsw-photo-glow::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          border-radius: 24px;
-          pointer-events: none;
-          box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset,
-            0 0 16px rgba(255, 255, 255, 0.24),
-            0 0 34px rgba(255, 255, 255, 0.16);
-          opacity: 0.6;
-        }
+  /* glow più morbido → elimina linee blu edge iOS */
+  background: radial-gradient(
+    120% 120% at 50% 20%,
+    rgba(255,255,255,0.18) 0%,
+    transparent 70%
+  );
+
+  opacity: 0.25;
+  filter: blur(22px);
+}
+
+.tsw-photo-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  pointer-events: none;
+
+  /* niente highlight edge → niente righe blu */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.10) inset,
+    0 0 18px rgba(255,255,255,0.12);
+
+  opacity: 0.5;
+}
+
 
         .tsw-modal-in {
           animation: tswModalIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
