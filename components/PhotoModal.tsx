@@ -84,9 +84,10 @@ export default function PhotoModal({ open, onClose, photo, photos }: Props) {
     if (isClosing) return;
     setIsClosing(true);
 
-    try {
-      (document.activeElement as HTMLElement | null)?.blur?.();
-    } catch {}
+    // Rimuoviamo il focus da qualsiasi elemento attivo per evitare "salti" verso bottoni della gallery
+    if (typeof document !== "undefined") {
+      (document.activeElement as HTMLElement)?.blur();
+    }
 
     window.setTimeout(() => {
       setIsClosing(false);
