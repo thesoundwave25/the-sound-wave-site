@@ -62,7 +62,7 @@ export default function Home() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [mobileNavOpen, activePhoto]);
+  }, [mobileNavOpen]);
 
   // Animazione sezione Servizi (entra/esce)
   useEffect(() => {
