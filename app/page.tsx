@@ -1052,7 +1052,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 </Section>
 
 
-     {/* 8) CONTATTI */}
+    {/* 8) CONTATTI */}
 <Section id="contatti" title="Contatti">
   <div className="grid gap-4 md:grid-cols-3">
     <a
@@ -1157,9 +1157,8 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
     {/* ✅ Loghi: una riga anche su mobile (come desktop) */}
     <div className="mt-6 flex flex-nowrap justify-center gap-2 sm:gap-6">
+      {/* ✅ SOLO QUI: Gianluk sm:w-36 come gli altri */}
       <div className="relative h-12 w-16 sm:h-16 sm:w-36">
-
-
         <Image
           src="/brand/gianluk-logo.svg"
           alt="logo"
@@ -1201,6 +1200,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     </div>
   </div>
 </Section>
+
 
 
       <footer className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12 text-zinc-500">
