@@ -1156,7 +1156,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     </div>
 
     {/* ✅ Loghi: una riga anche su mobile (come desktop) */}
-    <div className="mt-6 flex justify-center gap-4 sm:gap-6 flex-nowrap overflow-x-auto px-2 tsw-hide-scrollbar">
+    <div className="mt-6 flex flex-wrap justify-center gap-4 sm:gap-6">
       <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
         <Image
           src="/brand/gianluk-logo.svg"
