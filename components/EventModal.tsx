@@ -33,11 +33,11 @@ function isMobileSoft() {
   return window.matchMedia("(max-width: 767px)").matches; // < md
 }
 
-
 export default function EventModal({ open, onClose, event, events }: Props) {
   const [isClosing, setIsClosing] = useState(false);
+  const [closingViaSwipe, setClosingViaSwipe] = useState(false);
 
-    // ==========================
+  // ==========================
   // Swipe UP to close (MOBILE ONLY)
   // ==========================
   const [dragY, setDragY] = useState(0); // negativo = swipe up
@@ -50,9 +50,8 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   );
 
   // ✅ RAF throttle per swipe (più fluido)
-const dragYRef = useRef(0);
-const dragRafRef = useRef<number | null>(null);
-
+  const dragYRef = useRef(0);
+  const dragRafRef = useRef<number | null>(null);
 
   const resetDrag = () => {
     setDragY(0);
@@ -99,57 +98,79 @@ const dragRafRef = useRef<number | null>(null);
     // evita scroll pagina solo se cancellabile
     if (e.cancelable) e.preventDefault();
 
-   // solo swipe UP (valori negativi)
-const clamped = Math.max(-260, Math.min(0, deltaY));
+    // solo swipe UP (valori negativi)
+    const clamped = Math.max(-260, Math.min(0, deltaY));
 
-// ✅ aggiorna in modo fluido (max 60fps)
-dragYRef.current = clamped;
+    // ✅ aggiorna in modo fluido (max 60fps)
+    dragYRef.current = clamped;
 
-if (dragRafRef.current == null) {
-  dragRafRef.current = window.requestAnimationFrame(() => {
-    dragRafRef.current = null;
-    setDragY(dragYRef.current);
-  });
-}
+    if (dragRafRef.current == null) {
+      dragRafRef.current = window.requestAnimationFrame(() => {
+        dragRafRef.current = null;
+        setDragY(dragYRef.current);
+      });
+    }
+  };
 
+  const requestClose = () => {
+    if (isClosing) return;
+
+    // click/ESC/backdrop = comportamento normale
+    setClosingViaSwipe(false);
+
+    setIsClosing(true);
+    window.setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 340);
+  };
+
+  // ✅ chiusura dedicata allo swipe: niente transform sul popup (evita lo "scatto")
+  const requestCloseSwipe = () => {
+    if (isClosing) return;
+
+    setClosingViaSwipe(true);
+
+    setIsClosing(true);
+    window.setTimeout(() => {
+      setIsClosing(false);
+      setClosingViaSwipe(false);
+      onClose();
+    }, 340);
   };
 
   const onSwipeTouchEnd = () => {
-  if (!isMobileSoft() || !dragging) return;
+    if (!isMobileSoft() || !dragging) return;
 
-  // ✅ se c’è un frame ancora in coda, lo annulliamo
-  if (dragRafRef.current) {
-    cancelAnimationFrame(dragRafRef.current);
-    dragRafRef.current = null;
-  }
+    // ✅ se c’è un frame ancora in coda, lo annulliamo
+    if (dragRafRef.current) {
+      cancelAnimationFrame(dragRafRef.current);
+      dragRafRef.current = null;
+    }
 
-  const TH = 140;
-  const CLOSE_Y = -360; // quanto “sparisce” verso l’alto (più negativo = più deciso)
+    const TH = 140;
+    const CLOSE_Y = -360; // quanto “sparisce” verso l’alto
 
-  if (dragY < -TH) {
-    // ✅ 1) anima il wrapper verso l’alto con la stessa transizione del snap-back
-    setSnapBack(true);
-    setDragY(CLOSE_Y);
+    if (dragY < -TH) {
+      // ✅ anima via verso l'alto (wrapper), poi fai fade (popup)
+      setSnapBack(true);
+      setDragY(CLOSE_Y);
 
-    // ✅ 2) avvia la chiusura mentre sta scorrendo (niente stop)
-    window.setTimeout(() => {
-      requestClose();
-    }, 140);
-  } else {
-    // snap back normale
-    setSnapBack(true);
-    setDragY(0);
-    window.setTimeout(() => setSnapBack(false), 260);
-  }
+      window.setTimeout(() => {
+        requestCloseSwipe();
+      }, 140);
+    } else {
+      // snap back
+      setSnapBack(true);
+      setDragY(0);
+      window.setTimeout(() => setSnapBack(false), 260);
+    }
 
-  setDragging(false);
-  setTouchStartY(null);
-  setTouchStartX(null);
-  setGestureLocked("none");
-};
-
-
-
+    setDragging(false);
+    setTouchStartY(null);
+    setTouchStartX(null);
+    setGestureLocked("none");
+  };
 
   // --- Video refs/states (devono esistere SEMPRE per non rompere l'ordine degli hooks)
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -167,16 +188,6 @@ if (dragRafRef.current == null) {
     if (!event) return -1;
     return events.findIndex((e) => e.id === event.id);
   }, [event, events]);
-
-  const requestClose = () => {
-    if (isClosing) return;
-    setIsClosing(true);
-
-    window.setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 340);
-  };
 
   const go = (dir: -1 | 1) => {
     if (!event) return;
@@ -215,12 +226,12 @@ if (dragRafRef.current == null) {
   }, [open, safeIndex, events]);
 
   useEffect(() => {
-  if (!open) return;
-  setIsClosing(false);
-  resetDrag();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [open]);
-
+    if (!open) return;
+    setIsClosing(false);
+    setClosingViaSwipe(false);
+    resetDrag();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // ✅ Video: riparte sempre da 0 e prova autoplay con audio quando si apre
   useEffect(() => {
@@ -355,17 +366,15 @@ if (dragRafRef.current == null) {
   // ✅ return null SOLO dopo gli hooks
   if (!open || !event) return null;
 
-    const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
+  const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
 
   const draggableStyle: React.CSSProperties = isMobileSoft()
-  ? { transform: `translate3d(0, ${dragY}px, 0) scale(${1 - progress * 0.01})` }
-  : {};
-
+    ? { transform: `translate3d(0, ${dragY}px, 0) scale(${1 - progress * 0.01})` }
+    : {};
 
   const backdropStyle: React.CSSProperties = isMobileSoft()
     ? { opacity: 1 - progress * 0.25 }
     : {};
-
 
   const isVideo = mt === "video";
 
@@ -373,273 +382,274 @@ if (dragRafRef.current == null) {
     <div className="fixed inset-0 z-[9999]">
       {/* Backdrop */}
       <button
-  aria-label="Chiudi"
-  onClick={requestClose}
-  style={backdropStyle}
-  className={[
-    "absolute inset-0 bg-black/60 backdrop-blur-md",
-    isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
-  ].join(" ")}
-/>
+        aria-label="Chiudi"
+        onClick={requestClose}
+        style={backdropStyle}
+        className={[
+          "absolute inset-0 bg-black/60 backdrop-blur-md",
+          isClosing ? "tsw-backdrop-out" : "tsw-backdrop-in",
+        ].join(" ")}
+      />
 
+      <div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
+        {/* drag wrapper: si muove solo su mobile */}
+        <div
+          className={snapBack ? "tsw-drag-snap" : ""}
+          style={{ ...draggableStyle, willChange: "transform" }}
+        >
+          {/* ✅ popup */}
+          <div
+            className={[
+              "relative w-[92vw] max-w-[520px]",
+              "max-h-[92vh]",
+              "rounded-3xl tsw-event-glow",
+              isClosing
+                ? (closingViaSwipe ? "tsw-modal-out-swipe" : "tsw-modal-out")
+                : "tsw-modal-in",
+            ].join(" ")}
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            // ✅ gesture SOLO su mobile
+            onTouchStart={isMobileSoft() ? onSwipeTouchStart : undefined}
+            onTouchMove={isMobileSoft() ? onSwipeTouchMove : undefined}
+            onTouchEnd={isMobileSoft() ? onSwipeTouchEnd : undefined}
+            style={isMobileSoft() ? ({ touchAction: "pan-x" } as any) : undefined}
+          >
+            <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+              {/* Close */}
+              <button
+                onClick={requestClose}
+                className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+              >
+                Chiudi ✕
+              </button>
 
-<div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
-  {/* drag wrapper: si muove solo su mobile */}
-  <div
-    className={snapBack ? "tsw-drag-snap" : ""}
-    style={{ ...draggableStyle, willChange: "transform" }}
-  >
-    {/* ✅ popup */}
-    <div
-      className={[
-        // mobile: leggermente più piccola e “staccata” dai bordi
-        "relative w-[92vw] max-w-[520px]",
-        // limita l’altezza per lasciare aria sopra/sotto su desktop
-        "max-h-[92vh]",
-        "rounded-3xl tsw-event-glow",
-        isClosing ? "tsw-modal-out" : "tsw-modal-in",
-      ].join(" ")}
-      role="dialog"
-      aria-modal="true"
-      onClick={(e) => e.stopPropagation()}
-      // ✅ gesture SOLO su mobile
-      onTouchStart={isMobileSoft() ? onSwipeTouchStart : undefined}
-      onTouchMove={isMobileSoft() ? onSwipeTouchMove : undefined}
-      onTouchEnd={isMobileSoft() ? onSwipeTouchEnd : undefined}
-      style={isMobileSoft() ? ({ touchAction: "pan-x" } as any) : undefined}
-    >
-
-
-          <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
-            {/* Close */}
-            <button
-              onClick={requestClose}
-              className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
-            >
-              Chiudi ✕
-            </button>
-
-            {/* Media */}
-            <div
-              className="relative w-full bg-black"
-              onMouseEnter={() => setHovering(true)}
-              onMouseLeave={() => setHovering(false)}
-            >
-              {/* ✅ media più grande + proporzioni più “verticali” */}
-              <div className="relative w-full bg-black">
-                <div
-                  className={[
-                    "relative w-full",
-                    // 9:16 per locandine / reel
-                    "aspect-[9/16]",
-                    // limite altezza per non “sfondare” lo schermo
-                    "max-h-[60vh] md:max-h-[58vh]",
-
-                    "mx-auto",
-                  ].join(" ")}
-                >
-                  {isVideo ? (
-                    <video
-                      ref={videoRef}
-                      src={ms}
-                      className="h-full w-full object-contain"
-                      playsInline
-                      controls={false}
-                      preload="metadata"
-                      onPlay={() => setIsPlaying(true)}
-                      onPause={() => setIsPlaying(false)}
-                      onEnded={() => {
-                        setIsPlaying(false);
-                        setShowTapToPlay(true);
-                        try {
-                          const v = videoRef.current;
-                          if (v) v.currentTime = 0;
-                        } catch {}
-                      }}
-                    />
-                  ) : (
-                    <Image
-                      src={ms}
-                      alt={event.title}
-                      fill
-                      className="object-contain object-center"
-                      priority
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
-
-              {/* Controls (solo video) */}
-              {isVideo && (
-                <>
-                  {/* Tap-to-play overlay */}
-                  {(showTapToPlay || !isPlaying) && (
-                    <button
-                      onClick={togglePlay}
-                      className={[
-                        "absolute left-4 top-4 z-20",
-                        "inline-flex items-center gap-3",
-                        "rounded-full border border-white/15 bg-black/55 backdrop-blur",
-                        "px-4 py-2 text-sm text-white/90",
-                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
-                        "active:scale-[0.98]",
-                      ].join(" ")}
-                    >
-                      <span className="grid h-8 w-8 place-items-center rounded-full border border-white/15 bg-black/35">
-                        ▶
-                      </span>
-                      <span>Riproduci</span>
-                    </button>
-                  )}
-
-                  {/* ✅ player più sottile */}
+              {/* Media */}
+              <div
+                className="relative w-full bg-black"
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
+              >
+                <div className="relative w-full bg-black">
                   <div
                     className={[
-                      "absolute inset-x-0 bottom-0 z-20",
-                      "px-5 pb-4 pt-2",
-                      "transition-opacity duration-300",
-                      hovering || isPlaying ? "opacity-100" : "opacity-0",
+                      "relative w-full",
+                      "aspect-[9/16]",
+                      "max-h-[60vh] md:max-h-[58vh]",
+                      "mx-auto",
                     ].join(" ")}
                   >
-                    <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur px-3 py-2">
-                      {/* progress */}
-                      <div
-                        className="relative h-1.5 w-full cursor-pointer rounded-full bg-white/15"
-                        onClick={(e) => {
-                          const r = (
-                            e.currentTarget as HTMLDivElement
-                          ).getBoundingClientRect();
-                          const ratio = (e.clientX - r.left) / r.width;
-                          seek(ratio);
+                    {isVideo ? (
+                      <video
+                        ref={videoRef}
+                        src={ms}
+                        className="h-full w-full object-contain"
+                        playsInline
+                        controls={false}
+                        preload="metadata"
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => {
+                          setIsPlaying(false);
+                          setShowTapToPlay(true);
+                          try {
+                            const v = videoRef.current;
+                            if (v) v.currentTime = 0;
+                          } catch {}
                         }}
+                      />
+                    ) : (
+                      <Image
+                        src={ms}
+                        alt={event.title}
+                        fill
+                        className="object-contain object-center"
+                        priority
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+
+                {/* Controls (solo video) */}
+                {isVideo && (
+                  <>
+                    {(showTapToPlay || !isPlaying) && (
+                      <button
+                        onClick={togglePlay}
+                        className={[
+                          "absolute left-4 top-4 z-20",
+                          "inline-flex items-center gap-3",
+                          "rounded-full border border-white/15 bg-black/55 backdrop-blur",
+                          "px-4 py-2 text-sm text-white/90",
+                          "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                          "hover:bg-black/70 hover:border-white/25 hover:scale-[1.02]",
+                          "active:scale-[0.98]",
+                        ].join(" ")}
                       >
+                        <span className="grid h-8 w-8 place-items-center rounded-full border border-white/15 bg-black/35">
+                          ▶
+                        </span>
+                        <span>Riproduci</span>
+                      </button>
+                    )}
+
+                    <div
+                      className={[
+                        "absolute inset-x-0 bottom-0 z-20",
+                        "px-5 pb-4 pt-2",
+                        "transition-opacity duration-300",
+                        hovering || isPlaying ? "opacity-100" : "opacity-0",
+                      ].join(" ")}
+                    >
+                      <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur px-3 py-2">
                         <div
-                          className="absolute left-0 top-0 h-1.5 rounded-full bg-white/75"
-                          style={{
-                            width:
-                              duration > 0
-                                ? `${Math.min(100, (t / duration) * 100)}%`
-                                : "0%",
+                          className="relative h-1.5 w-full cursor-pointer rounded-full bg-white/15"
+                          onClick={(e) => {
+                            const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                            const ratio = (e.clientX - r.left) / r.width;
+                            seek(ratio);
                           }}
-                        />
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={togglePlay}
-                            className={[
-                              "h-9 w-9 rounded-full",
-                              "border border-white/15 bg-black/35",
-                              "grid place-items-center text-white/90",
-                              "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                              "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
-                              "active:scale-[0.98]",
-                            ].join(" ")}
-                            aria-label={isPlaying ? "Pausa" : "Play"}
-                          >
-                            {isPlaying ? "❚❚" : "▶"}
-                          </button>
-
-                          <button
-                            onClick={toggleMute}
-                            className={[
-                              "h-9 w-9 rounded-full",
-                              "border border-white/15 bg-black/35",
-                              "grid place-items-center text-white/90",
-                              "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                              "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
-                              "active:scale-[0.98]",
-                            ].join(" ")}
-                            aria-label={
-                              muted ? "Riattiva audio" : "Disattiva audio"
-                            }
-                          >
-                            {muted ? "🔇" : "🔊"}
-                          </button>
-
-                          {/* ✅ Fullscreen */}
-                          <button
-                            onClick={requestFullscreen}
-                            className={[
-                              "h-9 w-9 rounded-full",
-                              "border border-white/15 bg-black/35",
-                              "grid place-items-center text-white/90",
-                              "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                              "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
-                              "active:scale-[0.98]",
-                            ].join(" ")}
-                            aria-label="Schermo intero"
-                            title="Schermo intero"
-                          >
-                            ⛶
-                          </button>
-
-                          <div className="ml-1 text-xs text-white/70 tabular-nums">
-                            {fmt(t)} / {fmt(duration)}
-                          </div>
+                        >
+                          <div
+                            className="absolute left-0 top-0 h-1.5 rounded-full bg-white/75"
+                            style={{
+                              width:
+                                duration > 0
+                                  ? `${Math.min(100, (t / duration) * 100)}%`
+                                  : "0%",
+                            }}
+                          />
                         </div>
 
-                        <div className="text-xs text-white/60">
-                          {event.title}
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={togglePlay}
+                              className={[
+                                "h-9 w-9 rounded-full",
+                                "border border-white/15 bg-black/35",
+                                "grid place-items-center text-white/90",
+                                "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                                "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
+                                "active:scale-[0.98]",
+                              ].join(" ")}
+                              aria-label={isPlaying ? "Pausa" : "Play"}
+                            >
+                              {isPlaying ? "❚❚" : "▶"}
+                            </button>
+
+                            <button
+                              onClick={toggleMute}
+                              className={[
+                                "h-9 w-9 rounded-full",
+                                "border border-white/15 bg-black/35",
+                                "grid place-items-center text-white/90",
+                                "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                                "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
+                                "active:scale-[0.98]",
+                              ].join(" ")}
+                              aria-label={muted ? "Riattiva audio" : "Disattiva audio"}
+                            >
+                              {muted ? "🔇" : "🔊"}
+                            </button>
+
+                            <button
+                              onClick={requestFullscreen}
+                              className={[
+                                "h-9 w-9 rounded-full",
+                                "border border-white/15 bg-black/35",
+                                "grid place-items-center text-white/90",
+                                "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                                "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
+                                "active:scale-[0.98]",
+                              ].join(" ")}
+                              aria-label="Schermo intero"
+                              title="Schermo intero"
+                            >
+                              ⛶
+                            </button>
+
+                            <div className="ml-1 text-xs text-white/70 tabular-nums">
+                              {fmt(t)} / {fmt(duration)}
+                            </div>
+                          </div>
+
+                          <div className="text-xs text-white/60">{event.title}</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Text */}
-            <div className="p-6 sm:p-8">
-              <div className="text-sm text-zinc-400">
-                {event.date} • {event.venue}
+                  </>
+                )}
               </div>
 
-              <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                {event.title}
-              </h3>
+              {/* Text */}
+              <div className="p-6 sm:p-8">
+                <div className="text-sm text-zinc-400">
+                  {event.date} • {event.venue}
+                </div>
 
-              <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed">
-                {event.description}
-              </p>
+                <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                  {event.title}
+                </h3>
+
+                <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed">
+                  {event.description}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <style jsx global>{`
-            .tsw-event-glow::before {
-              content: "";
-              position: absolute;
-              inset: -3px;
-              border-radius: 26px;
-              pointer-events: none;
-              background: radial-gradient(
-                120% 120% at 50% 0%,
-                rgba(255, 255, 255, 0.85) 0%,
-                rgba(255, 255, 255, 0.25) 35%,
-                transparent 70%
-              );
-              opacity: 0.22;
-              filter: blur(16px);
-            }
-            .tsw-event-glow::after {
-              content: "";
-              position: absolute;
-              inset: 0;
-              border-radius: 24px;
-              pointer-events: none;
-              box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset,
-                0 0 16px rgba(255, 255, 255, 0.22),
-                0 0 34px rgba(255, 255, 255, 0.14);
-              opacity: 0.62;
-            }
-          `}</style>
+            <style jsx global>{`
+              .tsw-event-glow::before {
+                content: "";
+                position: absolute;
+                inset: -3px;
+                border-radius: 26px;
+                pointer-events: none;
+                background: radial-gradient(
+                  120% 120% at 50% 0%,
+                  rgba(255, 255, 255, 0.85) 0%,
+                  rgba(255, 255, 255, 0.25) 35%,
+                  transparent 70%
+                );
+                opacity: 0.22;
+                filter: blur(16px);
+              }
+              .tsw-event-glow::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 24px;
+                pointer-events: none;
+                box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+                  0 0 16px rgba(255, 255, 255, 0.22),
+                  0 0 34px rgba(255, 255, 255, 0.14);
+                opacity: 0.62;
+              }
+
+              /* ✅ transizione wrapper (drag) */
+              .tsw-drag-snap {
+                transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+              }
+
+              /* ✅ swipe close: solo fade (evita conflitto transform) */
+              .tsw-modal-out-swipe {
+                animation: tswSwipeFadeOut 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+              }
+              @keyframes tswSwipeFadeOut {
+                from {
+                  opacity: 1;
+                }
+                to {
+                  opacity: 0;
+                }
+              }
+            `}</style>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }
