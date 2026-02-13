@@ -954,86 +954,103 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
         <EventModal open={!!activeEvent} onClose={() => setActiveEvent(null)} event={activeEvent} events={events} />
       </Section>
 
-      {/* 6) CHI SIAMO */}
-      <Section id="chi-siamo" title="Chi siamo">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
-          <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+     {/* 6) CHI SIAMO */}
+<Section id="chi-siamo" title="Chi siamo">
+  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
+    />
+    <div
+      aria-hidden
+      className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"
+    />
 
-          <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-5">
-              <div className="group relative">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
-                  style={{ background: "rgba(255,255,255,0.12)" }}
+    <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
+      {/* IMMAGINE */}
+      <div className="lg:col-span-5">
+        <div className="group relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
+            style={{ background: "rgba(255,255,255,0.12)" }}
+          />
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
+            <div className="relative aspect-[4/5] w-full">
+              <Image
+                src="/brand/chi-siamo.webp"
+                alt="The Sound Wave DJs"
+                fill
+                className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                sizes="(max-width: 1024px) 100vw, 40vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* TESTI + LOGHI (centrati su mobile + desktop) */}
+      <div className="lg:col-span-7 flex flex-col items-center text-center">
+        <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">
+          The Sound Wave
+        </h3>
+
+        <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
+          The Sound Wave è un progetto nato dall’unione di due professionisti
+          dell’intrattenimento con l’obiettivo di portare eventi musicali
+          strutturati, coinvolgenti.<br />
+          DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del
+          pubblico, l’uso della voce e la capacità di leggere la pista e
+          trasformare la musica in spettacolo.<br />
+          DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla
+          creazione di veri e propri viaggi sonori.<br />
+          Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi
+          format.
+        </p>
+
+        <p className="mt-4 text-zinc-400 leading-relaxed">
+          Dall’organizzazione completa dell’evento alla gestione dell’atmosfera
+          musicale e visiva, ogni dettaglio viene curato per creare momenti
+          memorabili e coinvolgenti.
+        </p>
+
+        {/* LOGHI: affiancati, più grandi, riquadro QUADRATO, bordi arrotondati */}
+        <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
+          <div className="group relative">
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="relative h-full w-full">
+                <Image
+                  src="/brand/wallen-logo.svg"
+                  alt="DJ Wallen"
+                  fill
+                  className="object-contain"
+                  sizes="96px"
                 />
-                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
-                  <div className="relative aspect-[4/5] w-full">
-                    <Image
-                      src="/brand/chi-siamo.webp"
-                      alt="The Sound Wave DJs"
-                      fill
-                      className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                      sizes="(max-width: 1024px) 100vw, 40vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  </div>
-                </div>
               </div>
             </div>
+          </div>
 
-            <div className="lg:col-span-7">
-              <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">The Sound Wave</h3>
-
-              <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
-                The Sound Wave è un progetto nato dall’unione di due professionisti dell’intrattenimento con l’obiettivo
-                di portare eventi musicali strutturati, coinvolgenti.<br />
-                DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del pubblico, l’uso della voce e la capacità
-                di leggere la pista e trasformare la musica in spettacolo.<br />
-                DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla creazione di veri e propri viaggi
-                sonori.<br />
-                Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi format.
-              </p>
-
-              <p className="mt-4 text-zinc-400 leading-relaxed">
-                Dall’organizzazione completa dell’evento alla gestione dell’atmosfera musicale e visiva, ogni dettaglio
-                viene curato per creare momenti memorabili e coinvolgenti.
-              </p>
-
-              <div className="mt-7 sm:mt-8 flex flex-wrap justify-center items-center gap-5 sm:gap-6">
-                <div className="group relative">
-                  <div className="relative h-14 sm:h-16 w-40 sm:w-44 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src="/brand/wallen-logo.svg"
-                        alt="DJ Wallen"
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 1024px) 160px, 176px"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group relative">
-                  <div className="relative h-14 sm:h-16 w-40 sm:w-44 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src="/brand/gianluk-logo.svg"
-                        alt="DJ Gianluk"
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 1024px) 160px, 176px"
-                      />
-                    </div>
-                  </div>
-                </div>
+          <div className="group relative">
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="relative h-full w-full">
+                <Image
+                  src="/brand/gianluk-logo.svg"
+                  alt="DJ Gianluk"
+                  fill
+                  className="object-contain"
+                  sizes="96px"
+                />
               </div>
             </div>
           </div>
         </div>
-      </Section>
+      </div>
+      {/* /TESTI + LOGHI */}
+    </div>
+  </div>
+</Section>
+
 
       {/* 8) CONTATTI */}
       <Section id="contatti" title="Contatti">
