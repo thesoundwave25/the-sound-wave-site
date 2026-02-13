@@ -124,9 +124,19 @@ if (dragRafRef.current == null) {
   }
 
   const TH = 140;
+  const CLOSE_Y = -360; // quanto “sparisce” verso l’alto (più negativo = più deciso)
+
   if (dragY < -TH) {
-    requestClose();
+    // ✅ 1) anima il wrapper verso l’alto con la stessa transizione del snap-back
+    setSnapBack(true);
+    setDragY(CLOSE_Y);
+
+    // ✅ 2) avvia la chiusura mentre sta scorrendo (niente stop)
+    window.setTimeout(() => {
+      requestClose();
+    }, 140);
   } else {
+    // snap back normale
     setSnapBack(true);
     setDragY(0);
     window.setTimeout(() => setSnapBack(false), 260);
@@ -137,6 +147,7 @@ if (dragRafRef.current == null) {
   setTouchStartX(null);
   setGestureLocked("none");
 };
+
 
 
 
