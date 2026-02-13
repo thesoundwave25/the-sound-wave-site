@@ -38,7 +38,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const [closingViaSwipe, setClosingViaSwipe] = useState(false);
 
   // ==========================
-  // Swipe UP to close (MOBILE ONLY)
+  // Swipe gestures (MOBILE ONLY)
+  // - UP: close
+  // - LEFT/RIGHT: navigate events
   // ==========================
   const [dragY, setDragY] = useState(0); // negativo = swipe up
   const [dragging, setDragging] = useState(false);
@@ -49,9 +51,12 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     "none"
   );
 
-  // ✅ RAF throttle per swipe (più fluido)
+  // ✅ RAF throttle per swipe verticale
   const dragYRef = useRef(0);
   const dragRafRef = useRef<number | null>(null);
+
+  // ✅ tracking swipe orizzontale
+  const lastXRef = useRef<number | null>(null);
 
   const resetDrag = () => {
     setDragY(0);
@@ -60,6 +65,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     setTouchStartY(null);
     setTouchStartX(null);
     setGestureLocked("none");
+    lastXRef.current = null;
   };
 
   const onSwipeTouchStart = (e: React.TouchEvent) => {
@@ -67,6 +73,8 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const t = e.touches[0];
     setTouchStartY(t.clientY);
     setTouchStartX(t.clientX);
+    lastXRef.current = t.clientX;
+
     setDragging(true);
     setSnapBack(false);
     setGestureLocked("none");
@@ -76,23 +84,24 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     if (!isMobileSoft() || !dragging || touchStartY === null || touchStartX === null) return;
 
     const t = e.touches[0];
+    lastXRef.current = t.clientX;
+
     const deltaY = t.clientY - touchStartY; // negativo = up
     const deltaX = t.clientX - touchStartX;
 
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
 
-    // decide gesto (evita conflitti con swipe orizzontale)
+    // decide gesto (evita conflitti tra swipe laterale e swipe up)
     if (gestureLocked === "none") {
       if (absX > 14 && absX > absY) {
-        setGestureLocked("ignore"); // orizzontale -> ignora drag
-        return;
-      }
-      if (absY > 10 && absY > absX) {
-        setGestureLocked("drag"); // verticale -> drag
+        setGestureLocked("ignore"); // orizzontale -> ignora dragY
+      } else if (absY > 10 && absY > absX) {
+        setGestureLocked("drag"); // verticale -> dragY
       }
     }
 
+    // swipe laterale: non gestiamo dragY qui
     if (gestureLocked === "ignore") return;
 
     // evita scroll pagina solo se cancellabile
@@ -110,6 +119,28 @@ export default function EventModal({ open, onClose, event, events }: Props) {
         setDragY(dragYRef.current);
       });
     }
+  };
+
+  const safeIndex = useMemo(() => {
+    if (!event) return -1;
+    return events.findIndex((e) => e.id === event.id);
+  }, [event, events]);
+
+  const navigateTo = (index: number) => {
+    if (!events?.length) return;
+    const clamped = ((index % events.length) + events.length) % events.length;
+    window.dispatchEvent(
+      new CustomEvent("tsw:event:navigate", { detail: { index: clamped } })
+    );
+  };
+
+  const go = (dir: -1 | 1) => {
+    if (!event) return;
+    if (!events?.length) return;
+    if (safeIndex < 0) return;
+
+    const nextIndex = (safeIndex + dir + events.length) % events.length;
+    navigateTo(nextIndex);
   };
 
   const requestClose = () => {
@@ -148,24 +179,41 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       dragRafRef.current = null;
     }
 
+    // ✅ 1) Se era uno swipe orizzontale -> naviga eventi
+    if (gestureLocked === "ignore" && touchStartX !== null && events?.length > 1) {
+      const endX = lastXRef.current ?? touchStartX;
+      const dx = endX - touchStartX;
+
+      const H_TH = 60; // soglia swipe laterale
+      if (dx < -H_TH) go(1); // swipe left -> next
+      else if (dx > H_TH) go(-1); // swipe right -> prev
+
+      resetDrag();
+      return;
+    }
+
+    // ✅ 2) Altrimenti swipe verticale (chiusura)
     const TH = 140;
     const CLOSE_Y = -360; // quanto “sparisce” verso l’alto
 
-  if (dragY < -TH) {
-  setSnapBack(true);
-  setDragY(CLOSE_Y);
+    if (dragY < -TH) {
+      setSnapBack(true);
+      setDragY(CLOSE_Y);
 
-  // ✅ avvia subito la chiusura: niente “freno” percepito
-  requestCloseSwipe();
-} else {
-  // snap back...
-}
-
+      // ✅ avvia subito la chiusura: niente “freno” percepito
+      requestCloseSwipe();
+    } else {
+      // snap back
+      setSnapBack(true);
+      setDragY(0);
+      window.setTimeout(() => setSnapBack(false), 260);
+    }
 
     setDragging(false);
     setTouchStartY(null);
     setTouchStartX(null);
     setGestureLocked("none");
+    lastXRef.current = null;
   };
 
   // --- Video refs/states (devono esistere SEMPRE per non rompere l'ordine degli hooks)
@@ -179,22 +227,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const [duration, setDuration] = useState(0);
   const [t, setT] = useState(0);
   const [muted, setMuted] = useState(false);
-
-  const safeIndex = useMemo(() => {
-    if (!event) return -1;
-    return events.findIndex((e) => e.id === event.id);
-  }, [event, events]);
-
-  const go = (dir: -1 | 1) => {
-    if (!event) return;
-    if (!events?.length) return;
-    if (safeIndex < 0) return;
-
-    const nextIndex = (safeIndex + dir + events.length) % events.length;
-    window.dispatchEvent(
-      new CustomEvent("tsw:event:navigate", { detail: { index: nextIndex } })
-    );
-  };
 
   // ✅ decide media (sempre, anche se event è null)
   const mt: "image" | "video" = (event?.mediaType ?? "image") as any;
@@ -252,7 +284,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       v.currentTime = 0;
     } catch {}
 
-    // audio ON (può essere bloccato da alcuni browser se non “gesture”)
     v.muted = false;
     v.volume = 1;
     setMuted(false);
@@ -297,7 +328,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     if (v.paused || v.ended) {
       setShowTapToPlay(false);
 
-      // riparti sempre da 0
       try {
         v.currentTime = 0;
       } catch {}
@@ -335,7 +365,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const v = videoRef.current;
     if (!v) return;
 
-    // iOS Safari spesso usa questo
     const anyV = v as any;
     if (typeof anyV.webkitEnterFullscreen === "function") {
       try {
@@ -344,7 +373,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       } catch {}
     }
 
-    // standard fullscreen
     const el: any = v;
     const req =
       el.requestFullscreen ||
@@ -373,6 +401,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     : {};
 
   const isVideo = mt === "video";
+  const hasMany = (events?.length ?? 0) > 1;
 
   return (
     <div className="fixed inset-0 z-[9999]">
@@ -420,6 +449,45 @@ export default function EventModal({ open, onClose, event, events }: Props) {
               >
                 Chiudi ✕
               </button>
+
+              {/* ✅ Desktop arrows */}
+              {hasMany && !isMobileSoft() && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => go(-1)}
+                    aria-label="Evento precedente"
+                    className={[
+                      "absolute left-3 top-1/2 z-30 -translate-y-1/2",
+                      "h-11 w-11 rounded-full",
+                      "border border-white/15 bg-black/45 backdrop-blur",
+                      "grid place-items-center text-white/90",
+                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "hover:bg-black/65 hover:border-white/25 hover:scale-[1.03]",
+                      "active:scale-[0.98]",
+                    ].join(" ")}
+                  >
+                    ‹
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => go(1)}
+                    aria-label="Evento successivo"
+                    className={[
+                      "absolute right-3 top-1/2 z-30 -translate-y-1/2",
+                      "h-11 w-11 rounded-full",
+                      "border border-white/15 bg-black/45 backdrop-blur",
+                      "grid place-items-center text-white/90",
+                      "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "hover:bg-black/65 hover:border-white/25 hover:scale-[1.03]",
+                      "active:scale-[0.98]",
+                    ].join(" ")}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
 
               {/* Media */}
               <div
@@ -581,6 +649,28 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                 )}
               </div>
 
+              {/* ✅ Dots indicator (desktop + mobile) */}
+              {hasMany && (
+                <div className="flex items-center justify-center gap-2 py-3">
+                  {events.map((_, i) => {
+                    const active = i === safeIndex;
+                    return (
+                      <button
+                        key={events[i]?.id ?? i}
+                        type="button"
+                        aria-label={`Vai a evento ${i + 1}`}
+                        onClick={() => navigateTo(i)}
+                        className={[
+                          "h-2.5 w-2.5 rounded-full",
+                          "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                          active ? "bg-white" : "bg-white/30 hover:bg-white/45",
+                        ].join(" ")}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Text */}
               <div className="p-6 sm:p-8">
                 <div className="text-sm text-zinc-400">
@@ -630,22 +720,25 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                 transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
               }
 
-              /* ✅ swipe close: solo fade (evita conflitto transform) */
               /* ✅ swipe close: SOLO fade + blocco transform (anti-jump) */
-.tsw-modal-out-swipe {
-  animation: tswSwipeFadeOut 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transform: none !important;
-}
+              .tsw-modal-out-swipe {
+                animation: tswSwipeFadeOut 260ms cubic-bezier(0.22, 1, 0.36, 1)
+                  forwards;
+                transform: none !important;
+              }
 
-.tsw-modal-out-swipe * {
-  transform: none !important;
-}
+              .tsw-modal-out-swipe * {
+                transform: none !important;
+              }
 
-@keyframes tswSwipeFadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
+              @keyframes tswSwipeFadeOut {
+                from {
+                  opacity: 1;
+                }
+                to {
+                  opacity: 0;
+                }
+              }
             `}</style>
           </div>
         </div>
