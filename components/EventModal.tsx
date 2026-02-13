@@ -151,20 +151,16 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     const TH = 140;
     const CLOSE_Y = -360; // quanto “sparisce” verso l’alto
 
-    if (dragY < -TH) {
-      // ✅ anima via verso l'alto (wrapper), poi fai fade (popup)
-      setSnapBack(true);
-      setDragY(CLOSE_Y);
+  if (dragY < -TH) {
+  setSnapBack(true);
+  setDragY(CLOSE_Y);
 
-      window.setTimeout(() => {
-        requestCloseSwipe();
-      }, 140);
-    } else {
-      // snap back
-      setSnapBack(true);
-      setDragY(0);
-      window.setTimeout(() => setSnapBack(false), 260);
-    }
+  // ✅ avvia subito la chiusura: niente “freno” percepito
+  requestCloseSwipe();
+} else {
+  // snap back...
+}
+
 
     setDragging(false);
     setTouchStartY(null);
