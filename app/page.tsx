@@ -1148,7 +1148,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     </a>
   </div>
 
-  className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center"
+  <div className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
     <div className="text-base sm:text-xl font-semibold leading-relaxed">
       Una squadra. Un’energia. Un’esperienza completa.<br />
       DJ, DJ e Vocalist, Social PR e Fotografo, lavoriamo insieme per creare eventi che funzionano davvero.<br />
@@ -1160,16 +1160,14 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
       <div className="relative h-12 w-16 sm:h-16 sm:w-36">
 
 
-        <div className="relative shrink-0 h-12 w-24 sm:h-16 sm:w-36">
-  <Image
-    src="/brand/gianluk-logo.svg"
-    alt="logo"
-    fill
-    className="object-contain"
-    sizes="(max-width: 640px) 96px, 176px"
-  />
-</div>
-
+        <Image
+          src="/brand/gianluk-logo.svg"
+          alt="logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 80px, 144px"
+        />
+      </div>
 
       <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
         <Image
