@@ -1052,107 +1052,154 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 </Section>
 
 
-      {/* 8) CONTATTI */}
-      <Section id="contatti" title="Contatti">
-        <div className="grid gap-4 md:grid-cols-3">
-          <a
-            href="https://wa.me/393516854933"
-            target="_blank"
-            className={[
-              "group relative flex items-center gap-4",
-              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:-translate-y-1 hover:border-white/20",
-              "active:translate-y-[1px] active:scale-[0.985]",
-              "select-none",
-            ].join(" ")}
-          >
-            <div className="relative h-8 w-8">
-              <Image src="/icons/whatsapp.png" alt="WhatsApp" fill className="object-contain" sizes="32px" />
-            </div>
+     {/* 8) CONTATTI */}
+<Section id="contatti" title="Contatti">
+  <div className="grid gap-4 md:grid-cols-3">
+    <a
+      href="https://wa.me/393516854933"
+      target="_blank"
+      className={[
+        "group relative flex flex-col items-center justify-center text-center gap-3",
+        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:-translate-y-1 hover:border-white/20",
+        "active:translate-y-[1px] active:scale-[0.985]",
+        "select-none",
+      ].join(" ")}
+    >
+      <div className="relative h-10 w-10">
+        <Image
+          src="/icons/whatsapp.png"
+          alt="WhatsApp"
+          fill
+          className="object-contain"
+          sizes="40px"
+        />
+      </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                WhatsApp
-                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-              </div>
-              <div className="text-sm text-zinc-400">+39 3516854933</div>
-            </div>
-          </a>
-
-          <a
-            href="mailto:thesoundwave25@gmail.com"
-            className={[
-              "group relative flex items-center gap-4",
-              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:-translate-y-1 hover:border-white/20",
-              "active:translate-y-[1px] active:scale-[0.985]",
-              "select-none",
-            ].join(" ")}
-          >
-            <div className="relative h-8 w-8">
-              <Image src="/icons/email.png" alt="Email" fill className="object-contain" sizes="32px" />
-            </div>
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                Email
-                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-              </div>
-              <div className="text-sm text-zinc-400">thesoundwave25@gmail.com</div>
-            </div>
-          </a>
-
-          <a
-            href="https://www.instagram.com/the.sound_wave/"
-            target="_blank"
-            className={[
-              "group relative flex items-center gap-4",
-              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:-translate-y-1 hover:border-white/20",
-              "active:translate-y-[1px] active:scale-[0.985]",
-              "select-none",
-            ].join(" ")}
-          >
-            <div className="relative h-8 w-8">
-              <Image src="/icons/instagram.png" alt="Instagram" fill className="object-contain" sizes="32px" />
-            </div>
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                Instagram
-                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-              </div>
-              <div className="text-sm text-zinc-400">the.sound_wave</div>
-            </div>
-          </a>
+      <div className="flex flex-col items-center">
+        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+          WhatsApp
+          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
         </div>
+        <div className="text-sm text-zinc-400">+39 3516854933</div>
+      </div>
+    </a>
 
-        <div className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
-          <div className="text-base sm:text-xl font-semibold leading-relaxed">
-            Una squadra. Un’energia. Un’esperienza completa.<br />
-            DJ, DJ e Vocalist, Social PR e Fotografo, lavoriamo insieme per creare eventi che funzionano davvero.<br />
-            Porta The Sound Wave nel tuo evento.
-          </div>
+    <a
+      href="mailto:thesoundwave25@gmail.com"
+      className={[
+        "group relative flex flex-col items-center justify-center text-center gap-3",
+        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:-translate-y-1 hover:border border-white/20",
+        "active:translate-y-[1px] active:scale-[0.985]",
+        "select-none",
+      ].join(" ")}
+    >
+      <div className="relative h-10 w-10">
+        <Image
+          src="/icons/email.png"
+          alt="Email"
+          fill
+          className="object-contain"
+          sizes="40px"
+        />
+      </div>
 
-          <div className="mt-6 flex justify-center flex-wrap gap-5 sm:gap-6">
-            <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/gianluk-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
-            </div>
-            <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/wallen-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
-            </div>
-            <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/waven-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
-            </div>
-            <div className="relative h-14 sm:h-16 w-32 sm:w-36">
-              <Image src="/brand/alemembrini-logo.svg" alt="logo" fill className="object-contain" sizes="(max-width: 640px) 128px, 144px" />
-            </div>
-          </div>
+      <div className="flex flex-col items-center">
+        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+          Email
+          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
         </div>
-      </Section>
+        <div className="text-sm text-zinc-400">thesoundwave25@gmail.com</div>
+      </div>
+    </a>
+
+    <a
+      href="https://www.instagram.com/the.sound_wave/"
+      target="_blank"
+      className={[
+        "group relative flex flex-col items-center justify-center text-center gap-3",
+        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:-translate-y-1 hover:border-white/20",
+        "active:translate-y-[1px] active:scale-[0.985]",
+        "select-none",
+      ].join(" ")}
+    >
+      <div className="relative h-10 w-10">
+        <Image
+          src="/icons/instagram.png"
+          alt="Instagram"
+          fill
+          className="object-contain"
+          sizes="40px"
+        />
+      </div>
+
+      <div className="flex flex-col items-center">
+        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+          Instagram
+          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
+        </div>
+        <div className="text-sm text-zinc-400">the.sound_wave</div>
+      </div>
+    </a>
+  </div>
+
+  <div className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
+    <div className="text-base sm:text-xl font-semibold leading-relaxed">
+      Una squadra. Un’energia. Un’esperienza completa.<br />
+      DJ, DJ e Vocalist, Social PR e Fotografo, lavoriamo insieme per creare eventi che funzionano davvero.<br />
+      Porta The Sound Wave nel tuo evento.
+    </div>
+
+    {/* ✅ Loghi: una riga anche su mobile (come desktop) */}
+    <div className="mt-6 flex justify-center gap-4 sm:gap-6 flex-nowrap overflow-x-auto px-2 tsw-hide-scrollbar">
+      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+        <Image
+          src="/brand/gianluk-logo.svg"
+          alt="logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 80px, 144px"
+        />
+      </div>
+
+      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+        <Image
+          src="/brand/wallen-logo.svg"
+          alt="logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 80px, 144px"
+        />
+      </div>
+
+      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+        <Image
+          src="/brand/waven-logo.svg"
+          alt="logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 80px, 144px"
+        />
+      </div>
+
+      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+        <Image
+          src="/brand/alemembrini-logo.svg"
+          alt="logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 640px) 80px, 144px"
+        />
+      </div>
+    </div>
+  </div>
+</Section>
+
 
       <footer className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12 text-zinc-500">
         © {new Date().getFullYear()} The Sound Wave
