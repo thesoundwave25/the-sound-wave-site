@@ -1159,6 +1159,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     <div className="mt-6 flex flex-nowrap justify-center gap-2 sm:gap-6">
       <div className="relative h-12 w-16 sm:h-16 sm:w-36">
 
+<div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
         <Image
           src="/brand/gianluk-logo.svg"
           alt="logo"
