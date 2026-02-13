@@ -635,17 +635,21 @@ export default function EventModal({ open, onClose, event, events }: Props) {
               }
 
               /* ✅ swipe close: solo fade (evita conflitto transform) */
-              .tsw-modal-out-swipe {
-                animation: tswSwipeFadeOut 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-              }
-              @keyframes tswSwipeFadeOut {
-                from {
-                  opacity: 1;
-                }
-                to {
-                  opacity: 0;
-                }
-              }
+              /* ✅ swipe close: SOLO fade + blocco transform (anti-jump) */
+.tsw-modal-out-swipe {
+  animation: tswSwipeFadeOut 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: none !important;
+}
+
+.tsw-modal-out-swipe * {
+  transform: none !important;
+}
+
+@keyframes tswSwipeFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
             `}</style>
           </div>
         </div>
