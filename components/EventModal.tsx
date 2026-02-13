@@ -58,6 +58,21 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   // ✅ tracking swipe orizzontale
   const lastXRef = useRef<number | null>(null);
 
+  // ==========================
+  // ✅ LIVE-DRAG (orizzontale) animation (MOBILE ONLY)
+  // ==========================
+  const [navX, setNavX] = useState(0); // segue dito
+  const [navA, setNavA] = useState(1); // fade leggero
+  const [navSnap, setNavSnap] = useState(false); // abilita transizione quando serve (end/snap)
+  const navXRef = useRef(0);
+
+  const resetNav = () => {
+    navXRef.current = 0;
+    setNavX(0);
+    setNavA(1);
+    setNavSnap(false);
+  };
+
   const resetDrag = () => {
     setDragY(0);
     setDragging(false);
@@ -66,6 +81,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     setTouchStartX(null);
     setGestureLocked("none");
     lastXRef.current = null;
+    resetNav();
   };
 
   const onSwipeTouchStart = (e: React.TouchEvent) => {
@@ -78,10 +94,19 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     setDragging(true);
     setSnapBack(false);
     setGestureLocked("none");
+
+    // ✅ reset live-drag state
+    resetNav();
   };
 
   const onSwipeTouchMove = (e: React.TouchEvent) => {
-    if (!isMobileSoft() || !dragging || touchStartY === null || touchStartX === null) return;
+    if (
+      !isMobileSoft() ||
+      !dragging ||
+      touchStartY === null ||
+      touchStartX === null
+    )
+      return;
 
     const t = e.touches[0];
     lastXRef.current = t.clientX;
@@ -95,29 +120,45 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     // decide gesto (evita conflitti tra swipe laterale e swipe up)
     if (gestureLocked === "none") {
       if (absX > 14 && absX > absY) {
-        setGestureLocked("ignore"); // orizzontale -> ignora dragY
+        setGestureLocked("ignore"); // orizzontale
       } else if (absY > 10 && absY > absX) {
-        setGestureLocked("drag"); // verticale -> dragY
+        setGestureLocked("drag"); // verticale
       }
     }
 
-    // swipe laterale: non gestiamo dragY qui
-    if (gestureLocked === "ignore") return;
+    // ✅ ORIZZONTALE: live-drag grafico (segue dito)
+    if (gestureLocked === "ignore") {
+      // evita scroll pagina solo se cancellabile
+      if (e.cancelable) e.preventDefault();
 
-    // evita scroll pagina solo se cancellabile
-    if (e.cancelable) e.preventDefault();
+      // clamp per non trascinare troppo
+      const clampedX = Math.max(-140, Math.min(140, deltaX));
+      navXRef.current = clampedX;
 
-    // solo swipe UP (valori negativi)
-    const clamped = Math.max(-260, Math.min(0, deltaY));
+      // fade leggero (più trascini, più cala)
+      const a = 1 - Math.min(0.22, Math.abs(clampedX) / 600);
+      setNavSnap(false);
+      setNavX(clampedX);
+      setNavA(a);
 
-    // ✅ aggiorna in modo fluido (max 60fps)
-    dragYRef.current = clamped;
+      return;
+    }
 
-    if (dragRafRef.current == null) {
-      dragRafRef.current = window.requestAnimationFrame(() => {
-        dragRafRef.current = null;
-        setDragY(dragYRef.current);
-      });
+    // ✅ VERTICALE: comportamento invariato (swipe up close)
+    if (gestureLocked === "drag") {
+      // evita scroll pagina solo se cancellabile
+      if (e.cancelable) e.preventDefault();
+
+      // solo swipe UP (valori negativi)
+      const clampedY = Math.max(-260, Math.min(0, deltaY));
+      dragYRef.current = clampedY;
+
+      if (dragRafRef.current == null) {
+        dragRafRef.current = window.requestAnimationFrame(() => {
+          dragRafRef.current = null;
+          setDragY(dragYRef.current);
+        });
+      }
     }
   };
 
@@ -132,15 +173,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     window.dispatchEvent(
       new CustomEvent("tsw:event:navigate", { detail: { index: clamped } })
     );
-  };
-
-  const go = (dir: -1 | 1) => {
-    if (!event) return;
-    if (!events?.length) return;
-    if (safeIndex < 0) return;
-
-    const nextIndex = (safeIndex + dir + events.length) % events.length;
-    navigateTo(nextIndex);
   };
 
   const requestClose = () => {
@@ -170,29 +202,88 @@ export default function EventModal({ open, onClose, event, events }: Props) {
     }, 340);
   };
 
+  const go = (dir: -1 | 1) => {
+    if (!event) return;
+    if (!events?.length) return;
+    if (safeIndex < 0) return;
+    if (events.length < 2) return;
+
+    const nextIndex = (safeIndex + dir + events.length) % events.length;
+    navigateTo(nextIndex);
+  };
+
   const onSwipeTouchEnd = () => {
     if (!isMobileSoft() || !dragging) return;
 
-    // ✅ se c’è un frame ancora in coda, lo annulliamo
+    // ✅ se c’è un frame verticale ancora in coda, lo annulliamo
     if (dragRafRef.current) {
       cancelAnimationFrame(dragRafRef.current);
       dragRafRef.current = null;
     }
 
-    // ✅ 1) Se era uno swipe orizzontale -> naviga eventi
+    // ✅ 1) Se era uno swipe orizzontale -> live-drag snap + navigate
     if (gestureLocked === "ignore" && touchStartX !== null && events?.length > 1) {
       const endX = lastXRef.current ?? touchStartX;
       const dx = endX - touchStartX;
 
       const H_TH = 60; // soglia swipe laterale
-      if (dx < -H_TH) go(1); // swipe left -> next
-      else if (dx > H_TH) go(-1); // swipe right -> prev
 
-      resetDrag();
+      // abilita transizione per lo snap
+      setNavSnap(true);
+
+      if (dx < -H_TH) {
+        // swipe left -> next (contenuto va a sinistra e cambia)
+        setNavX(-180);
+        setNavA(0);
+
+        window.setTimeout(() => {
+          go(1);
+          // rientra da destra
+          setNavX(180);
+          setNavA(0);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              setNavX(0);
+              setNavA(1);
+              window.setTimeout(() => setNavSnap(false), 260);
+            });
+          });
+        }, 130);
+      } else if (dx > H_TH) {
+        // swipe right -> prev (contenuto va a destra e cambia)
+        setNavX(180);
+        setNavA(0);
+
+        window.setTimeout(() => {
+          go(-1);
+          // rientra da sinistra
+          setNavX(-180);
+          setNavA(0);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              setNavX(0);
+              setNavA(1);
+              window.setTimeout(() => setNavSnap(false), 260);
+            });
+          });
+        }, 130);
+      } else {
+        // non abbastanza -> snap back
+        setNavX(0);
+        setNavA(1);
+        window.setTimeout(() => setNavSnap(false), 260);
+      }
+
+      // reset gesture (non tocchiamo il resto)
+      setDragging(false);
+      setTouchStartY(null);
+      setTouchStartX(null);
+      setGestureLocked("none");
+      lastXRef.current = null;
       return;
     }
 
-    // ✅ 2) Altrimenti swipe verticale (chiusura)
+    // ✅ 2) Altrimenti swipe verticale (chiusura) — invariato
     const TH = 140;
     const CLOSE_Y = -360; // quanto “sparisce” verso l’alto
 
@@ -403,6 +494,18 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const isVideo = mt === "video";
   const hasMany = (events?.length ?? 0) > 1;
 
+  // ✅ stile live-drag applicato SOLO su mobile
+  const liveDragStyle: React.CSSProperties | undefined = isMobileSoft()
+    ? {
+        transform: `translate3d(${navX}px, 0, 0)`,
+        opacity: navA,
+        transition: navSnap
+          ? "transform 260ms cubic-bezier(0.22,1,0.36,1), opacity 260ms cubic-bezier(0.22,1,0.36,1)"
+          : "none",
+        willChange: "transform, opacity",
+      }
+    : undefined;
+
   return (
     <div className="fixed inset-0 z-[9999]">
       {/* Backdrop */}
@@ -417,7 +520,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-5 md:p-4">
-        {/* drag wrapper: si muove solo su mobile */}
+        {/* drag wrapper: si muove solo su mobile (swipe UP close) */}
         <div
           className={snapBack ? "tsw-drag-snap" : ""}
           style={{ ...draggableStyle, willChange: "transform" }}
@@ -429,7 +532,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
               "max-h-[92vh]",
               "rounded-3xl tsw-event-glow",
               isClosing
-                ? (closingViaSwipe ? "tsw-modal-out-swipe" : "tsw-modal-out")
+                ? closingViaSwipe
+                  ? "tsw-modal-out-swipe"
+                  : "tsw-modal-out"
                 : "tsw-modal-in",
             ].join(" ")}
             role="dialog"
@@ -441,7 +546,11 @@ export default function EventModal({ open, onClose, event, events }: Props) {
             onTouchEnd={isMobileSoft() ? onSwipeTouchEnd : undefined}
             style={isMobileSoft() ? ({ touchAction: "pan-x" } as any) : undefined}
           >
-            <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+            {/* ✅ LIVE-DRAG container: SOLO animazione orizzontale mobile */}
+            <div
+              className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl"
+              style={liveDragStyle}
+            >
               {/* Close */}
               <button
                 onClick={requestClose}
@@ -572,7 +681,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                         <div
                           className="relative h-1.5 w-full cursor-pointer rounded-full bg-white/15"
                           onClick={(e) => {
-                            const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                            const r = (
+                              e.currentTarget as HTMLDivElement
+                            ).getBoundingClientRect();
                             const ratio = (e.clientX - r.left) / r.width;
                             seek(ratio);
                           }}
@@ -615,7 +726,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                                 "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
                                 "active:scale-[0.98]",
                               ].join(" ")}
-                              aria-label={muted ? "Riattiva audio" : "Disattiva audio"}
+                              aria-label={
+                                muted ? "Riattiva audio" : "Disattiva audio"
+                              }
                             >
                               {muted ? "🔇" : "🔊"}
                             </button>
