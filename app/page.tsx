@@ -326,6 +326,24 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
   const [activeEvent, setActiveEvent] = useState<EventItem | null>(null);
   const eventTrackRef = useRef<HTMLDivElement | null>(null);
+  // ✅ ascolta la navigazione eventi dal modal (frecce desktop + swipe mobile)
+useEffect(() => {
+  const onNavigate = (ev: Event) => {
+    const detail = (ev as CustomEvent).detail as { index?: number } | undefined;
+    const idx = detail?.index;
+
+    if (typeof idx !== "number") return;
+    if (!events?.length) return;
+
+    const next = events[idx] ?? null;
+    setActiveEvent(next);
+  };
+
+  window.addEventListener("tsw:event:navigate", onNavigate as EventListener);
+  return () =>
+    window.removeEventListener("tsw:event:navigate", onNavigate as EventListener);
+}, [events]);
+
 
   const scrollEvents = (dir: -1 | 1) => {
     const el = eventTrackRef.current;
