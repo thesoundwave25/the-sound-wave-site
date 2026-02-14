@@ -844,12 +844,20 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
      {/* 5) EVENTI */}
 <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-  <div className="relative">
-    {/* Bottoni Navigazione */}
+  <div className="relative px-4 sm:px-12 lg:px-24">
     <button
       aria-label="Indietro"
       onClick={() => scrollEvents(-1)}
-      className="hidden sm:grid absolute left-4 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
+      className={[
+        "hidden sm:grid",
+        "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06]",
+        "active:scale-[0.98]",
+      ].join(" ")}
     >
       ‹
     </button>
@@ -857,76 +865,104 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     <button
       aria-label="Avanti"
       onClick={() => scrollEvents(1)}
-      className="hidden sm:grid absolute right-4 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
+      className={[
+        "hidden sm:grid",
+        "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06]",
+        "active:scale-[0.98]",
+      ].join(" ")}
     >
       ›
     </button>
 
-    {/* Track Eventi */}
     <div
-      ref={eventTrackRef}
-      className={[
-        "tsw-hide-scrollbar",
-        "flex gap-4 overflow-x-auto",
-        "scroll-smooth",
-        "py-14", // Aumentato per sicurezza verticale
-        "snap-x snap-mandatory",
-        // ✅ SOLUZIONE: Aggiungiamo padding laterale reale per ospitare il glow
-        "px-10 sm:px-20 lg:px-32", 
-        // ✅ E diciamo allo scroll di fermarsi all'inizio del padding
-        "scroll-px-10 sm:scroll-px-20 lg:scroll-px-32",
-      ].join(" ")}
-    >
+  ref={eventTrackRef}
+  className={[
+    "tsw-hide-scrollbar",
+    "flex gap-4 overflow-x-auto",
+    "scroll-smooth",
+    // ✅ più spazio ai lati per non tagliare il glow
+    "px-6 sm:px-10 lg:px-12",
+    "py-6",
+    "snap-x snap-mandatory",
+  ].join(" ")}
+>
       {events.map((ev, idx) => (
         <button
           key={ev.id}
+          data-event-card={idx === 0 ? "1" : undefined}
           onClick={() => setActiveEvent(ev)}
           className={[
             "snap-start shrink-0 text-left",
-            "group cursor-pointer relative rounded-2xl bg-black",
+            "group cursor-pointer relative overflow-hidden rounded-2xl bg-black",
+            // bordo: quasi invisibile su mobile, identico su md+
             "border border-white/5 md:border-white/10",
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            "hover:-translate-y-2 hover:border-white/30",
-            // Glow esterno potente
-            "hover:shadow-[0_0_40px_rgba(255,255,255,0.18)]", 
+            "hover:-translate-y-1 hover:border-white/20",
+            // ✅ neon bianco on hover
+            "hover:shadow-[0_0_26px_rgba(255,255,255,0.28),0_0_44px_rgba(255,255,255,0.16)]",
+            "active:translate-y-[1px] active:scale-[0.985]",
             "select-none",
-            "w-[65vw] sm:w-[36vw] md:w-[24%] lg:w-[22%]",
+            // card più piccola su mobile
+            "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
           ].join(" ")}
         >
-          {/* Overlay glow interno */}
+          {/* ✅ overlay glow interno (leggero bianco dentro) */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
           >
             <div
               className="absolute inset-0 rounded-2xl"
               style={{
-                background: `radial-gradient(120% 120% at 50% 10%, rgba(255,255,255,0.08) 0%, transparent 70%)`,
-                filter: "blur(15px)",
+                background: `
+                  radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
+                `,
+                opacity: 0.14,
+                filter: "blur(18px)",
               }}
+            />
+            <div
+              className="absolute inset-0 rounded-2xl"
+              style={{ background: "rgba(255,255,255,0.03)" }}
             />
           </div>
 
-          {/* Immagine */}
           <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
             <Image
               src={ev.imageSrc}
               alt={ev.title}
               fill
-              className="object-contain object-center transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 1024px) 46vw, 33vw"
+              className="object-contain object-center"
+              sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
+              priority={false}
             />
           </div>
 
           <div className="relative px-4 pt-4 pb-5">
-            <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+            <div className="text-xs text-zinc-400">
               {ev.date} • {ev.venue}
             </div>
-            <div className="mt-1 text-lg font-semibold tracking-tight text-white line-clamp-1">
+
+            <div className="mt-1 text-lg font-semibold tracking-tight text-white">
               {ev.title}
             </div>
-            <p className="mt-2 text-sm text-zinc-400 line-clamp-1">{ev.cta}</p>
-            <span className="absolute bottom-4 right-4 text-zinc-500 transition-all group-hover:translate-x-1 group-hover:text-white">
+
+            <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
+
+            {/* Freccia dentro, allineata Apple-style */}
+            <span
+              className={[
+                "absolute bottom-4 right-4",
+                "text-zinc-400",
+                "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                "group-hover:translate-x-1 group-hover:text-white/70",
+              ].join(" ")}
+            >
               →
             </span>
           </div>
