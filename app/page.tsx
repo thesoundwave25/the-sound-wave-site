@@ -881,13 +881,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
     <div
   ref={eventTrackRef}
-  style={{ overflowY: "visible" }} // ✅ così il glow non viene tagliato
   className={[
     "tsw-hide-scrollbar",
     "flex gap-4 overflow-x-auto",
     "scroll-smooth",
-    "px-10",
-    "py-10",              // ✅ più spazio sopra/sotto per il glow
+    // ✅ più spazio ai lati per non tagliare il glow
+    "px-6 sm:px-10 lg:px-12",
+    "py-6",
     "snap-x snap-mandatory",
   ].join(" ")}
 >
