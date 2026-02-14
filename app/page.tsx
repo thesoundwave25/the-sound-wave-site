@@ -842,117 +842,141 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
         <PhotoDownloadModal open={openDownloads} onClose={() => setOpenDownloads(false)} albums={downloadAlbums} />
       </Section>
 
-      {/* 5) EVENTI */}
-      <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-        <div className="relative px-4 sm:px-12">
-          <button
-            aria-label="Indietro"
-            onClick={() => scrollEvents(-1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ‹
-          </button>
+     {/* 5) EVENTI */}
+<Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
+  <div className="relative px-4 sm:px-12">
+    <button
+      aria-label="Indietro"
+      onClick={() => scrollEvents(-1)}
+      className={[
+        "hidden sm:grid",
+        "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06]",
+        "active:scale-[0.98]",
+      ].join(" ")}
+    >
+      ‹
+    </button>
 
-          <button
-            aria-label="Avanti"
-            onClick={() => scrollEvents(1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ›
-          </button>
+    <button
+      aria-label="Avanti"
+      onClick={() => scrollEvents(1)}
+      className={[
+        "hidden sm:grid",
+        "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06]",
+        "active:scale-[0.98]",
+      ].join(" ")}
+    >
+      ›
+    </button>
 
+    <div
+      ref={eventTrackRef}
+      className={[
+        "tsw-hide-scrollbar",
+        "flex gap-4 overflow-x-auto",
+        "scroll-smooth",
+        "px-2 py-3",
+        "snap-x snap-mandatory",
+      ].join(" ")}
+    >
+      {events.map((ev, idx) => (
+        <button
+          key={ev.id}
+          data-event-card={idx === 0 ? "1" : undefined}
+          onClick={() => setActiveEvent(ev)}
+          className={[
+            "snap-start shrink-0 text-left",
+            "group cursor-pointer relative overflow-hidden rounded-2xl bg-black",
+            // bordo: quasi invisibile su mobile, identico su md+
+            "border border-white/5 md:border-white/10",
+            "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            "hover:-translate-y-1 hover:border-white/20",
+            // ✅ neon bianco on hover
+            "hover:shadow-[0_0_26px_rgba(255,255,255,0.28),0_0_44px_rgba(255,255,255,0.16)]",
+            "active:translate-y-[1px] active:scale-[0.985]",
+            "select-none",
+            // card più piccola su mobile
+            "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
+          ].join(" ")}
+        >
+          {/* ✅ overlay glow interno (leggero bianco dentro) */}
           <div
-            ref={eventTrackRef}
-            className={[
-              "tsw-hide-scrollbar",
-              "flex gap-4 overflow-x-auto",
-              "scroll-smooth",
-              "px-2 py-3",
-              "snap-x snap-mandatory",
-            ].join(" ")}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
           >
-            {events.map((ev, idx) => (
-              <button
-                key={ev.id}
-                data-event-card={idx === 0 ? "1" : undefined}
-                onClick={() => setActiveEvent(ev)}
-                className={[
-  "snap-start shrink-0 text-left",
-  "group cursor-pointer relative rounded-2xl bg-black",
-  // bordo: quasi invisibile su mobile, identico su md+
-  "border border-white/5 md:border-white/10",
-  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-  "hover:-translate-y-1 hover:border-white/20",
-  "active:translate-y-[1px] active:scale-[0.985]",
-  "select-none",
-  // card più piccola su mobile
-  "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
-
-].join(" ")}
-
-              >
-                <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
-                  <Image
-                    src={ev.imageSrc}
-                    alt={ev.title}
-                    fill
-                    className="object-contain object-center"
-                    sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
-                    priority={false}
-                  />
-                </div>
-
-                <div className="relative px-4 pt-4 pb-5">
-  <div className="text-xs text-zinc-400">
-    {ev.date} • {ev.venue}
-  </div>
-
-  <div className="mt-1 text-lg font-semibold tracking-tight text-white">
-    {ev.title}
-  </div>
-
-  <p className="mt-2 text-sm text-zinc-300">
-    {ev.cta}
-  </p>
-
-  {/* Freccia dentro, allineata Apple-style */}
-  <span
-    className={[
-      "absolute bottom-4 right-4",
-      "text-zinc-400",
-      "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-      "group-hover:translate-x-1 group-hover:text-white/70",
-    ].join(" ")}
-  >
-    →
-  </span>
-</div>
-
-              </button>
-            ))}
+            <div
+              className="absolute inset-0 rounded-2xl"
+              style={{
+                background: `
+                  radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
+                `,
+                opacity: 0.14,
+                filter: "blur(18px)",
+              }}
+            />
+            <div
+              className="absolute inset-0 rounded-2xl"
+              style={{ background: "rgba(255,255,255,0.03)" }}
+            />
           </div>
-        </div>
 
-        <EventModal open={!!activeEvent} onClose={() => setActiveEvent(null)} event={activeEvent} events={events} />
-      </Section>
+          <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
+            <Image
+              src={ev.imageSrc}
+              alt={ev.title}
+              fill
+              className="object-contain object-center"
+              sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
+              priority={false}
+            />
+          </div>
+
+          <div className="relative px-4 pt-4 pb-5">
+            <div className="text-xs text-zinc-400">
+              {ev.date} • {ev.venue}
+            </div>
+
+            <div className="mt-1 text-lg font-semibold tracking-tight text-white">
+              {ev.title}
+            </div>
+
+            <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
+
+            {/* Freccia dentro, allineata Apple-style */}
+            <span
+              className={[
+                "absolute bottom-4 right-4",
+                "text-zinc-400",
+                "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                "group-hover:translate-x-1 group-hover:text-white/70",
+              ].join(" ")}
+            >
+              →
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <EventModal
+    open={!!activeEvent}
+    onClose={() => setActiveEvent(null)}
+    event={activeEvent}
+    events={events}
+  />
+</Section>
+
 
      {/* 6) CHI SIAMO */}
 <Section id="chi-siamo" title="Chi siamo">
