@@ -886,8 +886,8 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     "tsw-hide-scrollbar",
     "flex gap-4 overflow-x-auto",
     "scroll-smooth",
-    "px-2",
-    "py-6",              // ✅ più spazio sopra/sotto per il glow
+    "px-10",
+    "py-10",              // ✅ più spazio sopra/sotto per il glow
     "snap-x snap-mandatory",
   ].join(" ")}
 >
