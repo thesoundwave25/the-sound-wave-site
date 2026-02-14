@@ -844,7 +844,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
      {/* 5) EVENTI */}
 <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-  <div className="relative px-4 sm:px-12">
+  <div className="relative px-4 sm:px-12 lg:px-24">
     <button
       aria-label="Indietro"
       onClick={() => scrollEvents(-1)}
