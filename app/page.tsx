@@ -879,18 +879,19 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
       ›
     </button>
 
-    <div
+  <div
   ref={eventTrackRef}
-  style={{ overflowY: "visible" }} // ✅ così il glow non viene tagliato
+  style={{ overflowX: "auto", overflowY: "visible" }}
   className={[
-    "tsw-hide-scrollbar",
-    "flex gap-4 overflow-x-auto",
+    "tsw-hide-scrollbar tsw-xtrack",
+    "flex gap-4",
     "scroll-smooth",
     "px-10",
-    "py-10",              // ✅ più spazio sopra/sotto per il glow
+    "py-10",
     "snap-x snap-mandatory",
   ].join(" ")}
 >
+
       {events.map((ev, idx) => (
         <button
           key={ev.id}
@@ -904,7 +905,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             "hover:-translate-y-1 hover:border-white/20",
             // ✅ neon bianco on hover
-            "hover:shadow-[0_0_26px_rgba(255,255,255,0.28),0_0_44px_rgba(255,255,255,0.16)]",
+            "hover:shadow-[0_0_26px_rgba(255,255,255,0.45),0_0_60px_rgba(255,255,255,0.25)]",
             "active:translate-y-[1px] active:scale-[0.985]",
             "select-none",
             // card più piccola su mobile
@@ -1243,8 +1244,12 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
         }
         .tsw-hide-scrollbar::-webkit-scrollbar {
           display: none;
+          .tsw-xtrack {
+  overflow-y: visible !important;
+}
         }
       `}</style>
+
     </main>
   );
 }
