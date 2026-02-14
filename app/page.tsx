@@ -845,19 +845,11 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
      {/* 5) EVENTI */}
 <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
   <div className="relative px-4 sm:px-12 lg:px-24">
+    {/* Bottoni Navigazione */}
     <button
       aria-label="Indietro"
       onClick={() => scrollEvents(-1)}
-      className={[
-        "hidden sm:grid",
-        "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
-        "h-11 w-11 rounded-full",
-        "border border-white/15 bg-black/55 backdrop-blur",
-        "place-items-center text-white/90",
-        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:scale-[1.06]",
-        "active:scale-[0.98]",
-      ].join(" ")}
+      className="hidden sm:grid absolute -left-2 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
     >
       ‹
     </button>
@@ -865,81 +857,63 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     <button
       aria-label="Avanti"
       onClick={() => scrollEvents(1)}
-      className={[
-        "hidden sm:grid",
-        "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
-        "h-11 w-11 rounded-full",
-        "border border-white/15 bg-black/55 backdrop-blur",
-        "place-items-center text-white/90",
-        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:scale-[1.06]",
-        "active:scale-[0.98]",
-      ].join(" ")}
+      className="hidden sm:grid absolute -right-2 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
     >
       ›
     </button>
 
+    {/* Track Eventi - Modificato per non tagliare il glow */}
     <div
-  ref={eventTrackRef}
-  className={[
-    "tsw-hide-scrollbar",
-    "flex gap-4 overflow-x-auto",
-    "scroll-smooth",
-    // ✅ più spazio ai lati per non tagliare il glow
-    "px-6 sm:px-10 lg:px-12",
-    "py-6",
-    "snap-x snap-mandatory",
-  ].join(" ")}
->
+      ref={eventTrackRef}
+      className={[
+        "tsw-hide-scrollbar",
+        "flex gap-4 overflow-x-auto",
+        "scroll-smooth",
+        "py-10", // Spazio vitale sopra/sotto per il glow
+        "px-2",  // Piccolo margine di sicurezza
+        "snap-x snap-mandatory",
+        "overflow-y-visible", // ✅ Fondamentale: permette al glow di uscire sopra e sotto
+      ].join(" ")}
+      style={{ clipPath: 'inset(-100px -100px -100px -100px)' }} // ✅ Forza il rendering del glow oltre i bordi del contenitore
+    >
       {events.map((ev, idx) => (
         <button
           key={ev.id}
-          data-event-card={idx === 0 ? "1" : undefined}
           onClick={() => setActiveEvent(ev)}
           className={[
             "snap-start shrink-0 text-left",
-            "group cursor-pointer relative overflow-hidden rounded-2xl bg-black",
-            // bordo: quasi invisibile su mobile, identico su md+
+            "group cursor-pointer relative rounded-2xl bg-black",
             "border border-white/5 md:border-white/10",
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            "hover:-translate-y-1 hover:border-white/20",
-            // ✅ neon bianco on hover
-            "hover:shadow-[0_0_26px_rgba(255,255,255,0.28),0_0_44px_rgba(255,255,255,0.16)]",
-            "active:translate-y-[1px] active:scale-[0.985]",
+            "hover:-translate-y-2 hover:border-white/30",
+            // ✅ Glow esterno: raggio ridotto per PC per evitare tagli netti
+            "hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]", 
             "select-none",
-            // card più piccola su mobile
             "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
           ].join(" ")}
         >
-          {/* ✅ overlay glow interno (leggero bianco dentro) */}
+          {/* Overlay glow interno (Leggero riflesso) */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
+            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           >
             <div
               className="absolute inset-0 rounded-2xl"
               style={{
-                background: `
-                  radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
-                `,
-                opacity: 0.14,
-                filter: "blur(18px)",
+                background: `radial-gradient(120% 120% at 50% 10%, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                filter: "blur(15px)",
               }}
-            />
-            <div
-              className="absolute inset-0 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.03)" }}
             />
           </div>
 
+          {/* Immagine con overflow-hidden localizzato */}
           <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
             <Image
               src={ev.imageSrc}
               alt={ev.title}
               fill
-              className="object-contain object-center"
-              sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
-              priority={false}
+              className="object-contain object-center transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 1024px) 46vw, 33vw"
             />
           </div>
 
@@ -947,22 +921,11 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             <div className="text-xs text-zinc-400">
               {ev.date} • {ev.venue}
             </div>
-
-            <div className="mt-1 text-lg font-semibold tracking-tight text-white">
+            <div className="mt-1 text-lg font-semibold tracking-tight text-white line-clamp-1">
               {ev.title}
             </div>
-
-            <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
-
-            {/* Freccia dentro, allineata Apple-style */}
-            <span
-              className={[
-                "absolute bottom-4 right-4",
-                "text-zinc-400",
-                "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                "group-hover:translate-x-1 group-hover:text-white/70",
-              ].join(" ")}
-            >
+            <p className="mt-2 text-sm text-zinc-300 line-clamp-1">{ev.cta}</p>
+            <span className="absolute bottom-4 right-4 text-zinc-500 transition-all group-hover:translate-x-1 group-hover:text-white">
               →
             </span>
           </div>
