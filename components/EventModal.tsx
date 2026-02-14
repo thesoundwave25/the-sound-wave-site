@@ -420,6 +420,23 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   // ✅ return null SOLO dopo gli hooks
   if (!open || !event) return null;
 
+  // ✅ handler per dots su MOBILE track (aggiunta MINIMA)
+  const goToIndexMobile = (i: number) => {
+    const el = trackRef.current;
+    if (el) {
+      try {
+        el.scrollTo({ left: el.clientWidth * i, behavior: "smooth" });
+      } catch {
+        try {
+          el.scrollLeft = el.clientWidth * i;
+        } catch {}
+      }
+    }
+    window.dispatchEvent(
+      new CustomEvent("tsw:event:navigate", { detail: { index: i } })
+    );
+  };
+
   const progress = Math.min(1, Math.max(0, Math.abs(dragY) / 220));
 
   const draggableStyle: React.CSSProperties = isMobileSoft()
@@ -471,41 +488,45 @@ export default function EventModal({ open, onClose, event, events }: Props) {
             onTouchMove={isMobileSoft() ? onSwipeTouchMove : undefined}
             onTouchEnd={isMobileSoft() ? onSwipeTouchEnd : undefined}
             // ✅ permetti pan-x alla track + gestiamo vertical drag quando serve
-            style={isMobileSoft() ? ({ touchAction: hasMany ? "pan-x" : "none" } as any) : undefined}
+            style={
+              isMobileSoft()
+                ? ({ touchAction: hasMany ? "pan-x" : "none" } as any)
+                : undefined
+            }
           >
             {/* ============================
                 ✅ MOBILE: Track swipe tra eventi (snap)
                 ✅ DESKTOP: contenuto invariato (singolo evento)
                ============================ */}
             {isMobileSoft() && hasMany ? (
-              <div
-                ref={trackRef}
-                tabIndex={-1}
-                onScroll={onMobileScroll}
-                className={[
-                  "tsw-event-track",
-                  "tsw-hide-scrollbar",
-                  "flex overflow-x-auto",
-                  "snap-x snap-mandatory",
-                  "overscroll-x-contain",
-                  "w-full",
-                ].join(" ")}
-                style={{
-                  WebkitOverflowScrolling: "touch" as any,
-                  touchAction: "pan-x",
-                }}
-              >
-                {events.map((ev, i) => {
-                  const mtEv: "image" | "video" = (ev.mediaType ?? "image") as any;
-                  const msEv: string = (ev.mediaSrc ?? ev.imageSrc ?? "") as any;
-                  const isVideoEv = mtEv === "video";
+              <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+                <div
+                  ref={trackRef}
+                  tabIndex={-1}
+                  onScroll={onMobileScroll}
+                  className={[
+                    "tsw-event-track",
+                    "tsw-hide-scrollbar",
+                    "flex overflow-x-auto",
+                    "snap-x snap-mandatory",
+                    "overscroll-x-contain",
+                    "w-full",
+                  ].join(" ")}
+                  style={{
+                    WebkitOverflowScrolling: "touch" as any,
+                    touchAction: "pan-x",
+                  }}
+                >
+                  {events.map((ev, i) => {
+                    const mtEv: "image" | "video" = (ev.mediaType ?? "image") as any;
+                    const msEv: string = (ev.mediaSrc ?? ev.imageSrc ?? "") as any;
+                    const isVideoEv = mtEv === "video";
 
-                  return (
-                    <div
-                      key={ev.id}
-                      className="snap-center snap-always shrink-0 w-full relative"
-                    >
-                      <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+                    return (
+                      <div
+                        key={ev.id}
+                        className="snap-center snap-always shrink-0 w-full relative"
+                      >
                         {/* ✅ barretta hint (solo mobile) */}
                         <div className="flex justify-center pt-3 pb-2">
                           <div className="h-1.5 w-12 rounded-full bg-white/20" />
@@ -535,8 +556,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                               ].join(" ")}
                             >
                               {isVideoEv ? (
-                                // ✅ su mobile track mostriamo video come <video> ma SOLO per la slide attiva
-                                // (per non cambiare altra logica, teniamo il tuo videoRef solo sulla slide attiva)
                                 i === safeIndex ? (
                                   <video
                                     ref={videoRef}
@@ -711,9 +730,30 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                           </p>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* ✅✅✅ DOTS (MOBILE TRACK) — AGGIUNTA SOLO QUESTA PARTE */}
+                <div className="flex items-center justify-center gap-2 py-3">
+                  {events.map((_, i) => {
+                    const active = i === safeIndex;
+                    return (
+                      <button
+                        key={events[i]?.id ?? i}
+                        type="button"
+                        aria-label={`Vai a evento ${i + 1}`}
+                        onClick={() => goToIndexMobile(i)}
+                        className={[
+                          "h-2.5 w-2.5 rounded-full",
+                          "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                          active ? "bg-white" : "bg-white/30 hover:bg-white/45",
+                        ].join(" ")}
+                      />
+                    );
+                  })}
+                </div>
+                {/* ✅✅✅ FINE DOTS */}
               </div>
             ) : (
               // ✅ DESKTOP (o mobile con 1 evento): contenuto identico al tuo
@@ -725,57 +765,6 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                 >
                   Chiudi ✕
                 </button>
-
-                {/* ✅ Desktop arrows */}
-                {hasMany && !isMobileSoft() && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        window.dispatchEvent(
-                          new CustomEvent("tsw:event:navigate", {
-                            detail: { index: (safeIndex - 1 + events.length) % events.length },
-                          })
-                        )
-                      }
-                      aria-label="Evento precedente"
-                      className={[
-                        "absolute left-3 top-1/2 z-30 -translate-y-1/2",
-                        "h-11 w-11 rounded-full",
-                        "border border-white/15 bg-black/45 backdrop-blur",
-                        "grid place-items-center text-white/90",
-                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "hover:bg-black/65 hover:border-white/25 hover:scale-[1.03]",
-                        "active:scale-[0.98]",
-                      ].join(" ")}
-                    >
-                      ‹
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        window.dispatchEvent(
-                          new CustomEvent("tsw:event:navigate", {
-                            detail: { index: (safeIndex + 1) % events.length },
-                          })
-                        )
-                      }
-                      aria-label="Evento successivo"
-                      className={[
-                        "absolute right-3 top-1/2 z-30 -translate-y-1/2",
-                        "h-11 w-11 rounded-full",
-                        "border border-white/15 bg-black/45 backdrop-blur",
-                        "grid place-items-center text-white/90",
-                        "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "hover:bg-black/65 hover:border-white/25 hover:scale-[1.03]",
-                        "active:scale-[0.98]",
-                      ].join(" ")}
-                    >
-                      ›
-                    </button>
-                  </>
-                )}
 
                 {/* Media */}
                 <div
@@ -905,7 +894,9 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                                   "hover:bg-black/55 hover:border-white/25 hover:scale-[1.03]",
                                   "active:scale-[0.98]",
                                 ].join(" ")}
-                                aria-label={muted ? "Riattiva audio" : "Disattiva audio"}
+                                aria-label={
+                                  muted ? "Riattiva audio" : "Disattiva audio"
+                                }
                               >
                                 {muted ? "🔇" : "🔊"}
                               </button>
