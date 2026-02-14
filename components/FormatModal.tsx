@@ -27,17 +27,20 @@ function isMobileSoft() {
 const FORMAT_DETAILS: Record<string, { description: string; linkHref: string }> =
   {
     emotion: {
-      description: "Una mini-selezione firmata The Sound Wave, per raccontare l’energia e i generi di EMOTION Official Party 90/2000.",
+      description:
+        "Una mini-selezione firmata The Sound Wave, per raccontare l’energia e i generi di EMOTION Official Party 90/2000.",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO_fb7R-hM5joDbDwSqKg9cX",
     },
     "italian-remix-party": {
-      description: "Solo musica italiana remixata: dalle hit che cantano tutti ai classici intramontabili, trasformati in versioni dance ad altissima energia. Ritornelli a squarciagola, drop che spingono e un’unica regola: non stare fermo.",
+      description:
+        "Solo musica italiana remixata: dalle hit che cantano tutti ai classici intramontabili, trasformati in versioni dance ad altissima energia. Ritornelli a squarciagola, drop che spingono e un’unica regola: non stare fermo.",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO9bmZ_hqh1T9Sk1yOiRmuPy",
     },
     "the-ritual": {
-      description: "Afro House e Tribal House,Percussioni ipnotiche, groove tribali e una crescita continua che porta la pista in uno stato di trance elegante, intensa, rituale. Se cerchi un’atmosfera che si sente nello stomaco e si balla fino all’alba… benvenuto nel rito. ",
+      description:
+        "Afro House e Tribal House,Percussioni ipnotiche, groove tribali e una crescita continua che porta la pista in uno stato di trance elegante, intensa, rituale. Se cerchi un’atmosfera che si sente nello stomaco e si balla fino all’alba… benvenuto nel rito. ",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO-eNm7xdngZcA7zRYjPPVMH",
     },
@@ -137,7 +140,7 @@ export default function FormatModal({ open, onClose, format }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, format?.id]);
 
-  // ✅ Apple swipe handlers: SOLO su mobile e SOLO dalla “barretta”
+  // ✅ Apple swipe handlers (ora su tutta la card - mobile)
   const onHandleTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
     const t = e.touches[0];
@@ -239,6 +242,10 @@ export default function FormatModal({ open, onClose, format }: Props) {
               } as React.CSSProperties
             }
             onClick={(e) => e.stopPropagation()}
+            // ✅ SWIPE SU TUTTA LA CARD (mobile)
+            onTouchStart={onHandleTouchStart}
+            onTouchMove={onHandleTouchMove}
+            onTouchEnd={onHandleTouchEnd}
           >
             <button
               onClick={requestClose}
@@ -247,13 +254,8 @@ export default function FormatModal({ open, onClose, format }: Props) {
               Chiudi ✕
             </button>
 
-            {/* ✅ SWIPE ZONE (SOLO MOBILE): BARRETTA + LOGO + TITOLO */}
-            <div
-              className="md:hidden touch-none"
-              onTouchStart={onHandleTouchStart}
-              onTouchMove={onHandleTouchMove}
-              onTouchEnd={onHandleTouchEnd}
-            >
+            {/* ✅ SWIPE ZONE (SOLO MOBILE): BARRETTA + LOGO + TITOLO (ora solo visiva) */}
+            <div className="md:hidden touch-none">
               {/* Barretta (hint) */}
               <div className="flex justify-center pt-3 pb-2">
                 <div className="h-1.5 w-12 rounded-full bg-white/20" />
@@ -319,6 +321,10 @@ export default function FormatModal({ open, onClose, format }: Props) {
                       target="_blank"
                       rel="noreferrer"
                       className="tsw-glow-btn inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-zinc-100 active:scale-[0.99]"
+                      // ✅ ESCLUSO dallo swipe: blocca i touch events verso il parent
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onTouchMove={(e) => e.stopPropagation()}
+                      onTouchEnd={(e) => e.stopPropagation()}
                     >
                       Ascolta su YouTube
                       <span className="ml-2 text-zinc-200">↗</span>
