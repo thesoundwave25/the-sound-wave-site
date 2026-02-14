@@ -21,11 +21,12 @@
 
 html {
   scroll-behavior: smooth;
- html.modal-open {
+}
+
+html.modal-open {
   scroll-behavior: auto;
 }
- 
-}
+
 
 body {
   background: var(--background);
@@ -112,5 +113,7 @@ img {
   backface-visibility: hidden;
 }
 html, body {
-  background: transparent !important;
+  background: var(--background) !important;
+  overflow-x: clip;
 }
+
