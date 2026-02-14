@@ -27,17 +27,17 @@ function isMobileSoft() {
 const FORMAT_DETAILS: Record<string, { description: string; linkHref: string }> =
   {
     emotion: {
-      description: "dance 90/2000",
+      description: "Una mini-selezione firmata The Sound Wave, per raccontare l’energia e i generi di EMOTION Official Party 90/2000.",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO_fb7R-hM5joDbDwSqKg9cX",
     },
     "italian-remix-party": {
-      description: "musica italiana remixata",
+      description: "Solo musica italiana remixata: dalle hit che cantano tutti ai classici intramontabili, trasformati in versioni dance ad altissima energia. Ritornelli a squarciagola, drop che spingono e un’unica regola: non stare fermo.",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO9bmZ_hqh1T9Sk1yOiRmuPy",
     },
     "the-ritual": {
-      description: "afro tribal-house",
+      description: "Afro House e Tribal House,Percussioni ipnotiche, groove tribali e una crescita continua che porta la pista in uno stato di trance elegante, intensa, rituale. Se cerchi un’atmosfera che si sente nello stomaco e si balla fino all’alba… benvenuto nel rito. ",
       linkHref:
         "https://www.youtube.com/playlist?list=PLJNHrR97zbO-eNm7xdngZcA7zRYjPPVMH",
     },
