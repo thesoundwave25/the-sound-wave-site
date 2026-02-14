@@ -844,12 +844,12 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
      {/* 5) EVENTI */}
 <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-  <div className="relative px-4 sm:px-12 lg:px-24">
+  <div className="relative">
     {/* Bottoni Navigazione */}
     <button
       aria-label="Indietro"
       onClick={() => scrollEvents(-1)}
-      className="hidden sm:grid absolute -left-2 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
+      className="hidden sm:grid absolute left-4 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
     >
       ‹
     </button>
@@ -857,24 +857,25 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     <button
       aria-label="Avanti"
       onClick={() => scrollEvents(1)}
-      className="hidden sm:grid absolute -right-2 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
+      className="hidden sm:grid absolute right-4 top-1/2 -translate-y-1/2 z-20 h-11 w-11 rounded-full border border-white/15 bg-black/55 backdrop-blur place-items-center text-white/90 transition-transform hover:scale-110 active:scale-95"
     >
       ›
     </button>
 
-    {/* Track Eventi - Modificato per non tagliare il glow */}
+    {/* Track Eventi */}
     <div
       ref={eventTrackRef}
       className={[
         "tsw-hide-scrollbar",
         "flex gap-4 overflow-x-auto",
         "scroll-smooth",
-        "py-10", // Spazio vitale sopra/sotto per il glow
-        "px-2",  // Piccolo margine di sicurezza
+        "py-14", // Aumentato per sicurezza verticale
         "snap-x snap-mandatory",
-        "overflow-y-visible", // ✅ Fondamentale: permette al glow di uscire sopra e sotto
+        // ✅ SOLUZIONE: Aggiungiamo padding laterale reale per ospitare il glow
+        "px-10 sm:px-20 lg:px-32", 
+        // ✅ E diciamo allo scroll di fermarsi all'inizio del padding
+        "scroll-px-10 sm:scroll-px-20 lg:scroll-px-32",
       ].join(" ")}
-      style={{ clipPath: 'inset(-100px -100px -100px -100px)' }} // ✅ Forza il rendering del glow oltre i bordi del contenitore
     >
       {events.map((ev, idx) => (
         <button
@@ -886,13 +887,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             "border border-white/5 md:border-white/10",
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             "hover:-translate-y-2 hover:border-white/30",
-            // ✅ Glow esterno: raggio ridotto per PC per evitare tagli netti
-            "hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]", 
+            // Glow esterno potente
+            "hover:shadow-[0_0_40px_rgba(255,255,255,0.18)]", 
             "select-none",
-            "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
+            "w-[65vw] sm:w-[36vw] md:w-[24%] lg:w-[22%]",
           ].join(" ")}
         >
-          {/* Overlay glow interno (Leggero riflesso) */}
+          {/* Overlay glow interno */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -900,13 +901,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             <div
               className="absolute inset-0 rounded-2xl"
               style={{
-                background: `radial-gradient(120% 120% at 50% 10%, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+                background: `radial-gradient(120% 120% at 50% 10%, rgba(255,255,255,0.08) 0%, transparent 70%)`,
                 filter: "blur(15px)",
               }}
             />
           </div>
 
-          {/* Immagine con overflow-hidden localizzato */}
+          {/* Immagine */}
           <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
             <Image
               src={ev.imageSrc}
@@ -918,13 +919,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           </div>
 
           <div className="relative px-4 pt-4 pb-5">
-            <div className="text-xs text-zinc-400">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
               {ev.date} • {ev.venue}
             </div>
             <div className="mt-1 text-lg font-semibold tracking-tight text-white line-clamp-1">
               {ev.title}
             </div>
-            <p className="mt-2 text-sm text-zinc-300 line-clamp-1">{ev.cta}</p>
+            <p className="mt-2 text-sm text-zinc-400 line-clamp-1">{ev.cta}</p>
             <span className="absolute bottom-4 right-4 text-zinc-500 transition-all group-hover:translate-x-1 group-hover:text-white">
               →
             </span>
