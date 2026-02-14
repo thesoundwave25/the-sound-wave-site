@@ -844,7 +844,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
      {/* 5) EVENTI */}
 <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-  <div className="relative px-4 sm:px-12 lg:px-24">
+  <div className="relative px-4 sm:px-12">
     <button
       aria-label="Indietro"
       onClick={() => scrollEvents(-1)}
@@ -881,13 +881,13 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
     <div
   ref={eventTrackRef}
+  style={{ overflowY: "visible" }} // ✅ così il glow non viene tagliato
   className={[
     "tsw-hide-scrollbar",
     "flex gap-4 overflow-x-auto",
     "scroll-smooth",
-    // ✅ più spazio ai lati per non tagliare il glow
-    "px-6 sm:px-10 lg:px-12",
-    "py-6",
+    "px-10",
+    "py-10",              // ✅ più spazio sopra/sotto per il glow
     "snap-x snap-mandatory",
   ].join(" ")}
 >
