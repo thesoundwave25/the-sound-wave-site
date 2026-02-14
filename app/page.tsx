@@ -898,7 +898,7 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           onClick={() => setActiveEvent(ev)}
           className={[
             "snap-start shrink-0 text-left",
-            "group cursor-pointer relative overflow-hidden rounded-2xl bg-black",
+            "group cursor-pointer relative rounded-2xl bg-black overflow-visible",
             // bordo: quasi invisibile su mobile, identico su md+
             "border border-white/5 md:border-white/10",
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
@@ -932,40 +932,43 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             />
           </div>
 
-          <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
-            <Image
-              src={ev.imageSrc}
-              alt={ev.title}
-              fill
-              className="object-contain object-center"
-              sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
-              priority={false}
-            />
-          </div>
+          {/* ✅ inner wrapper: taglia SOLO contenuti, non il glow */}
+<div className="relative overflow-hidden rounded-2xl">
+  <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
+    <Image
+      src={ev.imageSrc}
+      alt={ev.title}
+      fill
+      className="object-contain object-center"
+      sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
+      priority={false}
+    />
+  </div>
 
-          <div className="relative px-4 pt-4 pb-5">
-            <div className="text-xs text-zinc-400">
-              {ev.date} • {ev.venue}
-            </div>
+  <div className="relative px-4 pt-4 pb-5">
+    <div className="text-xs text-zinc-400">
+      {ev.date} • {ev.venue}
+    </div>
 
-            <div className="mt-1 text-lg font-semibold tracking-tight text-white">
-              {ev.title}
-            </div>
+    <div className="mt-1 text-lg font-semibold tracking-tight text-white">
+      {ev.title}
+    </div>
 
-            <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
+    <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
 
-            {/* Freccia dentro, allineata Apple-style */}
-            <span
-              className={[
-                "absolute bottom-4 right-4",
-                "text-zinc-400",
-                "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                "group-hover:translate-x-1 group-hover:text-white/70",
-              ].join(" ")}
-            >
-              →
-            </span>
-          </div>
+    <span
+      className={[
+        "absolute bottom-4 right-4",
+        "text-zinc-400",
+        "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "group-hover:translate-x-1 group-hover:text-white/70",
+      ].join(" ")}
+    >
+      →
+    </span>
+  </div>
+</div>
+
         </button>
       ))}
     </div>
