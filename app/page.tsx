@@ -880,15 +880,17 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
     </button>
 
     <div
-      ref={eventTrackRef}
-      className={[
-        "tsw-hide-scrollbar",
-        "flex gap-4 overflow-x-auto",
-        "scroll-smooth",
-        "px-2 py-3",
-        "snap-x snap-mandatory",
-      ].join(" ")}
-    >
+  ref={eventTrackRef}
+  style={{ overflowY: "visible" }} // ✅ così il glow non viene tagliato
+  className={[
+    "tsw-hide-scrollbar",
+    "flex gap-4 overflow-x-auto",
+    "scroll-smooth",
+    "px-2",
+    "py-6",              // ✅ più spazio sopra/sotto per il glow
+    "snap-x snap-mandatory",
+  ].join(" ")}
+>
       {events.map((ev, idx) => (
         <button
           key={ev.id}
