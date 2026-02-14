@@ -905,7 +905,8 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             "hover:-translate-y-1 hover:border-white/20",
             // ✅ neon bianco on hover
-            "hover:shadow-[0_0_26px_rgba(255,255,255,0.45),0_0_60px_rgba(255,255,255,0.25)]",
+            "hover:ring-1 hover:ring-white/25",
+            "hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_0_90px_rgba(255,255,255,0.18)]",
             "active:translate-y-[1px] active:scale-[0.985]",
             "select-none",
             // card più piccola su mobile
@@ -1238,17 +1239,20 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
       </footer>
 
       <style jsx global>{`
-        .tsw-hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .tsw-hide-scrollbar::-webkit-scrollbar {
-          display: none;
-          .tsw-xtrack {
-  overflow-y: visible !important;
-}
-        }
-      `}</style>
+  .tsw-hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .tsw-hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ✅ important: non deve stare dentro ::-webkit-scrollbar */
+  .tsw-xtrack {
+    overflow-y: visible !important;
+  }
+`}</style>
+
 
     </main>
   );
