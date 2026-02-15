@@ -135,5 +135,19 @@ html, body {
 body {
   overflow-y: auto; /* ✅ lo scroll deve stare sul body (navbar fixed resta sempre visibile) */
 }
+/* --- FIX NAVBAR SEMPRE VISIBILE --- */
+/* Identifica il primo div dentro il body o il tag nav e lo blocca in alto */
+header, nav, .navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background-color: #000000; /* Assicura che sia coprente durante lo scroll */
+}
 
+/* Se la tua navbar non usa i tag standard sopra, aggiungiamo questo fix 
+   per colpire il primo elemento del layout */
+body > div:first-child {
+  position: relative;
+  z-index: 1;
+}
 
