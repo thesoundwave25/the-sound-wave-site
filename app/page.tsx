@@ -436,183 +436,182 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   <>
 
       {/* NAVBAR (desktop invariata, mobile con hamburger) */}
-      <header
+      {/* NAVBAR (desktop invariata, mobile con hamburger) */}
+<header
   className={[
     "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
-    "relative overflow-hidden rounded-xl",
-    "border border-white/10 bg-black/60 backdrop-blur",
-    "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
   ].join(" ")}
 >
-
-        {/* === WAVE GLOW (palette onda) === */}
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(0,210,255,0.35) 0%, rgba(120,70,255,0.30) 38%, rgba(255,60,200,0.26) 55%, rgba(255,140,40,0.28) 78%, rgba(255,210,0,0.24) 100%)",
-            }}
-          />
-
-          <div
-            className="absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"
-            style={{ background: "rgba(0,210,255,0.22)" }}
-          />
-          <div
-            className="absolute left-1/2 -top-20 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
-            style={{ background: "rgba(255,60,200,0.18)" }}
-          />
-          <div
-            className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full blur-3xl"
-            style={{ background: "rgba(255,170,40,0.18)" }}
-          />
-
-          <div className="absolute inset-0 bg-black/25" />
-        </div>
-
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
-          {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
-         <button
-  type="button"
-  onClick={() => goTo("hero")}
-  className="flex items-center justify-center"
->
-  <Image
-    src="/brand/tsw-logo.svg"
-    alt="The Sound Wave"
-    width={400}
-    height={400}
-    className="h-16 sm:h-28 w-auto object-contain"
-    priority
-  />
-</button>
-
-
-          {/* DESKTOP MENU (md+) — Partner rimosso */}
-          <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
-  <button type="button" className="hover:text-white" onClick={() => goTo("servizi")}>Servizi</button>
-  <button type="button" className="hover:text-white" onClick={() => goTo("format")}>Format</button>
-  <button type="button" className="hover:text-white" onClick={() => goTo("foto")}>Foto</button>
-  <button type="button" className="hover:text-white" onClick={() => goTo("eventi")}>Eventi</button>
-  <button type="button" className="hover:text-white" onClick={() => goTo("chi-siamo")}>Chi siamo</button>
-  <button type="button" className="hover:text-white" onClick={() => goTo("contatti")}>Contatti</button>
-</nav>
-
-
-          {/* DESKTOP CTA (md+) — scroll senza hash */}
-<button
-  type="button"
-  onClick={() => goTo("contatti")}
-  className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
->
-  Contatta
-</button>
-
-          {/* MOBILE HAMBURGER (solo < md) */}
-          <button
-            type="button"
-            aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
-            aria-expanded={mobileNavOpen}
-            onClick={() => setMobileNavOpen((v) => !v)}
-            className={[
-              "md:hidden col-start-3 justify-self-end",
-              "h-11 w-11 rounded-xl",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "grid place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.04] active:scale-[0.98]",
-            ].join(" ")}
-          >
-            {/* Icona hamburger / X */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              {mobileNavOpen ? (
-                <path
-                  d="M6 6L18 18M18 6L6 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              ) : (
-                <path
-                  d="M4 7H20M4 12H20M4 17H20"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* MOBILE DROPDOWN (Apple-like) */}
-        {mobileNavOpen && (
-          <div className="md:hidden">
-            {/* overlay */}
-            <button
-              aria-label="Chiudi menu"
-              onClick={() => setMobileNavOpen(false)}
-              className="fixed inset-0 z-40 bg-black/45"
-            />
-            {/* panel */}
-            <div className="relative z-50 px-3 pb-3">
-              <div
-                className={[
-                  "mt-2 overflow-hidden rounded-2xl",
-                  "border border-white/10 bg-black/80 backdrop-blur",
-                  "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
-                ].join(" ")}
-              >
-                <div className="px-3 py-3">
-                  <div className="grid gap-1">
-     {mobileLinks.map((l) => (
-  <button
-    key={l.id}
-    type="button"
-    onClick={() => {
-      setMobileNavOpen(false);
-      goTo(l.id);
-    }}
-
+  {/* wrapper “posizionato” per glow + clipping (non tocca il fixed) */}
+  <div
     className={[
-      "flex items-center justify-center text-center",
-      "rounded-xl px-3 py-3",
-      "text-[15px] font-medium text-zinc-200",
-      "bg-white/0 hover:bg-white/5 active:bg-white/10",
-      "transition w-full",
+      "relative overflow-hidden rounded-xl",
+      "border border-white/10 bg-black/60 backdrop-blur",
+      "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
     ].join(" ")}
   >
-    <span>{l.label}</span>
-  </button>
-))}
+    {/* === WAVE GLOW (palette onda) === */}
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div
+        className="absolute inset-0 opacity-40"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(0,210,255,0.35) 0%, rgba(120,70,255,0.30) 38%, rgba(255,60,200,0.26) 55%, rgba(255,140,40,0.28) 78%, rgba(255,210,0,0.24) 100%)",
+        }}
+      />
 
-                  </div>
+      <div
+        className="absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"
+        style={{ background: "rgba(0,210,255,0.22)" }}
+      />
+      <div
+        className="absolute left-1/2 -top-20 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
+        style={{ background: "rgba(255,60,200,0.18)" }}
+      />
+      <div
+        className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full blur-3xl"
+        style={{ background: "rgba(255,170,40,0.18)" }}
+      />
 
-                  <div className="mt-3 h-px bg-white/10" />
+      <div className="absolute inset-0 bg-black/25" />
+    </div>
 
-                 {/* CTA nel menu mobile — scroll senza hash */}
-<button
-  type="button"
-  onClick={() => {
-    setMobileNavOpen(false);
-    goTo("contatti");
-  }}
-  className={[
-    "mt-3 inline-flex w-full items-center justify-center",
-    "rounded-xl bg-white px-4 py-3",
-    "text-sm font-semibold text-black",
-    "transition active:scale-[0.99]",
-  ].join(" ")}
->
-  Contatta
-</button>
+    <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+      {/* Logo */}
+      <button
+        type="button"
+        onClick={() => goTo("hero")}
+        className="flex items-center justify-center"
+      >
+        <Image
+          src="/brand/tsw-logo.svg"
+          alt="The Sound Wave"
+          width={400}
+          height={400}
+          className="h-16 sm:h-28 w-auto object-contain"
+          priority
+        />
+      </button>
 
-                </div>
+      {/* DESKTOP MENU (md+) */}
+      <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
+        <button type="button" className="hover:text-white" onClick={() => goTo("servizi")}>Servizi</button>
+        <button type="button" className="hover:text-white" onClick={() => goTo("format")}>Format</button>
+        <button type="button" className="hover:text-white" onClick={() => goTo("foto")}>Foto</button>
+        <button type="button" className="hover:text-white" onClick={() => goTo("eventi")}>Eventi</button>
+        <button type="button" className="hover:text-white" onClick={() => goTo("chi-siamo")}>Chi siamo</button>
+        <button type="button" className="hover:text-white" onClick={() => goTo("contatti")}>Contatti</button>
+      </nav>
+
+      {/* DESKTOP CTA */}
+      <button
+        type="button"
+        onClick={() => goTo("contatti")}
+        className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
+      >
+        Contatta
+      </button>
+
+      {/* MOBILE HAMBURGER */}
+      <button
+        type="button"
+        aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
+        aria-expanded={mobileNavOpen}
+        onClick={() => setMobileNavOpen((v) => !v)}
+        className={[
+          "md:hidden col-start-3 justify-self-end",
+          "h-11 w-11 rounded-xl",
+          "border border-white/15 bg-black/55 backdrop-blur",
+          "grid place-items-center text-white/90",
+          "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "hover:scale-[1.04] active:scale-[0.98]",
+        ].join(" ")}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          {mobileNavOpen ? (
+            <path
+              d="M6 6L18 18M18 6L6 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          ) : (
+            <path
+              d="M4 7H20M4 12H20M4 17H20"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          )}
+        </svg>
+      </button>
+    </div>
+
+    {/* MOBILE DROPDOWN */}
+    {mobileNavOpen && (
+      <div className="md:hidden">
+        <button
+          aria-label="Chiudi menu"
+          onClick={() => setMobileNavOpen(false)}
+          className="fixed inset-0 z-40 bg-black/45"
+        />
+
+        <div className="relative z-50 px-3 pb-3">
+          <div
+            className={[
+              "mt-2 overflow-hidden rounded-2xl",
+              "border border-white/10 bg-black/80 backdrop-blur",
+              "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
+            ].join(" ")}
+          >
+            <div className="px-3 py-3">
+              <div className="grid gap-1">
+                {mobileLinks.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => {
+                      setMobileNavOpen(false);
+                      goTo(l.id);
+                    }}
+                    className={[
+                      "flex items-center justify-center text-center",
+                      "rounded-xl px-3 py-3",
+                      "text-[15px] font-medium text-zinc-200",
+                      "bg-white/0 hover:bg-white/5 active:bg-white/10",
+                      "transition w-full",
+                    ].join(" ")}
+                  >
+                    <span>{l.label}</span>
+                  </button>
+                ))}
               </div>
+
+              <div className="mt-3 h-px bg-white/10" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  goTo("contatti");
+                }}
+                className={[
+                  "mt-3 inline-flex w-full items-center justify-center",
+                  "rounded-xl bg-white px-4 py-3",
+                  "text-sm font-semibold text-black",
+                  "transition active:scale-[0.99]",
+                ].join(" ")}
+              >
+                Contatta
+              </button>
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      </div>
+    )}
+  </div>
+</header>
+
       <main className="min-h-screen bg-black text-white">
 
       {/* 1) HERO */}
