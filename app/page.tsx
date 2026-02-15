@@ -11,7 +11,9 @@ import FormatModal, { type FormatItem } from "../components/FormatModal";
 import PhotoModal from "../components/PhotoModal";
 import type { PhotoItem } from "../components/PhotoModal";
 
-import PhotoDownloadModal, { type DownloadAlbum } from "../components/PhotoDownloadModal";
+import PhotoDownloadModal, {
+  type DownloadAlbum,
+} from "../components/PhotoDownloadModal";
 
 import EventModal, { type EventItem } from "../components/EventModal";
 
@@ -41,16 +43,16 @@ export default function Home() {
   // ✅ Chiudi menu mobile quando l’utente scrolla (solo < md)
   // Modificato per evitare salti di scroll quando apri le foto
   useEffect(() => {
-    if (!mobileNavOpen || activePhoto) return; 
+    if (!mobileNavOpen || activePhoto) return;
     if (typeof window === "undefined") return;
 
-    const isMobile = () => window.innerWidth < 768; 
+    const isMobile = () => window.innerWidth < 768;
     if (!isMobile()) return;
 
     let ticking = false;
 
     const onScroll = () => {
-      if (!isMobile() || activePhoto) return; 
+      if (!isMobile() || activePhoto) return;
       if (ticking) return;
       ticking = true;
 
@@ -108,8 +110,6 @@ export default function Home() {
     ],
     []
   );
-
-  
 
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
@@ -229,12 +229,36 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   // ✅ Palette “waveform”
   const serviceWaveGlows = useMemo(
     () => [
-      { g1: "rgba(0, 140, 255, 0.62)", g2: "rgba(0, 255, 220, 0.42)", sh: "rgba(0, 170, 255, 0.70)" },
-      { g1: "rgba(0, 210, 255, 0.55)", g2: "rgba(0, 255, 170, 0.35)", sh: "rgba(0, 220, 255, 0.65)" },
-      { g1: "rgba(120, 70, 255, 0.55)", g2: "rgba(70, 160, 255, 0.32)", sh: "rgba(140, 90, 255, 0.68)" },
-      { g1: "rgba(255, 60, 200, 0.52)", g2: "rgba(180, 70, 255, 0.30)", sh: "rgba(255, 90, 210, 0.62)" },
-      { g1: "rgba(255, 120, 0, 0.48)", g2: "rgba(255, 60, 120, 0.28)", sh: "rgba(255, 140, 40, 0.60)" },
-      { g1: "rgba(255, 210, 0, 0.42)", g2: "rgba(120, 255, 120, 0.26)", sh: "rgba(255, 220, 70, 0.55)" },
+      {
+        g1: "rgba(0, 140, 255, 0.62)",
+        g2: "rgba(0, 255, 220, 0.42)",
+        sh: "rgba(0, 170, 255, 0.70)",
+      },
+      {
+        g1: "rgba(0, 210, 255, 0.55)",
+        g2: "rgba(0, 255, 170, 0.35)",
+        sh: "rgba(0, 220, 255, 0.65)",
+      },
+      {
+        g1: "rgba(120, 70, 255, 0.55)",
+        g2: "rgba(70, 160, 255, 0.32)",
+        sh: "rgba(140, 90, 255, 0.68)",
+      },
+      {
+        g1: "rgba(255, 60, 200, 0.52)",
+        g2: "rgba(180, 70, 255, 0.30)",
+        sh: "rgba(255, 90, 210, 0.62)",
+      },
+      {
+        g1: "rgba(255, 120, 0, 0.48)",
+        g2: "rgba(255, 60, 120, 0.28)",
+        sh: "rgba(255, 140, 40, 0.60)",
+      },
+      {
+        g1: "rgba(255, 210, 0, 0.42)",
+        g2: "rgba(120, 255, 120, 0.26)",
+        sh: "rgba(255, 220, 70, 0.55)",
+      },
     ],
     []
   );
@@ -246,13 +270,17 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         id: "emotion",
         title: "Emotion 90/2000",
         logoSrc: "/brand/EMOTION_2.png",
-        tracks: [{ title: "Emotion 90/2000", src: "/audio/emotion-90-2000.mp3" }],
+        tracks: [
+          { title: "Emotion 90/2000", src: "/audio/emotion-90-2000.mp3" },
+        ],
       },
       {
         id: "italian-remix-party",
         title: "Italian Remix Party",
         logoSrc: "/brand/italian-remix-logo.svg",
-        tracks: [{ title: "Italian Remix 1", src: "/audio/remix-italian-audio.mp3" }],
+        tracks: [
+          { title: "Italian Remix 1", src: "/audio/remix-italian-audio.mp3" },
+        ],
       },
       {
         id: "the-ritual",
@@ -326,24 +354,24 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
   const [activeEvent, setActiveEvent] = useState<EventItem | null>(null);
   const eventTrackRef = useRef<HTMLDivElement | null>(null);
+
   // ✅ ascolta la navigazione eventi dal modal (frecce desktop + swipe mobile)
-useEffect(() => {
-  const onNavigate = (ev: Event) => {
-    const detail = (ev as CustomEvent).detail as { index?: number } | undefined;
-    const idx = detail?.index;
+  useEffect(() => {
+    const onNavigate = (ev: Event) => {
+      const detail = (ev as CustomEvent).detail as { index?: number } | undefined;
+      const idx = detail?.index;
 
-    if (typeof idx !== "number") return;
-    if (!events?.length) return;
+      if (typeof idx !== "number") return;
+      if (!events?.length) return;
 
-    const next = events[idx] ?? null;
-    setActiveEvent(next);
-  };
+      const next = events[idx] ?? null;
+      setActiveEvent(next);
+    };
 
-  window.addEventListener("tsw:event:navigate", onNavigate as EventListener);
-  return () =>
-    window.removeEventListener("tsw:event:navigate", onNavigate as EventListener);
-}, [events]);
-
+    window.addEventListener("tsw:event:navigate", onNavigate as EventListener);
+    return () =>
+      window.removeEventListener("tsw:event:navigate", onNavigate as EventListener);
+  }, [events]);
 
   const scrollEvents = (dir: -1 | 1) => {
     const el = eventTrackRef.current;
@@ -360,12 +388,24 @@ useEffect(() => {
   // ✅ glow card format
   const formatGlow = (id: string) => {
     if (id === "emotion") {
-      return { glowL: "rgba(255, 0, 0, 0.85)", glowC: "rgba(255, 0, 0, 0.85)", glowR: "rgba(255, 0, 0, 0.85)" };
+      return {
+        glowL: "rgba(255, 0, 0, 0.85)",
+        glowC: "rgba(255, 0, 0, 0.85)",
+        glowR: "rgba(255, 0, 0, 0.85)",
+      };
     }
     if (id === "italian-remix-party") {
-      return { glowL: "rgba(0,166,80,0.65)", glowC: "rgba(255,255,255,0.70)", glowR: "rgba(224,0,42,0.65)" };
+      return {
+        glowL: "rgba(0,166,80,0.65)",
+        glowC: "rgba(255,255,255,0.70)",
+        glowR: "rgba(224,0,42,0.65)",
+      };
     }
-    return { glowL: "rgba(124,58,237,0.60)", glowC: "rgba(245,158,11,0.70)", glowR: "rgba(249,115,22,0.60)" };
+    return {
+      glowL: "rgba(124,58,237,0.60)",
+      glowC: "rgba(245,158,11,0.70)",
+      glowR: "rgba(249,115,22,0.60)",
+    };
   };
 
   const mobileLinks = [
@@ -378,195 +418,193 @@ useEffect(() => {
     { label: "Contatti", href: "#contatti" },
   ];
 
- {/* NAVBAR (desktop invariata, mobile con hamburger) */}
-<header
-  className={[
-    "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
-    "relative overflow-hidden rounded-xl", // ✅ AGGIUNTO "relative" (fondamentale per i layer absolute)
-    "border border-white/10 bg-black/60 backdrop-blur",
-    "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
-  ].join(" ")}
->
-  {/* === WAVE GLOW (palette onda) === */}
-  <div aria-hidden className="pointer-events-none absolute inset-0">
-    <div
-      className="absolute inset-0 opacity-40"
-      style={{
-        background:
-          "linear-gradient(90deg, rgba(0,210,255,0.35) 0%, rgba(120,70,255,0.30) 38%, rgba(255,60,200,0.26) 55%, rgba(255,140,40,0.28) 78%, rgba(255,210,0,0.24) 100%)",
-      }}
-    />
-
-    <div
-      className="absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"
-      style={{ background: "rgba(0,210,255,0.22)" }}
-    />
-    <div
-      className="absolute left-1/2 -top-20 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
-      style={{ background: "rgba(255,60,200,0.18)" }}
-    />
-    <div
-      className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full blur-3xl"
-      style={{ background: "rgba(255,170,40,0.18)" }}
-    />
-
-    <div className="absolute inset-0 bg-black/25" />
-  </div>
-
-  <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
-    {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
-    <a href="#hero" className="flex items-center justify-center">
-      <Image
-        src="/brand/tsw-logo.svg"
-        alt="The Sound Wave"
-        width={400}
-        height={400}
-        className="h-16 sm:h-28 w-auto object-contain"
-        priority
-      />
-    </a>
-
-    {/* DESKTOP MENU (md+) — Partner rimosso */}
-    <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
-      <a className="hover:text-white" href="#servizi">Servizi</a>
-      <a className="hover:text-white" href="#format">Format</a>
-      <a className="hover:text-white" href="#foto">Foto</a>
-      <a className="hover:text-white" href="#eventi">Eventi</a>
-      <a className="hover:text-white" href="#chi-siamo">Chi siamo</a>
-      <a className="hover:text-white" href="#contatti">Contatti</a>
-    </nav>
-
-    {/* DESKTOP CTA (md+) — identico */}
-    <a
-      href="#contatti"
-      className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
-    >
-      Contatta
-    </a>
-
-    {/* MOBILE HAMBURGER (solo < md) */}
-    <button
-      type="button"
-      aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
-      aria-expanded={mobileNavOpen}
-      onClick={() => setMobileNavOpen((v) => !v)}
-      className={[
-        "md:hidden col-start-3 justify-self-end",
-        "h-11 w-11 rounded-xl",
-        "border border-white/15 bg-black/55 backdrop-blur",
-        "grid place-items-center text-white/90",
-        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:scale-[1.04] active:scale-[0.98]",
-      ].join(" ")}
-    >
-      {/* Icona hamburger / X */}
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        {mobileNavOpen ? (
-          <path
-            d="M6 6L18 18M18 6L6 18"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+  return (
+    <main className="min-h-screen bg-black text-white">
+      {/* NAVBAR (desktop invariata, mobile con hamburger) */}
+      <header
+        className={[
+          "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
+          "relative overflow-hidden rounded-xl", // ✅ UNICA MODIFICA: aggiunto "relative"
+          "border border-white/10 bg-black/60 backdrop-blur",
+          "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
+        ].join(" ")}
+      >
+        {/* === WAVE GLOW (palette onda) === */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(0,210,255,0.35) 0%, rgba(120,70,255,0.30) 38%, rgba(255,60,200,0.26) 55%, rgba(255,140,40,0.28) 78%, rgba(255,210,0,0.24) 100%)",
+            }}
           />
-        ) : (
-          <path
-            d="M4 7H20M4 12H20M4 17H20"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+
+          <div
+            className="absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"
+            style={{ background: "rgba(0,210,255,0.22)" }}
           />
-        )}
-      </svg>
-    </button>
-  </div>
+          <div
+            className="absolute left-1/2 -top-20 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "rgba(255,60,200,0.18)" }}
+          />
+          <div
+            className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full blur-3xl"
+            style={{ background: "rgba(255,170,40,0.18)" }}
+          />
 
-  {/* MOBILE DROPDOWN (Apple-like) */}
-  {mobileNavOpen && (
-    <div className="md:hidden">
-      {/* overlay */}
-      <button
-        aria-label="Chiudi menu"
-        onClick={() => setMobileNavOpen(false)}
-        className="fixed inset-0 z-40 bg-black/45"
-      />
-      {/* panel */}
-      <div className="relative z-50 px-3 pb-3">
-        <div
-          className={[
-            "mt-2 overflow-hidden rounded-2xl",
-            "border border-white/10 bg-black/80 backdrop-blur",
-            "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
-          ].join(" ")}
-        >
-          <div className="px-3 py-3">
-            <div className="grid gap-1">
-              {mobileLinks.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMobileNavOpen(false)}
-                  className={[
-                    "flex items-center justify-center text-center",
-                    "rounded-xl px-3 py-3",
-                    "text-[15px] font-medium text-zinc-200",
-                    "bg-white/0 hover:bg-white/5 active:bg-white/10",
-                    "transition",
-                  ].join(" ")}
-                >
-                  <span>{l.label}</span>
-                </a>
-              ))}
-            </div>
-
-            <div className="mt-3 h-px bg-white/10" />
-
-            {/* CTA nel menu mobile */}
-            <a
-              href="#contatti"
-              onClick={() => setMobileNavOpen(false)}
-              className={[
-                "mt-3 inline-flex w-full items-center justify-center",
-                "rounded-xl bg-white px-4 py-3",
-                "text-sm font-semibold text-black",
-                "transition active:scale-[0.99]",
-              ].join(" ")}
-            >
-              Contatta
-            </a>
-          </div>
+          <div className="absolute inset-0 bg-black/25" />
         </div>
-      </div>
-    </div>
-  )}
-</header>
 
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+          {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
+          <a href="#hero" className="flex items-center justify-center">
+            <Image
+              src="/brand/tsw-logo.svg"
+              alt="The Sound Wave"
+              width={400}
+              height={400}
+              className="h-16 sm:h-28 w-auto object-contain"
+              priority
+            />
+          </a>
+
+          {/* DESKTOP MENU (md+) — Partner rimosso */}
+          <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
+            <a className="hover:text-white" href="#servizi">Servizi</a>
+            <a className="hover:text-white" href="#format">Format</a>
+            <a className="hover:text-white" href="#foto">Foto</a>
+            <a className="hover:text-white" href="#eventi">Eventi</a>
+            <a className="hover:text-white" href="#chi-siamo">Chi siamo</a>
+            <a className="hover:text-white" href="#contatti">Contatti</a>
+          </nav>
+
+          {/* DESKTOP CTA (md+) — identico */}
+          <a
+            href="#contatti"
+            className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
+          >
+            Contatta
+          </a>
+
+          {/* MOBILE HAMBURGER (solo < md) */}
+          <button
+            type="button"
+            aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((v) => !v)}
+            className={[
+              "md:hidden col-start-3 justify-self-end",
+              "h-11 w-11 rounded-xl",
+              "border border-white/15 bg-black/55 backdrop-blur",
+              "grid place-items-center text-white/90",
+              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:scale-[1.04] active:scale-[0.98]",
+            ].join(" ")}
+          >
+            {/* Icona hamburger / X */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              {mobileNavOpen ? (
+                <path
+                  d="M6 6L18 18M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path
+                  d="M4 7H20M4 12H20M4 17H20"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* MOBILE DROPDOWN (Apple-like) */}
+        {mobileNavOpen && (
+          <div className="md:hidden">
+            {/* overlay */}
+            <button
+              aria-label="Chiudi menu"
+              onClick={() => setMobileNavOpen(false)}
+              className="fixed inset-0 z-40 bg-black/45"
+            />
+            {/* panel */}
+            <div className="relative z-50 px-3 pb-3">
+              <div
+                className={[
+                  "mt-2 overflow-hidden rounded-2xl",
+                  "border border-white/10 bg-black/80 backdrop-blur",
+                  "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
+                ].join(" ")}
+              >
+                <div className="px-3 py-3">
+                  <div className="grid gap-1">
+                    {mobileLinks.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        onClick={() => setMobileNavOpen(false)}
+                        className={[
+                          "flex items-center justify-center text-center",
+                          "rounded-xl px-3 py-3",
+                          "text-[15px] font-medium text-zinc-200",
+                          "bg-white/0 hover:bg-white/5 active:bg-white/10",
+                          "transition",
+                        ].join(" ")}
+                      >
+                        <span>{l.label}</span>
+                      </a>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 h-px bg-white/10" />
+
+                  {/* CTA nel menu mobile */}
+                  <a
+                    href="#contatti"
+                    onClick={() => setMobileNavOpen(false)}
+                    className={[
+                      "mt-3 inline-flex w-full items-center justify-center",
+                      "rounded-xl bg-white px-4 py-3",
+                      "text-sm font-semibold text-black",
+                      "transition active:scale-[0.99]",
+                    ].join(" ")}
+                  >
+                    Contatta
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
 
       {/* 1) HERO */}
-     <section
-  id="hero"
-  className="pt-32 sm:pt-56 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-20"
->
-
+      <section
+        id="hero"
+        className="pt-32 sm:pt-56 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-20"
+      >
         <div className="tsw-fade-up relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-4 sm:p-10 backdrop-blur">
-
           <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
           <div aria-hidden className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
 
           <div className="tsw-fade-up relative grid gap-6 sm:gap-10 lg:grid-cols-2 lg:items-center">
-  <div className="flex flex-col items-center md:items-start text-center md:text-left">
-    <div className="text-sm text-zinc-300/80">THE SOUND WAVE • DJ & ENTERTAINMENT</div>
-
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
+              <div className="text-sm text-zinc-300/80">THE SOUND WAVE • DJ & ENTERTAINMENT</div>
 
               <div className="relative">
                 <div aria-hidden className="absolute -inset-6 rounded-full bg-purple-500/20 blur-3xl" />
                 <h1 className="relative mt-4 text-3xl sm:text-5xl font-semibold tracking-tight text-center md:text-left">
-  PLEASE DON'T STOP <br className="md:hidden" /> THE MUSIC
-</h1>
-
+                  PLEASE DON'T STOP <br className="md:hidden" /> THE MUSIC
+                </h1>
               </div>
 
-             <p className="mt-4 max-w-xl mx-auto md:mx-0 text-zinc-300 text-center md:text-left">
-Dj Set ed Eventi che fanno vibrare il pubblico</p>
+              <p className="mt-4 max-w-xl mx-auto md:mx-0 text-zinc-300 text-center md:text-left">
+                Dj Set ed Eventi che fanno vibrare il pubblico
+              </p>
 
               <div className="mt-7 sm:mt-8 flex flex-wrap justify-center md:justify-start gap-3">
                 <a
@@ -603,7 +641,10 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
               <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/20 via-transparent to-blue-500/20" />
-                <HeroImage src="/brand/wallen-gianluk-home.webp" alt="Wallen & Gianluk - The Sound Wave" />
+                <HeroImage
+                  src="/brand/wallen-gianluk-home.webp"
+                  alt="Wallen & Gianluk - The Sound Wave"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
               </div>
             </div>
@@ -655,13 +696,12 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
 
                   <div className="relative z-10">
                     <div className="text-base font-semibold tracking-tight text-center md:text-left">
-  {s.title}
-</div>
+                      {s.title}
+                    </div>
 
-<p className="mt-2 text-sm text-zinc-300 line-clamp-1 text-center md:text-left">
-  {s.desc}
-</p>
-
+                    <p className="mt-2 text-sm text-zinc-300 line-clamp-1 text-center md:text-left">
+                      {s.desc}
+                    </p>
                   </div>
                 </li>
               );
@@ -669,7 +709,11 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           </ul>
         </div>
 
-        <ServiceModal open={!!activeService} onClose={() => setActiveService(null)} service={activeService} />
+        <ServiceModal
+          open={!!activeService}
+          onClose={() => setActiveService(null)}
+          service={activeService}
+        />
       </Section>
 
       {/* 3) FORMAT */}
@@ -743,7 +787,11 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           })}
         </div>
 
-        <FormatModal open={!!activeFormat} onClose={() => setActiveFormat(null)} format={activeFormat} />
+        <FormatModal
+          open={!!activeFormat}
+          onClose={() => setActiveFormat(null)}
+          format={activeFormat}
+        />
       </Section>
 
       {/* 4) FOTO */}
@@ -794,56 +842,55 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
               "snap-x snap-mandatory",
             ].join(" ")}
           >
-          {photos.map((p, idx) => (
-  <button
-    key={p.id}
-    type="button"
-    data-photo-card={idx === 0 ? "1" : undefined}
-    // FIX: e.preventDefault() e blur() impediscono il salto della pagina
-    onClick={(e) => {
-      e.preventDefault();
-      e.currentTarget.blur();
-      setActivePhoto(p);
-    }}
-    className={[
-      "snap-start shrink-0 text-left",
-      "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
-      "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-      "hover:-translate-y-1 hover:border-white/20",
-      "active:translate-y-[1px] active:scale-[0.985]",
-      "select-none",
-      "w-[82vw] sm:w-[46vw] md:w-[24%]",
-    ].join(" ")}
-  >
-    <div className="relative overflow-hidden rounded-2xl bg-black">
-      {/* MOBILE */}
-      <div className="md:hidden flex items-center justify-center px-2 py-3">
-        <Image
-          src={p.src}
-          alt={p.alt ?? "Foto evento"}
-          width={800} // Ridotto per performance mobile
-          height={450}
-          className="w-full h-auto max-h-[220px] object-contain"
-        />
-      </div>
-      {/* DESKTOP */}
-      <div className="hidden md:block relative aspect-[16/10] w-full">
-        <Image
-          src={p.src}
-          alt={p.alt ?? "Foto evento"}
-          fill
-          className="object-cover"
-          sizes="25vw"
-        />
-      </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
-        <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
-          ← scorri →
-        </div>
-      </div>
-    </div>
-  </button>
-))}
+            {photos.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                data-photo-card={idx === 0 ? "1" : undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                  setActivePhoto(p);
+                }}
+                className={[
+                  "snap-start shrink-0 text-left",
+                  "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
+                  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  "hover:-translate-y-1 hover:border-white/20",
+                  "active:translate-y-[1px] active:scale-[0.985]",
+                  "select-none",
+                  "w-[82vw] sm:w-[46vw] md:w-[24%]",
+                ].join(" ")}
+              >
+                <div className="relative overflow-hidden rounded-2xl bg-black">
+                  {/* MOBILE */}
+                  <div className="md:hidden flex items-center justify-center px-2 py-3">
+                    <Image
+                      src={p.src}
+                      alt={p.alt ?? "Foto evento"}
+                      width={800}
+                      height={450}
+                      className="w-full h-auto max-h-[220px] object-contain"
+                    />
+                  </div>
+                  {/* DESKTOP */}
+                  <div className="hidden md:block relative aspect-[16/10] w-full">
+                    <Image
+                      src={p.src}
+                      alt={p.alt ?? "Foto evento"}
+                      fill
+                      className="object-cover"
+                      sizes="25vw"
+                    />
+                  </div>
+                  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
+                    <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
+                      ← scorri →
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -867,422 +914,413 @@ Dj Set ed Eventi che fanno vibrare il pubblico</p>
           </button>
         </div>
 
-        <PhotoModal open={!!activePhoto} onClose={() => setActivePhoto(null)} photo={activePhoto} photos={photos as any} />
-        <PhotoDownloadModal open={openDownloads} onClose={() => setOpenDownloads(false)} albums={downloadAlbums} />
+        <PhotoModal
+          open={!!activePhoto}
+          onClose={() => setActivePhoto(null)}
+          photo={activePhoto}
+          photos={photos as any}
+        />
+        <PhotoDownloadModal
+          open={openDownloads}
+          onClose={() => setOpenDownloads(false)}
+          albums={downloadAlbums}
+        />
       </Section>
 
-     {/* 5) EVENTI */}
-<Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-  <div className="relative px-4 sm:px-12">
-    <button
-      aria-label="Indietro"
-      onClick={() => scrollEvents(-1)}
-      className={[
-        "hidden sm:grid",
-        "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
-        "h-11 w-11 rounded-full",
-        "border border-white/15 bg-black/55 backdrop-blur",
-        "place-items-center text-white/90",
-        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:scale-[1.06]",
-        "active:scale-[0.98]",
-      ].join(" ")}
-    >
-      ‹
-    </button>
-
-    <button
-      aria-label="Avanti"
-      onClick={() => scrollEvents(1)}
-      className={[
-        "hidden sm:grid",
-        "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
-        "h-11 w-11 rounded-full",
-        "border border-white/15 bg-black/55 backdrop-blur",
-        "place-items-center text-white/90",
-        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:scale-[1.06]",
-        "active:scale-[0.98]",
-      ].join(" ")}
-    >
-      ›
-    </button>
-
-  <div
-  ref={eventTrackRef}
-  style={{ overflowX: "auto", overflowY: "visible" }}
-  className={[
-    "tsw-hide-scrollbar tsw-xtrack",
-    "flex gap-4",
-    "scroll-smooth",
-    "px-10",
-    "py-10",
-    "snap-x snap-mandatory",
-  ].join(" ")}
->
-
-      {events.map((ev, idx) => (
-        <button
-          key={ev.id}
-          data-event-card={idx === 0 ? "1" : undefined}
-          onClick={() => setActiveEvent(ev)}
-          className={[
-            "snap-start shrink-0 text-left",
-            "group cursor-pointer relative rounded-2xl bg-black overflow-visible",
-            // bordo: quasi invisibile su mobile, identico su md+
-            "border border-white/5 md:border-white/10",
-            "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            "hover:-translate-y-1 hover:border-white/20",
-            // ✅ neon bianco on hover
-            "hover:ring-1 hover:ring-white/25",
-            "hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_0_90px_rgba(255,255,255,0.18)]",
-            "active:translate-y-[1px] active:scale-[0.985]",
-            "select-none",
-            // card più piccola su mobile
-            "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
-          ].join(" ")}
-        >
-          {/* ✅ overlay glow interno (leggero bianco dentro) */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
+      {/* 5) EVENTI */}
+      <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
+        <div className="relative px-4 sm:px-12">
+          <button
+            aria-label="Indietro"
+            onClick={() => scrollEvents(-1)}
+            className={[
+              "hidden sm:grid",
+              "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
+              "h-11 w-11 rounded-full",
+              "border border-white/15 bg-black/55 backdrop-blur",
+              "place-items-center text-white/90",
+              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:scale-[1.06]",
+              "active:scale-[0.98]",
+            ].join(" ")}
           >
-            <div
-              className="absolute inset-0 rounded-2xl"
-              style={{
-                background: `
-                  radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
-                `,
-                opacity: 0.14,
-                filter: "blur(18px)",
-              }}
-            />
-            <div
-              className="absolute inset-0 rounded-2xl"
-              style={{ background: "rgba(255,255,255,0.03)" }}
-            />
+            ‹
+          </button>
+
+          <button
+            aria-label="Avanti"
+            onClick={() => scrollEvents(1)}
+            className={[
+              "hidden sm:grid",
+              "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
+              "h-11 w-11 rounded-full",
+              "border border-white/15 bg-black/55 backdrop-blur",
+              "place-items-center text-white/90",
+              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:scale-[1.06]",
+              "active:scale-[0.98]",
+            ].join(" ")}
+          >
+            ›
+          </button>
+
+          <div
+            ref={eventTrackRef}
+            style={{ overflowX: "auto", overflowY: "visible" }}
+            className={[
+              "tsw-hide-scrollbar tsw-xtrack",
+              "flex gap-4",
+              "scroll-smooth",
+              "px-10",
+              "py-10",
+              "snap-x snap-mandatory",
+            ].join(" ")}
+          >
+            {events.map((ev, idx) => (
+              <button
+                key={ev.id}
+                data-event-card={idx === 0 ? "1" : undefined}
+                onClick={() => setActiveEvent(ev)}
+                className={[
+                  "snap-start shrink-0 text-left",
+                  "group cursor-pointer relative rounded-2xl bg-black overflow-visible",
+                  "border border-white/5 md:border-white/10",
+                  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  "hover:-translate-y-1 hover:border-white/20",
+                  "hover:ring-1 hover:ring-white/25",
+                  "hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_0_90px_rgba(255,255,255,0.18)]",
+                  "active:translate-y-[1px] active:scale-[0.985]",
+                  "select-none",
+                  "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
+                ].join(" ")}
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
+                >
+                  <div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: `
+                        radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
+                      `,
+                      opacity: 0.14,
+                      filter: "blur(18px)",
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{ background: "rgba(255,255,255,0.03)" }}
+                  />
+                </div>
+
+                <div className="relative overflow-hidden rounded-2xl">
+                  <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
+                    <Image
+                      src={ev.imageSrc}
+                      alt={ev.title}
+                      fill
+                      className="object-contain object-center"
+                      sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
+                      priority={false}
+                    />
+                  </div>
+
+                  <div className="relative px-4 pt-4 pb-5">
+                    <div className="text-xs text-zinc-400">
+                      {ev.date} • {ev.venue}
+                    </div>
+
+                    <div className="mt-1 text-lg font-semibold tracking-tight text-white">
+                      {ev.title}
+                    </div>
+
+                    <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
+
+                    <span
+                      className={[
+                        "absolute bottom-4 right-4",
+                        "text-zinc-400",
+                        "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                        "group-hover:translate-x-1 group-hover:text-white/70",
+                      ].join(" ")}
+                    >
+                      →
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* ✅ inner wrapper: taglia SOLO contenuti, non il glow */}
-<div className="relative overflow-hidden rounded-2xl">
-  <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
-    <Image
-      src={ev.imageSrc}
-      alt={ev.title}
-      fill
-      className="object-contain object-center"
-      sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
-      priority={false}
-    />
-  </div>
+        <EventModal
+          open={!!activeEvent}
+          onClose={() => setActiveEvent(null)}
+          event={activeEvent}
+          events={events}
+        />
+      </Section>
 
-  <div className="relative px-4 pt-4 pb-5">
-    <div className="text-xs text-zinc-400">
-      {ev.date} • {ev.venue}
-    </div>
-
-    <div className="mt-1 text-lg font-semibold tracking-tight text-white">
-      {ev.title}
-    </div>
-
-    <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
-
-    <span
-      className={[
-        "absolute bottom-4 right-4",
-        "text-zinc-400",
-        "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "group-hover:translate-x-1 group-hover:text-white/70",
-      ].join(" ")}
-    >
-      →
-    </span>
-  </div>
-</div>
-
-        </button>
-      ))}
-    </div>
-  </div>
-
-  <EventModal
-    open={!!activeEvent}
-    onClose={() => setActiveEvent(null)}
-    event={activeEvent}
-    events={events}
-  />
-</Section>
-
-
-     {/* 6) CHI SIAMO */}
-<Section id="chi-siamo" title="Chi siamo">
-  <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
-    <div
-      aria-hidden
-      className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
-    />
-    <div
-      aria-hidden
-      className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"
-    />
-
-    <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
-      {/* IMMAGINE */}
-      <div className="lg:col-span-5">
-        <div className="group relative">
+      {/* 6) CHI SIAMO */}
+      <Section id="chi-siamo" title="Chi siamo">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
-            style={{ background: "rgba(255,255,255,0.12)" }}
+            className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
           />
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
-            <div className="relative aspect-[4/5] w-full">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"
+          />
+
+          <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-5">
+              <div className="group relative">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
+                  style={{ background: "rgba(255,255,255,0.12)" }}
+                />
+                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
+                  <div className="relative aspect-[4/5] w-full">
+                    <Image
+                      src="/brand/chi-siamo.webp"
+                      alt="The Sound Wave DJs"
+                      fill
+                      className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 flex flex-col items-center text-center">
+              <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">
+                The Sound Wave
+              </h3>
+
+              <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
+                The Sound Wave è un progetto nato dall’unione di due professionisti
+                dell’intrattenimento con l’obiettivo di portare eventi musicali
+                strutturati, coinvolgenti.<br />
+                DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del
+                pubblico, l’uso della voce e la capacità di leggere la pista e
+                trasformare la musica in spettacolo.<br />
+                DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla
+                creazione di veri e propri viaggi sonori.<br />
+                Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi
+                format.
+              </p>
+
+              <p className="mt-4 text-zinc-400 leading-relaxed">
+                Dall’organizzazione completa dell’evento alla gestione dell’atmosfera
+                musicale e visiva, ogni dettaglio viene curato per creare momenti
+                memorabili e coinvolgenti.
+              </p>
+
+              <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
+                <div className="group relative">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="relative h-full w-full">
+                      <Image
+                        src="/brand/wallen-logo.svg"
+                        alt="DJ Wallen"
+                        fill
+                        className="object-contain"
+                        sizes="96px"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="relative h-full w-full">
+                      <Image
+                        src="/brand/gianluk-logo.svg"
+                        alt="DJ Gianluk"
+                        fill
+                        className="object-contain"
+                        sizes="96px"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* 8) CONTATTI */}
+      <Section id="contatti" title="Contatti">
+        <div className="grid gap-4 md:grid-cols-3">
+          <a
+            href="https://wa.me/393516854933"
+            target="_blank"
+            className={[
+              "group relative flex flex-col items-center justify-center text-center gap-3",
+              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:-translate-y-1 hover:border-white/20",
+              "active:translate-y-[1px] active:scale-[0.985]",
+              "select-none",
+            ].join(" ")}
+          >
+            <div className="relative h-10 w-10">
               <Image
-                src="/brand/chi-siamo.webp"
-                alt="The Sound Wave DJs"
+                src="/icons/whatsapp.png"
+                alt="WhatsApp"
                 fill
-                className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-contain"
+                sizes="40px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* TESTI + LOGHI (centrati su mobile + desktop) */}
-      <div className="lg:col-span-7 flex flex-col items-center text-center">
-        <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">
-          The Sound Wave
-        </h3>
-
-        <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
-          The Sound Wave è un progetto nato dall’unione di due professionisti
-          dell’intrattenimento con l’obiettivo di portare eventi musicali
-          strutturati, coinvolgenti.<br />
-          DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del
-          pubblico, l’uso della voce e la capacità di leggere la pista e
-          trasformare la musica in spettacolo.<br />
-          DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla
-          creazione di veri e propri viaggi sonori.<br />
-          Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi
-          format.
-        </p>
-
-        <p className="mt-4 text-zinc-400 leading-relaxed">
-          Dall’organizzazione completa dell’evento alla gestione dell’atmosfera
-          musicale e visiva, ogni dettaglio viene curato per creare momenti
-          memorabili e coinvolgenti.
-        </p>
-
-        {/* LOGHI: affiancati, più grandi, riquadro QUADRATO, bordi arrotondati */}
-        <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
-          <div className="group relative">
-            <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
-              <div className="relative h-full w-full">
-                <Image
-                  src="/brand/wallen-logo.svg"
-                  alt="DJ Wallen"
-                  fill
-                  className="object-contain"
-                  sizes="96px"
-                />
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+                WhatsApp
+                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
               </div>
+              <div className="text-sm text-zinc-400">+39 3516854933</div>
             </div>
-          </div>
+          </a>
 
-          <div className="group relative">
-            <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
-              <div className="relative h-full w-full">
-                <Image
-                  src="/brand/gianluk-logo.svg"
-                  alt="DJ Gianluk"
-                  fill
-                  className="object-contain"
-                  sizes="96px"
-                />
+          <a
+            href="mailto:thesoundwave25@gmail.com"
+            className={[
+              "group relative flex flex-col items-center justify-center text-center gap-3",
+              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:-translate-y-1 hover:border border-white/20",
+              "active:translate-y-[1px] active:scale-[0.985]",
+              "select-none",
+            ].join(" ")}
+          >
+            <div className="relative h-10 w-10">
+              <Image
+                src="/icons/email.png"
+                alt="Email"
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+                Email
+                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
               </div>
+              <div className="text-sm text-zinc-400">thesoundwave25@gmail.com</div>
+            </div>
+          </a>
+
+          <a
+            href="https://www.instagram.com/the.sound_wave/"
+            target="_blank"
+            className={[
+              "group relative flex flex-col items-center justify-center text-center gap-3",
+              "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
+              "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "hover:-translate-y-1 hover:border-white/20",
+              "active:translate-y-[1px] active:scale-[0.985]",
+              "select-none",
+            ].join(" ")}
+          >
+            <div className="relative h-10 w-10">
+              <Image
+                src="/icons/instagram.png"
+                alt="Instagram"
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-2 text-lg font-semibold">
+                Instagram
+                <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
+              </div>
+              <div className="text-sm text-zinc-400">the.sound_wave</div>
+            </div>
+          </a>
+        </div>
+
+        <div className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
+          <div className="text-base sm:text-xl font-semibold leading-relaxed">
+            Una squadra. Un’energia. Un’esperienza completa.<br />
+            DJ, DJ e Vocalist, Social PR e Fotografo, lavoriamo insieme per creare eventi che funzionano davvero.<br />
+            Porta The Sound Wave nel tuo evento.
+          </div>
+
+          <div className="mt-6 flex flex-nowrap justify-center gap-2 sm:gap-6">
+            <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+              <Image
+                src="/brand/gianluk-logo.svg"
+                alt="logo"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 80px, 144px"
+              />
+            </div>
+
+            <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+              <Image
+                src="/brand/wallen-logo.svg"
+                alt="logo"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 80px, 144px"
+              />
+            </div>
+
+            <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+              <Image
+                src="/brand/waven-logo.svg"
+                alt="logo"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 80px, 144px"
+              />
+            </div>
+
+            <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
+              <Image
+                src="/brand/alemembrini-logo.svg"
+                alt="logo"
+                fill
+                className="object-contain"
+                sizes="(max-width: 640px) 80px, 144px"
+              />
             </div>
           </div>
         </div>
-      </div>
-      {/* /TESTI + LOGHI */}
-    </div>
-  </div>
-</Section>
-
-
-    {/* 8) CONTATTI */}
-<Section id="contatti" title="Contatti">
-  <div className="grid gap-4 md:grid-cols-3">
-    <a
-      href="https://wa.me/393516854933"
-      target="_blank"
-      className={[
-        "group relative flex flex-col items-center justify-center text-center gap-3",
-        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:-translate-y-1 hover:border-white/20",
-        "active:translate-y-[1px] active:scale-[0.985]",
-        "select-none",
-      ].join(" ")}
-    >
-      <div className="relative h-10 w-10">
-        <Image
-          src="/icons/whatsapp.png"
-          alt="WhatsApp"
-          fill
-          className="object-contain"
-          sizes="40px"
-        />
-      </div>
-
-      <div className="flex flex-col items-center">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-          WhatsApp
-          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-        </div>
-        <div className="text-sm text-zinc-400">+39 3516854933</div>
-      </div>
-    </a>
-
-    <a
-      href="mailto:thesoundwave25@gmail.com"
-      className={[
-        "group relative flex flex-col items-center justify-center text-center gap-3",
-        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:-translate-y-1 hover:border border-white/20",
-        "active:translate-y-[1px] active:scale-[0.985]",
-        "select-none",
-      ].join(" ")}
-    >
-      <div className="relative h-10 w-10">
-        <Image
-          src="/icons/email.png"
-          alt="Email"
-          fill
-          className="object-contain"
-          sizes="40px"
-        />
-      </div>
-
-      <div className="flex flex-col items-center">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-          Email
-          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-        </div>
-        <div className="text-sm text-zinc-400">thesoundwave25@gmail.com</div>
-      </div>
-    </a>
-
-    <a
-      href="https://www.instagram.com/the.sound_wave/"
-      target="_blank"
-      className={[
-        "group relative flex flex-col items-center justify-center text-center gap-3",
-        "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
-        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "hover:-translate-y-1 hover:border-white/20",
-        "active:translate-y-[1px] active:scale-[0.985]",
-        "select-none",
-      ].join(" ")}
-    >
-      <div className="relative h-10 w-10">
-        <Image
-          src="/icons/instagram.png"
-          alt="Instagram"
-          fill
-          className="object-contain"
-          sizes="40px"
-        />
-      </div>
-
-      <div className="flex flex-col items-center">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-          Instagram
-          <span className="text-zinc-400 transition group-hover:translate-x-1">→</span>
-        </div>
-        <div className="text-sm text-zinc-400">the.sound_wave</div>
-      </div>
-    </a>
-  </div>
-
-  <div className="mt-7 sm:mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 text-center">
-    <div className="text-base sm:text-xl font-semibold leading-relaxed">
-      Una squadra. Un’energia. Un’esperienza completa.<br />
-      DJ, DJ e Vocalist, Social PR e Fotografo, lavoriamo insieme per creare eventi che funzionano davvero.<br />
-      Porta The Sound Wave nel tuo evento.
-    </div>
-
-    {/* ✅ Loghi: una riga anche su mobile (come desktop) */}
-    <div className="mt-6 flex flex-nowrap justify-center gap-2 sm:gap-6">
-      {/* ✅ SOLO QUI: Gianluk sm:w-36 come gli altri */}
-      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
-        <Image
-          src="/brand/gianluk-logo.svg"
-          alt="logo"
-          fill
-          className="object-contain"
-          sizes="(max-width: 640px) 80px, 144px"
-        />
-      </div>
-
-      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
-        <Image
-          src="/brand/wallen-logo.svg"
-          alt="logo"
-          fill
-          className="object-contain"
-          sizes="(max-width: 640px) 80px, 144px"
-        />
-      </div>
-
-      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
-        <Image
-          src="/brand/waven-logo.svg"
-          alt="logo"
-          fill
-          className="object-contain"
-          sizes="(max-width: 640px) 80px, 144px"
-        />
-      </div>
-
-      <div className="relative shrink-0 h-12 w-20 sm:h-16 sm:w-36">
-        <Image
-          src="/brand/alemembrini-logo.svg"
-          alt="logo"
-          fill
-          className="object-contain"
-          sizes="(max-width: 640px) 80px, 144px"
-        />
-      </div>
-    </div>
-  </div>
-</Section>
-
-
+      </Section>
 
       <footer className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12 text-zinc-500">
         © {new Date().getFullYear()} The Sound Wave
       </footer>
 
       <style jsx global>{`
-  .tsw-hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .tsw-hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+        .tsw-hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .tsw-hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
 
-  /* ✅ important: non deve stare dentro ::-webkit-scrollbar */
-  .tsw-xtrack {
-    overflow-y: visible !important;
-  }
-`}</style>
-
-
+        /* ✅ important: non deve stare dentro ::-webkit-scrollbar */
+        .tsw-xtrack {
+          overflow-y: visible !important;
+        }
+      `}</style>
     </main>
   );
 }
