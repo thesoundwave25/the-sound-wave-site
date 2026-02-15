@@ -21,6 +21,20 @@ export default function Home() {
   // ✅ MOBILE NAV
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activePhoto, setActivePhoto] = useState<PhotoItem | null>(null);
+    // ✅ Soluzione B: scroll senza # nell’URL (refresh torna sempre in alto)
+  const goTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    // scroll smooth
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // rimuove eventuale hash dall’URL (senza ricaricare)
+    if (typeof window !== "undefined" && window.location.hash) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  };
+
 
   // Chiudi menu se passo a desktop
   useEffect(() => {
@@ -409,14 +423,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   };
 
   const mobileLinks = [
-    { label: "Servizi", href: "#servizi" },
-    { label: "Format", href: "#format" },
-    { label: "Foto", href: "#foto" },
-    { label: "Eventi", href: "#eventi" },
-    { label: "Chi siamo", href: "#chi-siamo" },
-    // ❌ Partner rimosso
-    { label: "Contatti", href: "#contatti" },
-  ];
+  { label: "Servizi", id: "servizi" },
+  { label: "Format", id: "format" },
+  { label: "Foto", id: "foto" },
+  { label: "Eventi", id: "eventi" },
+  { label: "Chi siamo", id: "chi-siamo" },
+  { label: "Contatti", id: "contatti" },
+];
+
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -424,7 +438,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       <header
   className={[
     "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
-    "overflow-hidden rounded-xl", // ✅ tolto "relative"
+    "relative overflow-hidden rounded-xl",
     "border border-white/10 bg-black/60 backdrop-blur",
     "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
   ].join(" ")}
@@ -458,34 +472,41 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
         <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
           {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
-          <a href="#hero" className="flex items-center justify-center">
-            <Image
-              src="/brand/tsw-logo.svg"
-              alt="The Sound Wave"
-              width={400}
-              height={400}
-              className="h-16 sm:h-28 w-auto object-contain"
-              priority
-            />
-          </a>
+         <button
+  type="button"
+  onClick={() => goTo("hero")}
+  className="flex items-center justify-center"
+>
+  <Image
+    src="/brand/tsw-logo.svg"
+    alt="The Sound Wave"
+    width={400}
+    height={400}
+    className="h-16 sm:h-28 w-auto object-contain"
+    priority
+  />
+</button>
+
 
           {/* DESKTOP MENU (md+) — Partner rimosso */}
           <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
-            <a className="hover:text-white" href="#servizi">Servizi</a>
-            <a className="hover:text-white" href="#format">Format</a>
-            <a className="hover:text-white" href="#foto">Foto</a>
-            <a className="hover:text-white" href="#eventi">Eventi</a>
-            <a className="hover:text-white" href="#chi-siamo">Chi siamo</a>
-            <a className="hover:text-white" href="#contatti">Contatti</a>
-          </nav>
+  <button type="button" className="hover:text-white" onClick={() => goTo("servizi")}>Servizi</button>
+  <button type="button" className="hover:text-white" onClick={() => goTo("format")}>Format</button>
+  <button type="button" className="hover:text-white" onClick={() => goTo("foto")}>Foto</button>
+  <button type="button" className="hover:text-white" onClick={() => goTo("eventi")}>Eventi</button>
+  <button type="button" className="hover:text-white" onClick={() => goTo("chi-siamo")}>Chi siamo</button>
+  <button type="button" className="hover:text-white" onClick={() => goTo("contatti")}>Contatti</button>
+</nav>
 
-          {/* DESKTOP CTA (md+) — identico */}
-          <a
-            href="#contatti"
-            className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
-          >
-            Contatta
-          </a>
+
+          {/* DESKTOP CTA (md+) — scroll senza hash */}
+<button
+  type="button"
+  onClick={() => goTo("contatti")}
+  className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
+>
+  Contatta
+</button>
 
           {/* MOBILE HAMBURGER (solo < md) */}
           <button
@@ -543,39 +564,48 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
               >
                 <div className="px-3 py-3">
                   <div className="grid gap-1">
-                    {mobileLinks.map((l) => (
-                      <a
-                        key={l.href}
-                        href={l.href}
-                        onClick={() => setMobileNavOpen(false)}
-                        className={[
-                          "flex items-center justify-center text-center",
-                          "rounded-xl px-3 py-3",
-                          "text-[15px] font-medium text-zinc-200",
-                          "bg-white/0 hover:bg-white/5 active:bg-white/10",
-                          "transition",
-                        ].join(" ")}
-                      >
-                        <span>{l.label}</span>
-                      </a>
-                    ))}
+     {mobileLinks.map((l) => (
+  <button
+    key={l.id}
+    type="button"
+    onClick={() => {
+      setMobileNavOpen(false);
+      goTo(l.id);
+    }}
+
+    className={[
+      "flex items-center justify-center text-center",
+      "rounded-xl px-3 py-3",
+      "text-[15px] font-medium text-zinc-200",
+      "bg-white/0 hover:bg-white/5 active:bg-white/10",
+      "transition w-full",
+    ].join(" ")}
+  >
+    <span>{l.label}</span>
+  </button>
+))}
+
                   </div>
 
                   <div className="mt-3 h-px bg-white/10" />
 
-                  {/* CTA nel menu mobile */}
-                  <a
-                    href="#contatti"
-                    onClick={() => setMobileNavOpen(false)}
-                    className={[
-                      "mt-3 inline-flex w-full items-center justify-center",
-                      "rounded-xl bg-white px-4 py-3",
-                      "text-sm font-semibold text-black",
-                      "transition active:scale-[0.99]",
-                    ].join(" ")}
-                  >
-                    Contatta
-                  </a>
+                 {/* CTA nel menu mobile — scroll senza hash */}
+<button
+  type="button"
+  onClick={() => {
+    setMobileNavOpen(false);
+    goTo("contatti");
+  }}
+  className={[
+    "mt-3 inline-flex w-full items-center justify-center",
+    "rounded-xl bg-white px-4 py-3",
+    "text-sm font-semibold text-black",
+    "transition active:scale-[0.99]",
+  ].join(" ")}
+>
+  Contatta
+</button>
+
                 </div>
               </div>
             </div>
@@ -608,34 +638,36 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
               </p>
 
               <div className="mt-7 sm:mt-8 flex flex-wrap justify-center md:justify-start gap-3">
-                <a
-                  href="#format"
-                  className={[
-                    "group relative inline-flex items-center justify-center",
-                    "overflow-hidden rounded-2xl",
-                    "border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white",
-                    "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "hover:-translate-y-0.5 hover:border-white/20",
-                    "hover:shadow-[0_0_28px_rgba(59,130,246,0.85)]",
-                    "active:translate-y-[1px] active:scale-[0.985]",
-                    "focus:outline-none focus:ring-2 focus:ring-blue-400/50",
-                    "select-none",
-                  ].join(" ")}
-                >
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
-                  >
-                    <span className="absolute inset-0 rounded-2xl bg-blue-400/65 blur-xl" />
-                    <span className="absolute inset-0 rounded-2xl bg-cyan-400/55 blur-xl" />
-                  </span>
+                <button
+  type="button"
+  onClick={() => goTo("format")}
+  className={[
+    "group relative inline-flex items-center justify-center",
+    "overflow-hidden rounded-2xl",
+    "border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white",
+    "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+    "hover:-translate-y-0.5 hover:border-white/20",
+    "hover:shadow-[0_0_28px_rgba(59,130,246,0.85)]",
+    "active:translate-y-[1px] active:scale-[0.985]",
+    "focus:outline-none focus:ring-2 focus:ring-blue-400/50",
+    "select-none",
+  ].join(" ")}
+>
+  <span
+    aria-hidden
+    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
+  >
+    <span className="absolute inset-0 rounded-2xl bg-blue-400/65 blur-xl" />
+    <span className="absolute inset-0 rounded-2xl bg-cyan-400/55 blur-xl" />
+  </span>
 
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute -inset-x-10 -top-10 h-20 rotate-12 bg-white/10 blur-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                  />
-                  <span className="relative z-10">Scopri i format</span>
-                </a>
+  <span
+    aria-hidden
+    className="pointer-events-none absolute -inset-x-10 -top-10 h-20 rotate-12 bg-white/10 blur-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+  />
+  <span className="relative z-10">Scopri i format</span>
+</button>
+
               </div>
             </div>
 
