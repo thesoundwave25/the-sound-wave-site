@@ -22,6 +22,9 @@
 html {
   scroll-behavior: smooth;
 }
+section {
+  scroll-margin-top: 90px; /* Regola questo valore finché il titolo non è perfetto */
+}
 
 html.modal-open {
   scroll-behavior: auto;
