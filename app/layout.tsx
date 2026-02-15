@@ -10,14 +10,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    // 1. Impedisce al browser di ricordare la vecchia posizione dello scroll
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
-    // 2. Forza lo scroll in cima in modo istantaneo al caricamento
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, []);
+  // forza top “istantaneo” anche se html ha scroll-behavior: smooth
+  const html = document.documentElement;
+  const prev = html.style.scrollBehavior;
+  html.style.scrollBehavior = "auto";
+
+  const toTop = () => window.scrollTo(0, 0);
+  toTop();
+  requestAnimationFrame(toTop);
+  setTimeout(toTop, 50);
+
+  // ripristina scroll-behavior
+  setTimeout(() => {
+    html.style.scrollBehavior = prev;
+  }, 0);
+}, []);
+
 
   return (
     <html lang="it">
