@@ -19,12 +19,23 @@
   }
 }
 
+/* --- Gestione Scorrimento Sezioni --- */
 html {
   scroll-behavior: smooth;
 }
+
+/* MOBILE: La navbar è più sottile, usiamo un margine minore */
 section {
-  scroll-margin-top: 90px; /* Regola questo valore finché il titolo non è perfetto */
+  scroll-margin-top: 60px; 
 }
+
+/* DESKTOP (dai 1024px in su): La navbar è più alta o vogliamo più respiro */
+@media (min-width: 1024px) {
+  section {
+    scroll-margin-top: 110px; 
+  }
+}
+/* ------------------------------------ */
 
 html.modal-open {
   scroll-behavior: auto;
