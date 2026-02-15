@@ -616,7 +616,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       {/* 1) HERO */}
       <section
         id="hero"
-        className="pt-32 sm:pt-56 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-20"
+        className="pt-24 sm:pt-32 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-20"
       >
         <div className="tsw-fade-up relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-4 sm:p-10 backdrop-blur">
           <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-purple-500/20 blur-3xl" />
