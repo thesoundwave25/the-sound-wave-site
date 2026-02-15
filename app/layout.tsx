@@ -10,9 +10,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   useEffect(() => {
+  // 1) Disabilita ripristino scroll del browser
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
-  // forza top “istantaneo” anche se html ha scroll-behavior: smooth
+  // 2) Se l'URL contiene #qualcosa (es: /#contatti), al refresh il browser ti porta lì.
+  //    Quindi lo rimuoviamo.
+  if (window.location.hash) {
+    history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search
+    );
+  }
+
+  // 3) Forza top “istantaneo” anche se html ha scroll-behavior: smooth
   const html = document.documentElement;
   const prev = html.style.scrollBehavior;
   html.style.scrollBehavior = "auto";
@@ -27,6 +38,7 @@ export default function RootLayout({
     html.style.scrollBehavior = prev;
   }, 0);
 }, []);
+
 
 
   return (
