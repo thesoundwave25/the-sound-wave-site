@@ -432,8 +432,9 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 ];
 
 
-  return (
-    <main className="min-h-screen bg-black text-white">
+    return (
+  <>
+
       {/* NAVBAR (desktop invariata, mobile con hamburger) */}
       <header
   className={[
@@ -612,6 +613,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
           </div>
         )}
       </header>
+      <main className="min-h-screen bg-black text-white">
 
       {/* 1) HERO */}
       <section
@@ -1355,5 +1357,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         }
       `}</style>
     </main>
-  );
+</>
+);
+
 }
