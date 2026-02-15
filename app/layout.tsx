@@ -38,12 +38,11 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         {/* --- FINE SEZIONE ICONE --- */}
       </head>
-      <body>
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {children}
-        </div>
-        <Analytics />
-      </body>
+      <body className="min-h-screen overflow-x-clip">
+  {children}
+  <Analytics />
+</body>
+
     </html>
   );
 }
