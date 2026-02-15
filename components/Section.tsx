@@ -9,7 +9,7 @@ export default function Section({ id, title, subtitle, children }: Props) {
   return (
     <section
   id={id}
-  className="scroll-mt-[220px] sm:scroll-mt-[240px] md:scroll-mt-[260px] mx-auto w-full max-w-6xl px-6 py-16"
+  className="scroll-mt-[260px] sm:scroll-mt-[280px] md:scroll-mt-[300px] mx-auto w-full max-w-6xl px-6 py-16"
 >
 
       <header className="mb-8">
