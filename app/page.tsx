@@ -381,8 +381,42 @@ useEffect(() => {
   return (
     <main className="min-h-screen bg-black text-white">
       {/* NAVBAR (desktop invariata, mobile con hamburger) */}
-      <header className="fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 rounded-xl border border-white/10 bg-black/70 backdrop-blur">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+      <header
+  className={[
+    "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
+    "relative overflow-hidden rounded-xl",
+    "border border-white/10 bg-black/60 backdrop-blur",
+    "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
+  ].join(" ")}
+>
+    {/* === WAVE GLOW (palette onda) === */}
+  <div aria-hidden className="pointer-events-none absolute inset-0">
+    <div
+      className="absolute inset-0 opacity-40"
+      style={{
+        background:
+          "linear-gradient(90deg, rgba(0,210,255,0.35) 0%, rgba(120,70,255,0.30) 38%, rgba(255,60,200,0.26) 55%, rgba(255,140,40,0.28) 78%, rgba(255,210,0,0.24) 100%)",
+      }}
+    />
+
+    <div
+      className="absolute -left-16 -top-16 h-56 w-56 rounded-full blur-3xl"
+      style={{ background: "rgba(0,210,255,0.22)" }}
+    />
+    <div
+      className="absolute left-1/2 -top-20 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
+      style={{ background: "rgba(255,60,200,0.18)" }}
+    />
+    <div
+      className="absolute -right-20 -bottom-20 h-72 w-72 rounded-full blur-3xl"
+      style={{ background: "rgba(255,170,40,0.18)" }}
+    />
+
+    <div className="absolute inset-0 bg-black/25" />
+  </div>
+
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+
           {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
           <a href="#hero" className="flex items-center justify-center">
             <Image
