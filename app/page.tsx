@@ -378,18 +378,16 @@ useEffect(() => {
     { label: "Contatti", href: "#contatti" },
   ];
 
-  return (
-    <main className="min-h-screen bg-black text-white">
-      {/* NAVBAR (desktop invariata, mobile con hamburger) */}
-      <header
+ {/* NAVBAR (desktop invariata, mobile con hamburger) */}
+<header
   className={[
     "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
-    "relative overflow-hidden rounded-xl",
+    "relative overflow-hidden rounded-xl", // ✅ AGGIUNTO "relative" (fondamentale per i layer absolute)
     "border border-white/10 bg-black/60 backdrop-blur",
     "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
   ].join(" ")}
 >
-    {/* === WAVE GLOW (palette onda) === */}
+  {/* === WAVE GLOW (palette onda) === */}
   <div aria-hidden className="pointer-events-none absolute inset-0">
     <div
       className="absolute inset-0 opacity-40"
@@ -415,136 +413,133 @@ useEffect(() => {
     <div className="absolute inset-0 bg-black/25" />
   </div>
 
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+  <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-3 items-center px-4 py-1">
+    {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
+    <a href="#hero" className="flex items-center justify-center">
+      <Image
+        src="/brand/tsw-logo.svg"
+        alt="The Sound Wave"
+        width={400}
+        height={400}
+        className="h-16 sm:h-28 w-auto object-contain"
+        priority
+      />
+    </a>
 
-          {/* Logo: desktop identico, mobile identico (non lo tocchiamo) */}
-          <a href="#hero" className="flex items-center justify-center">
-            <Image
-              src="/brand/tsw-logo.svg"
-              alt="The Sound Wave"
-              width={400}
-              height={400}
-              className="h-16 sm:h-28 w-auto object-contain"
-              priority
-            />
-          </a>
+    {/* DESKTOP MENU (md+) — Partner rimosso */}
+    <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
+      <a className="hover:text-white" href="#servizi">Servizi</a>
+      <a className="hover:text-white" href="#format">Format</a>
+      <a className="hover:text-white" href="#foto">Foto</a>
+      <a className="hover:text-white" href="#eventi">Eventi</a>
+      <a className="hover:text-white" href="#chi-siamo">Chi siamo</a>
+      <a className="hover:text-white" href="#contatti">Contatti</a>
+    </nav>
 
-          {/* DESKTOP MENU (md+) — Partner rimosso */}
-          <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
-            <a className="hover:text-white" href="#servizi">Servizi</a>
-            <a className="hover:text-white" href="#format">Format</a>
-            <a className="hover:text-white" href="#foto">Foto</a>
-            <a className="hover:text-white" href="#eventi">Eventi</a>
-            <a className="hover:text-white" href="#chi-siamo">Chi siamo</a>
-            <a className="hover:text-white" href="#contatti">Contatti</a>
-          </nav>
+    {/* DESKTOP CTA (md+) — identico */}
+    <a
+      href="#contatti"
+      className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
+    >
+      Contatta
+    </a>
 
-          {/* DESKTOP CTA (md+) — identico */}
-          <a
-            href="#contatti"
-            className="hidden md:inline-flex justify-self-end w-fit whitespace-nowrap rounded-xl bg-white px-3 sm:px-4 py-2 text-sm font-semibold text-black"
-          >
-            Contatta
-          </a>
-
-          {/* MOBILE HAMBURGER (solo < md) */}
-          <button
-  type="button"
-  aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
-  aria-expanded={mobileNavOpen}
-  onClick={() => setMobileNavOpen((v) => !v)}
-  className={[
-    "md:hidden col-start-3 justify-self-end",
-    "h-11 w-11 rounded-xl",
-    "border border-white/15 bg-black/55 backdrop-blur",
-    "grid place-items-center text-white/90",
-    "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-    "hover:scale-[1.04] active:scale-[0.98]",
-  ].join(" ")}
->
-
-            {/* Icona hamburger / X */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              {mobileNavOpen ? (
-                <path
-                  d="M6 6L18 18M18 6L6 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              ) : (
-                <path
-                  d="M4 7H20M4 12H20M4 17H20"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* MOBILE DROPDOWN (Apple-like) */}
-        {mobileNavOpen && (
-          <div className="md:hidden">
-            {/* overlay */}
-            <button
-              aria-label="Chiudi menu"
-              onClick={() => setMobileNavOpen(false)}
-              className="fixed inset-0 z-40 bg-black/45"
-            />
-            {/* panel */}
-            <div className="relative z-50 px-3 pb-3">
-              <div
-                className={[
-                  "mt-2 overflow-hidden rounded-2xl",
-                  "border border-white/10 bg-black/80 backdrop-blur",
-                  "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
-                ].join(" ")}
-              >
-                <div className="px-3 py-3">
-                  <div className="grid gap-1">
-                    {mobileLinks.map((l) => (
-  <a
-  key={l.href}
-  href={l.href}
-  onClick={() => setMobileNavOpen(false)}
-  className={[
-    "flex items-center justify-center text-center",
-    "rounded-xl px-3 py-3",
-    "text-[15px] font-medium text-zinc-200",
-    "bg-white/0 hover:bg-white/5 active:bg-white/10",
-    "transition",
-  ].join(" ")}
->
-  <span>{l.label}</span>
-</a>
-
-))}
-
-                  </div>
-
-                  <div className="mt-3 h-px bg-white/10" />
-
-                  {/* CTA nel menu mobile */}
-                  <a
-                    href="#contatti"
-                    onClick={() => setMobileNavOpen(false)}
-                    className={[
-                      "mt-3 inline-flex w-full items-center justify-center",
-                      "rounded-xl bg-white px-4 py-3",
-                      "text-sm font-semibold text-black",
-                      "transition active:scale-[0.99]",
-                    ].join(" ")}
-                  >
-                    Contatta
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
+    {/* MOBILE HAMBURGER (solo < md) */}
+    <button
+      type="button"
+      aria-label={mobileNavOpen ? "Chiudi menu" : "Apri menu"}
+      aria-expanded={mobileNavOpen}
+      onClick={() => setMobileNavOpen((v) => !v)}
+      className={[
+        "md:hidden col-start-3 justify-self-end",
+        "h-11 w-11 rounded-xl",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "grid place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.04] active:scale-[0.98]",
+      ].join(" ")}
+    >
+      {/* Icona hamburger / X */}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        {mobileNavOpen ? (
+          <path
+            d="M6 6L18 18M18 6L6 18"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        ) : (
+          <path
+            d="M4 7H20M4 12H20M4 17H20"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
         )}
-      </header>
+      </svg>
+    </button>
+  </div>
+
+  {/* MOBILE DROPDOWN (Apple-like) */}
+  {mobileNavOpen && (
+    <div className="md:hidden">
+      {/* overlay */}
+      <button
+        aria-label="Chiudi menu"
+        onClick={() => setMobileNavOpen(false)}
+        className="fixed inset-0 z-40 bg-black/45"
+      />
+      {/* panel */}
+      <div className="relative z-50 px-3 pb-3">
+        <div
+          className={[
+            "mt-2 overflow-hidden rounded-2xl",
+            "border border-white/10 bg-black/80 backdrop-blur",
+            "shadow-[0_0_40px_rgba(0,0,0,0.55)]",
+          ].join(" ")}
+        >
+          <div className="px-3 py-3">
+            <div className="grid gap-1">
+              {mobileLinks.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileNavOpen(false)}
+                  className={[
+                    "flex items-center justify-center text-center",
+                    "rounded-xl px-3 py-3",
+                    "text-[15px] font-medium text-zinc-200",
+                    "bg-white/0 hover:bg-white/5 active:bg-white/10",
+                    "transition",
+                  ].join(" ")}
+                >
+                  <span>{l.label}</span>
+                </a>
+              ))}
+            </div>
+
+            <div className="mt-3 h-px bg-white/10" />
+
+            {/* CTA nel menu mobile */}
+            <a
+              href="#contatti"
+              onClick={() => setMobileNavOpen(false)}
+              className={[
+                "mt-3 inline-flex w-full items-center justify-center",
+                "rounded-xl bg-white px-4 py-3",
+                "text-sm font-semibold text-black",
+                "transition active:scale-[0.99]",
+              ].join(" ")}
+            >
+              Contatta
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</header>
+
 
       {/* 1) HERO */}
      <section
