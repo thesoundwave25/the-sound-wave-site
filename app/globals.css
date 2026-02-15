@@ -127,7 +127,13 @@ img {
   backface-visibility: hidden;
 }
 html, body {
+  height: 100%;
   background: var(--background) !important;
   overflow-x: clip;
 }
+
+body {
+  overflow-y: auto; /* ✅ lo scroll deve stare sul body (navbar fixed resta sempre visibile) */
+}
+
 
