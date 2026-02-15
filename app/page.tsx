@@ -422,13 +422,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
     <main className="min-h-screen bg-black text-white">
       {/* NAVBAR (desktop invariata, mobile con hamburger) */}
       <header
-        className={[
-          "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
-          "relative overflow-hidden rounded-xl", // ✅ UNICA MODIFICA: aggiunto "relative"
-          "border border-white/10 bg-black/60 backdrop-blur",
-          "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
-        ].join(" ")}
-      >
+  className={[
+    "fixed top-2 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50",
+    "overflow-hidden rounded-xl", // ✅ tolto "relative"
+    "border border-white/10 bg-black/60 backdrop-blur",
+    "shadow-[0_10px_40px_rgba(0,0,0,0.45)]",
+  ].join(" ")}
+>
+
         {/* === WAVE GLOW (palette onda) === */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div
