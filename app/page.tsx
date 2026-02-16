@@ -333,7 +333,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         venue: "'Loft Cafè - Rovato'",
         imageSrc: "/locandine/20-febbraio-loft.webp",
         cta: "MAGGIORI DETTAGLI",
-        description: "THE SOUND WAVE TORNA AL LOFT! EMOTION Official Party 90/2000 + ITALIAN REMIX PARTY START H22.00",
+        description: 'THE SOUND WAVE TORNA AL LOFT!/nEMOTION Official Party 90/2000 + ITALIAN REMIX PARTY/nSTART H22.00'
       },
       {
         id: "event-2",

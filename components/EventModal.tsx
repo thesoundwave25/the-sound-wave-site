@@ -725,9 +725,10 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                             {ev.title}
                           </h3>
 
-                          <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed">
-                            {ev.description}
-                          </p>
+                          <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed whitespace-pre-line">
+  {ev.description}
+</p>
+
                         </div>
                       </div>
                     );
@@ -966,7 +967,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                     {event.title}
                   </h3>
 
-                  <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed">
+                  <p className="mt-4 max-w-3xl text-zinc-300 leading-relaxed whitespace-pre-line">
                     {event.description}
                   </p>
                 </div>
