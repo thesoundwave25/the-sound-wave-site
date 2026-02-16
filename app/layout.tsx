@@ -1,5 +1,6 @@
 "use client";
 
+import PrivacyNotice from "../components/PrivacyNotice";
 import { useEffect } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
