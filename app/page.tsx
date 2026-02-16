@@ -1226,8 +1226,6 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
           <a
             href="mailto:thesoundwave25@gmail.com"
-            target="_blank"
-  rel="noopener noreferrer"
             className={[
               "group relative flex flex-col items-center justify-center text-center gap-3",
               "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
