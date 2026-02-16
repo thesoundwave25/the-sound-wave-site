@@ -1226,6 +1226,8 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
           <a
             href="mailto:thesoundwave25@gmail.com"
+            target="_blank"
+  rel="noopener noreferrer"
             className={[
               "group relative flex flex-col items-center justify-center text-center gap-3",
               "rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6",
@@ -1338,8 +1340,20 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       </Section>
 
       <footer className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-12 text-zinc-500">
-        © {new Date().getFullYear()} The Sound Wave
-      </footer>
+  <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+    <div>© {new Date().getFullYear()} The Sound Wave</div>
+
+    <div className="flex items-center gap-4 text-sm">
+      <a className="hover:text-white transition" href="/privacy">
+        Privacy
+      </a>
+      <a className="hover:text-white transition" href="/cookie">
+        Cookie
+      </a>
+    </div>
+  </div>
+</footer>
+
 
       <style jsx global>{`
         .tsw-hide-scrollbar {
