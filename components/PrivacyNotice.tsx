@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 const STORAGE_KEY = "tsw_privacy_notice_v1";
 
 export default function PrivacyNotice() {
-  const [open, setOpen] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Mostra solo se non è già stato chiuso in passato
+    setMounted(true);
+
     try {
       const seen = localStorage.getItem(STORAGE_KEY);
       if (!seen) setOpen(true);
@@ -19,22 +21,20 @@ export default function PrivacyNotice() {
   }, []);
 
   const close = () => {
-    setOpen(false);
     try {
       localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // ignora errori
-    }
+    } catch {}
+    setOpen(false);
   };
 
-  if (!open) return null;
+  // 🔒 Importantissimo per evitare hydration mismatch
+  if (!mounted || !open) return null;
 
   return (
     <div
       className={[
-        "fixed inset-x-0 bottom-0 z-[9999]",
+        "fixed inset-x-0 bottom-0 z-[2147483647]",
         "p-3 sm:p-4",
-        // safe area per iPhone (notch/home bar)
         "pb-[calc(env(safe-area-inset-bottom,0px)+12px)]",
       ].join(" ")}
       role="region"
@@ -48,7 +48,6 @@ export default function PrivacyNotice() {
             "shadow-[0_18px_70px_rgba(0,0,0,0.55)]",
           ].join(" ")}
         >
-          {/* glow soft */}
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full blur-3xl bg-white/10" />
             <div className="absolute -right-16 -bottom-16 h-56 w-56 rounded-full blur-3xl bg-white/5" />
