@@ -1154,6 +1154,24 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                 musicale e visiva, ogni dettaglio viene curato per creare momenti
                 memorabili e coinvolgenti.
               </p>
+{/* VIDEO (YouTube) */}
+<div className="mt-6 w-full max-w-2xl mx-auto">
+  <div className="mb-3 text-lg sm:text-xl font-semibold text-white">
+    Intervista radio
+  </div>
+
+  <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video">
+    <iframe
+      className="absolute inset-0 h-full w-full"
+      src="https://www.youtube-nocookie.com/embed/D1sUavNV3ts?rel=0"
+      title="Intervista radio - The Sound Wave"
+      frameBorder="0"
+      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+    />
+  </div>
+</div>
+
 
               <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
                 <div className="group relative">
