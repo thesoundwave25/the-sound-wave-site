@@ -328,12 +328,12 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
     () => [
       {
         id: "event-1",
-        title: "ITALIAN REMIX",
+        title: "EMOTION 90/2000 + ITALIAN REMIX PARTY",
         date: "20 FEBBRAIO 2026",
         venue: "'Loft Cafè - Rovato'",
-        imageSrc: "/brand/italian-remix-logo.svg",
+        imageSrc: "/locandine/20-febbraio-loft.webp",
         cta: "MAGGIORI DETTAGLI",
-        description: "work in progress",
+        description: "START ORE 22.00",
       },
       {
         id: "event-2",
