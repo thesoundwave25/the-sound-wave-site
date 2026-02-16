@@ -136,4 +136,16 @@ body {
   overflow-y: auto; /* ✅ lo scroll deve stare sul body (navbar fixed resta sempre visibile) */
 }
 
+/* ✅ Cursor “manina” su elementi cliccabili */
+a,
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/* ✅ Se disabilitato, non deve sembrare cliccabile */
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
 
