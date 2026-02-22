@@ -327,15 +327,6 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   const events = useMemo<EventItem[]>(
     () => [
       {
-        id: "event-1",
-        title: "EMOTION 90/2000 + ITALIAN REMIX PARTY",
-        date: "20 FEBBRAIO 2026",
-        venue: "'Loft Cafè - Rovato'",
-        imageSrc: "/locandine/20-febbraio-loft.webp",
-        cta: "MAGGIORI DETTAGLI",
-        description: "THE SOUND WAVE TORNA AL LOFT!\nEMOTION Official Party 90/2000 + ITALIAN REMIX PARTY\n START H22.00",
-      },
-      {
         id: "event-2",
         title: "ITALIAN REMIX PARTY",
         date: "24 Aprile  2026",
