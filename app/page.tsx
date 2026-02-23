@@ -103,6 +103,11 @@ export default function Home() {
   // --- FOTO GALLERY (cards + popup) ---
   const photos = useMemo<PhotoItem[]>(
     () => [
+      { id: "p1", src: "/gallery/7B3A5169.webp", alt: "Foto evento 01" },
+      { id: "p1", src: "/gallery/7B3A5145.webp", alt: "Foto evento 01" },
+      { id: "p1", src: "/gallery/7B3A5170.webp", alt: "Foto evento 01" },
+      { id: "p1", src: "/gallery/7B3A5100.webp", alt: "Foto evento 01" },
+      { id: "p1", src: "/gallery/7B3A5240.webp", alt: "Foto evento 01" },
       { id: "p1", src: "/gallery/1.webp", alt: "Foto evento 01" },
       { id: "p2", src: "/gallery/2.webp", alt: "Foto evento 02" },
       { id: "p3", src: "/gallery/3.webp", alt: "Foto evento 03" },
@@ -128,19 +133,29 @@ export default function Home() {
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
       {
-        date: "14 Giugno 2024",
-        venue: "Festa della luce - Calcinate",
-        url: "https://photos.app.goo.gl/vrJPMRMgc7SnxxiM7",
+        date: "20 Febbraio 2026",
+        venue: "Emotion 90-2000 Vs Italian remix - Loft Cafè - Rovato",
+        url: "https://photos.app.goo.gl/ywP5nQV2wwbZoZzE9",
       },
       {
-        date: "22 Settembre 2024",
+        date: "31 Gennaio 2026",
+        venue: "Emotion 90-2000 - Loft Cafè - Rovato",
+        url: "https://photos.app.goo.gl/jMowu6Phn36FLUs88",
+      },
+       {
+        date: "24 Gennaio 2026",
+        venue: "Emotion 90-2000 - Movida beer and food - Erbusco",
+        url: "https://photos.app.goo.gl/W25M2LLcdCdq44W3A",
+      },
+      {
+        date: "31 Dicembre 2025",
+        venue: "Emotion 90-2000 - Posto fisso - Palosco",
+        url: "https://photos.app.goo.gl/MC2q1sM3Zg5XH7Jd9",
+      },
+     {
+        date: "10 Ottobre 2025",
         venue: "Festa della luce - Bolgare",
-        url: "https://photos.app.goo.gl/bKxFtbZRkCetHVo29",
-      },
-      {
-        date: "1 - 2 Giugno 2025",
-        venue: "Festa della luce - Calcinate",
-        url: "https://photos.app.goo.gl/XHy7HsyGYfv3zSUZA",
+        url: "https://photos.app.goo.gl/3hhrWJmBv4vULgX67",
       },
       {
         date: "12 Luglio 2025 ",
@@ -148,25 +163,25 @@ export default function Home() {
         url: "https://photos.app.goo.gl/JWoEFtcphZThL83y5",
       },
       {
-        date: "10 Ottobre 2025",
+        date: "1 - 2 Giugno 2025",
+        venue: "Festa della luce - Calcinate",
+        url: "https://photos.app.goo.gl/XHy7HsyGYfv3zSUZA",
+      },
+       
+      {
+        date: "22 Settembre 2024",
         venue: "Festa della luce - Bolgare",
-        url: "https://photos.app.goo.gl/3hhrWJmBv4vULgX67",
+        url: "https://photos.app.goo.gl/bKxFtbZRkCetHVo29",
       },
       {
-        date: "31 Dicembre 2025",
-        venue: "Emotion 90-2000 - Posto fisso - Palosco",
-        url: "https://photos.app.goo.gl/MC2q1sM3Zg5XH7Jd9",
+        date: "14 Giugno 2024",
+        venue: "Festa della luce - Calcinate",
+        url: "https://photos.app.goo.gl/vrJPMRMgc7SnxxiM7",
       },
-      {
-        date: "24 Gennaio 2026",
-        venue: "Emotion 90-2000 - Movida beer and food - Erbusco",
-        url: "https://photos.app.goo.gl/W25M2LLcdCdq44W3A",
-      },
-      {
-        date: "31 Gennaio 2026",
-        venue: "Emotion 90-2000 - Loft Cafè - Rovato",
-        url: "https://photos.app.goo.gl/jMowu6Phn36FLUs88",
-      },
+     
+      
+      
+
     ],
     []
   );
