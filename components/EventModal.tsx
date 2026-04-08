@@ -416,6 +416,31 @@ export default function EventModal({ open, onClose, event, events }: Props) {
       } catch {}
     }
   };
+  const goPrevEvent = () => {
+  if (!event) return;
+  if (!events?.length) return;
+  if (safeIndex < 0) return;
+  if (events.length < 2) return;
+
+  const prevIndex = (safeIndex - 1 + events.length) % events.length;
+
+  window.dispatchEvent(
+    new CustomEvent("tsw:event:navigate", { detail: { index: prevIndex } })
+  );
+};
+
+const goNextEvent = () => {
+  if (!event) return;
+  if (!events?.length) return;
+  if (safeIndex < 0) return;
+  if (events.length < 2) return;
+
+  const nextIndex = (safeIndex + 1) % events.length;
+
+  window.dispatchEvent(
+    new CustomEvent("tsw:event:navigate", { detail: { index: nextIndex } })
+  );
+};
 
   // ✅ return null SOLO dopo gli hooks
   if (!open || !event) return null;
@@ -535,7 +560,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                         {/* Close */}
                         <button
                           onClick={requestClose}
-                          className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+                          className="absolute right-4 top-4 z-40 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
                         >
                           Chiudi ✕
                         </button>
@@ -757,15 +782,55 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                 {/* ✅✅✅ FINE DOTS */}
               </div>
             ) : (
-              // ✅ DESKTOP (o mobile con 1 evento): contenuto identico al tuo
-              <div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
-                {/* Close */}
-                <button
-                  onClick={requestClose}
-                  className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
-                >
-                  Chiudi ✕
-                </button>
+             // ✅ DESKTOP (o mobile con 1 evento): contenuto identico al tuo
+<div className="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/85 shadow-2xl">
+  {/* Freccia sinistra desktop */}
+  {hasMany && !isMobileSoft() && (
+    <button
+      type="button"
+      aria-label="Evento precedente"
+      onClick={goPrevEvent}
+      className={[
+        "absolute left-4 top-1/2 -translate-y-1/2 z-30",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "grid place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06] hover:bg-black/70",
+        "active:scale-[0.98]",
+      ].join(" ")}
+    >
+      ‹
+    </button>
+  )}
+
+  {/* Freccia destra desktop */}
+  {hasMany && !isMobileSoft() && (
+    <button
+      type="button"
+      aria-label="Evento successivo"
+      onClick={goNextEvent}
+      className={[
+        "absolute right-4 top-1/2 -translate-y-1/2 z-30",
+        "h-11 w-11 rounded-full",
+        "border border-white/15 bg-black/55 backdrop-blur",
+        "grid place-items-center text-white/90",
+        "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "hover:scale-[1.06] hover:bg-black/70",
+        "active:scale-[0.98]",
+      ].join(" ")}
+    >
+      ›
+    </button>
+  )}
+
+  {/* Close */}
+  <button
+    onClick={requestClose}
+    className="absolute right-4 top-4 z-30 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-100 hover:bg-white/10"
+  >
+    Chiudi ✕
+  </button>
 
                 {/* Media */}
                 <div
@@ -931,31 +996,32 @@ export default function EventModal({ open, onClose, event, events }: Props) {
                   )}
                 </div>
 
-                {/* ✅ Dots indicator (desktop + mobile) — invariato */}
-                {hasMany && (
-                  <div className="flex items-center justify-center gap-2 py-3">
-                    {events.map((_, i) => {
-                      const active = i === safeIndex;
-                      return (
-                        <button
-                          key={events[i]?.id ?? i}
-                          type="button"
-                          aria-label={`Vai a evento ${i + 1}`}
-                          onClick={() =>
-                            window.dispatchEvent(
-                              new CustomEvent("tsw:event:navigate", { detail: { index: i } })
-                            )
-                          }
-                          className={[
-                            "h-2.5 w-2.5 rounded-full",
-                            "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                            active ? "bg-white" : "bg-white/30 hover:bg-white/45",
-                          ].join(" ")}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
+                {/* ✅ Barra eventi desktop: trattini stile page + attivo */}
+{hasMany && (
+  <div className="flex items-center justify-center gap-2 py-4">
+    {events.map((_, i) => {
+      const active = i === safeIndex;
+      return (
+        <button
+          key={events[i]?.id ?? i}
+          type="button"
+          aria-label={`Vai a evento ${i + 1}`}
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("tsw:event:navigate", { detail: { index: i } })
+            )
+          }
+          className={[
+            "h-2.5 rounded-full transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+            active
+              ? "w-10 bg-white shadow-[0_0_18px_rgba(255,255,255,0.55)]"
+              : "w-5 bg-white/20 hover:bg-white/35",
+          ].join(" ")}
+        />
+      );
+    })}
+  </div>
+)}
 
                 {/* Text */}
                 <div className="p-6 sm:p-8">

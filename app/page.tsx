@@ -104,28 +104,28 @@ export default function Home() {
   const photos = useMemo<PhotoItem[]>(
     () => [
       { id: "p1", src: "/gallery/7B3A5169.webp", alt: "Foto evento 01" },
-      { id: "p1", src: "/gallery/7B3A5145.webp", alt: "Foto evento 01" },
-      { id: "p1", src: "/gallery/7B3A5170.webp", alt: "Foto evento 01" },
-      { id: "p1", src: "/gallery/7B3A5100.webp", alt: "Foto evento 01" },
-      { id: "p1", src: "/gallery/7B3A5240.webp", alt: "Foto evento 01" },
-      { id: "p1", src: "/gallery/1.webp", alt: "Foto evento 01" },
-      { id: "p2", src: "/gallery/2.webp", alt: "Foto evento 02" },
-      { id: "p3", src: "/gallery/3.webp", alt: "Foto evento 03" },
-      { id: "p4", src: "/gallery/4.webp", alt: "Foto evento 04" },
-      { id: "p5", src: "/gallery/5.webp", alt: "Foto evento 05" },
-      { id: "p6", src: "/gallery/6.webp", alt: "Foto evento 06" },
-      { id: "p7", src: "/gallery/7.webp", alt: "Foto evento 07" },
-      { id: "p9", src: "/gallery/9.webp", alt: "Foto evento 09" },
-      { id: "p10", src: "/gallery/10.webp", alt: "Foto evento 10" },
-      { id: "p11", src: "/gallery/11.webp", alt: "Foto evento 11" },
-      { id: "p12", src: "/gallery/12.webp", alt: "Foto evento 12" },
-      { id: "p13", src: "/gallery/13.webp", alt: "Foto evento 13" },
-      { id: "p14", src: "/gallery/14.webp", alt: "Foto evento 14" },
-      { id: "p15", src: "/gallery/15.webp", alt: "Foto evento 15" },
-      { id: "p16", src: "/gallery/16.webp", alt: "Foto evento 16" },
-      { id: "p17", src: "/gallery/17.webp", alt: "Foto evento 17" },
-      { id: "p18", src: "/gallery/18.webp", alt: "Foto evento 18" },
-      { id: "p19", src: "/gallery/19.webp", alt: "Foto evento 19" },
+      { id: "p2", src: "/gallery/7B3A5145.webp", alt: "Foto evento 01" },
+      { id: "p3", src: "/gallery/7B3A5170.webp", alt: "Foto evento 01" },
+      { id: "p4", src: "/gallery/7B3A5100.webp", alt: "Foto evento 01" },
+      { id: "p5", src: "/gallery/7B3A5240.webp", alt: "Foto evento 01" },
+      { id: "p6", src: "/gallery/1.webp", alt: "Foto evento 01" },
+      { id: "p7", src: "/gallery/2.webp", alt: "Foto evento 02" },
+      { id: "p8", src: "/gallery/3.webp", alt: "Foto evento 03" },
+      { id: "p9", src: "/gallery/4.webp", alt: "Foto evento 04" },
+      { id: "p10", src: "/gallery/5.webp", alt: "Foto evento 05" },
+      { id: "p11", src: "/gallery/6.webp", alt: "Foto evento 06" },
+      { id: "p12", src: "/gallery/7.webp", alt: "Foto evento 07" },
+      { id: "p13", src: "/gallery/9.webp", alt: "Foto evento 09" },
+      { id: "p14", src: "/gallery/10.webp", alt: "Foto evento 10" },
+      { id: "p15", src: "/gallery/11.webp", alt: "Foto evento 11" },
+      { id: "p16", src: "/gallery/12.webp", alt: "Foto evento 12" },
+      { id: "p17", src: "/gallery/13.webp", alt: "Foto evento 13" },
+      { id: "p18", src: "/gallery/14.webp", alt: "Foto evento 14" },
+      { id: "p19", src: "/gallery/15.webp", alt: "Foto evento 15" },
+      { id: "p20", src: "/gallery/16.webp", alt: "Foto evento 16" },
+      { id: "p21", src: "/gallery/17.webp", alt: "Foto evento 17" },
+      { id: "p22", src: "/gallery/18.webp", alt: "Foto evento 18" },
+      { id: "p23", src: "/gallery/19.webp", alt: "Foto evento 19" },
     ],
     []
   );
@@ -368,6 +368,15 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         cta: "WORK IN PROGRESS",
         description: "STAY TUNED",
       },
+        {
+        id: "event-4",
+        title: "EMOTION 90/2000 - FESTIVAL DELLA DANCE",
+        date: "22 MAGGIO 2026",
+        venue: "Cividate al piano",
+        imageSrc: "/locandine/22_MAGGIO_2.webp",
+        cta: "Maggiori dettagli",
+        description: "Cena in compagnia dei duo per caso, gonfiabili per bambini, cucina aperta ore 19:00, dance party 90/2000",
+      },
     ],
     []
   );
@@ -394,17 +403,21 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   }, [events]);
 
   const scrollEvents = (dir: -1 | 1) => {
-    const el = eventTrackRef.current;
-    if (!el) return;
+  const el = eventTrackRef.current;
+  if (!el) return;
 
-    const firstCard = el.querySelector<HTMLElement>("[data-event-card='1']");
-    const cardW = firstCard ? firstCard.offsetWidth : 360;
-    const gap = 16;
-    const amount = (cardW + gap) * 2 * dir;
+  const firstCard = el.querySelector<HTMLElement>("[data-event-card='1']");
+  if (!firstCard) return;
 
-    el.scrollTo({ left: el.scrollLeft + amount, behavior: "smooth" });
-  };
+  const styles = window.getComputedStyle(el);
+  const gap = parseFloat(styles.columnGap || styles.gap || "0");
+  const amount = (firstCard.offsetWidth + gap) * dir;
 
+  el.scrollBy({
+    left: amount,
+    behavior: "smooth",
+  });
+};
   // ✅ glow card format
   const formatGlow = (id: string) => {
     if (id === "emotion") {
@@ -1005,22 +1018,21 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
           </button>
 
           <div
-            ref={eventTrackRef}
-            style={{ overflowX: "auto", overflowY: "visible" }}
-            className={[
-              "tsw-hide-scrollbar tsw-xtrack",
-              "flex gap-4",
-              "scroll-smooth",
-              "px-10",
-              "py-10",
-              "snap-x snap-mandatory",
-            ].join(" ")}
-          >
+  ref={eventTrackRef}
+ className={[
+  "tsw-hide-scrollbar tsw-xtrack",
+  "flex gap-6 md:gap-16 overflow-x-auto overflow-y-visible",
+  "scroll-smooth",
+  "px-4 sm:px-10",
+  "py-10",
+  "snap-x snap-mandatory",
+].join(" ")}
+>
             {events.map((ev, idx) => (
-              <button
-                key={ev.id}
-                data-event-card={idx === 0 ? "1" : undefined}
-                onClick={() => setActiveEvent(ev)}
+             <button
+  key={ev.id}
+  data-event-card={idx === 0 ? "1" : undefined}
+  onClick={() => setActiveEvent(ev)}
                 className={[
                   "snap-start shrink-0 text-left",
                   "group cursor-pointer relative rounded-2xl bg-black overflow-visible",
@@ -1093,7 +1105,15 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
             ))}
           </div>
         </div>
-
+<div className="mt-6 mb-2 flex items-center justify-center gap-2">
+  {events.map((_, idx) => (
+    <span
+      key={`event-indicator-${idx}`}
+      aria-hidden="true"
+      className="h-2.5 w-5 rounded-full bg-white/20"
+    />
+  ))}
+</div>
         <EventModal
           open={!!activeEvent}
           onClose={() => setActiveEvent(null)}
