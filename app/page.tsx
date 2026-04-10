@@ -341,8 +341,18 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   // ====== MODIFICA EVENTI ======
   const events = useMemo<EventItem[]>(
     () => [
-      {
+     {
         id: "event-1",
+        title: "DJH IN TOUR",
+        date: "19 Aprile 2026",
+        venue: "Rovato - Loft Cafè",
+        imageSrc: "/locandine/19_aprile.webp",
+        cta: "Maggiori dettagli",
+        description: "Non sarà il solito aperitivo.Non sarà il classico dj set. Sarà la prima uscita ufficiale dei ragazzi del progetto DJH",
+      },
+     
+      {
+        id: "event-2",
         title: "ITALIAN REMIX PARTY",
         date: "24 Aprile  2026",
         venue: "Quintano",
@@ -351,7 +361,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         description: "Festa di San Giuseppe, ci sarà da mangiare con un ottima cucina, area bimbi, e tanto divertimento con The Sound Wave",
       },
       {
-        id: "event-2",
+        id: "event-3",
         title: "EMOTION 90-2000",
         date: "1 MAGGIO 2026",
         venue: "Quintano",
@@ -360,7 +370,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         description: "Festa di San Giuseppe, ci sarà da mangiare con un ottima cucina, area bimbi, e tanto divertimento con The Sound Wa",
       },
       {
-        id: "event-3",
+        id: "event-4",
         title: "???????????",
         date: "2 MAGGIO 2026",
         venue: "Rovato",
@@ -369,7 +379,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         description: "STAY TUNED",
       },
         {
-        id: "event-4",
+        id: "event-5",
         title: "EMOTION 90/2000 - FESTIVAL DELLA DANCE",
         date: "22 MAGGIO 2026",
         venue: "Cividate al piano",
