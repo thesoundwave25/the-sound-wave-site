@@ -320,7 +320,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
     {
       id: "all-dance-experience",
       title: "All Dance Experience",
-      logoSrc: "/brand/all-dance-experience.svg",
+      logoSrc: "/brand/all-dance-svg.svg",
       tracks: [
         {
           title: "All Dance Experience",
@@ -807,7 +807,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
             { id: "emotion", title: "Emotion 90/2000", logo: "/brand/emotion.svg", logoClass: "h-20" },
             { id: "italian-remix-party", title: "Italian Remix Party", logo: "/brand/italian-remix-logo.svg", logoClass: "h-28" },
             { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.svg", logoClass: "h-36" },
-             { id: "all-dance-experience", title: "All Dance Experience", logo: "/brand/all-dance-experience.svg", logoClass: "h-28" },
+             { id: "all-dance-experience", title: "All Dance Experience", logo: "/brand/all-dance-svg.svg", logoClass: "h-28" },
           ].map((f) => {
             const g = formatGlow(f.id);
             return (
