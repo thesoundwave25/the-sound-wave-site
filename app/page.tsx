@@ -294,32 +294,43 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
   // --- DATI FORMAT (per popup) ---
   const formats = useMemo<FormatItem[]>(
-    () => [
-      {
-        id: "emotion",
-        title: "Emotion 90/2000",
-        logoSrc: "/brand/EMOTION_2.png",
-        tracks: [
-          { title: "Emotion 90/2000", src: "/audio/emotion-90-2000.mp3" },
-        ],
-      },
-      {
-        id: "italian-remix-party",
-        title: "Italian Remix Party",
-        logoSrc: "/brand/italian-remix-logo.svg",
-        tracks: [
-          { title: "Italian Remix 1", src: "/audio/remix-italian-audio.mp3" },
-        ],
-      },
-      {
-        id: "the-ritual",
-        title: "The Ritual",
-        logoSrc: "/brand/the-ritual-logo.svg",
-        tracks: [{ title: "The Ritual", src: "/audio/audio-the-ritual.mp3" }],
-      },
-    ],
-    []
-  );
+  () => [
+    {
+      id: "emotion",
+      title: "Emotion 90/2000",
+      logoSrc: "/brand/emotion.svg",
+      tracks: [
+        { title: "Emotion 90/2000", src: "/audio/emotion-90-2000.mp3" },
+      ],
+    },
+    {
+      id: "italian-remix-party",
+      title: "Italian Remix Party",
+      logoSrc: "/brand/italian-remix-logo.svg",
+      tracks: [
+        { title: "Italian Remix 1", src: "/audio/remix-italian-audio.mp3" },
+      ],
+    },
+    {
+      id: "the-ritual",
+      title: "The Ritual",
+      logoSrc: "/brand/the-ritual-logo.svg",
+      tracks: [{ title: "The Ritual", src: "/audio/audio-the-ritual.mp3" }],
+    },
+    {
+      id: "all-dance-experience",
+      title: "All Dance Experience",
+      logoSrc: "/brand/all-dance-experience.svg",
+      tracks: [
+        {
+          title: "All Dance Experience",
+          src: "/audio/all-dance-experience.mp3",
+        },
+      ],
+    },
+  ],
+  []
+);
 
   const [activeFormat, setActiveFormat] = useState<FormatItem | null>(null);
 
@@ -430,26 +441,36 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 };
   // ✅ glow card format
   const formatGlow = (id: string) => {
-    if (id === "emotion") {
-      return {
-        glowL: "rgba(255, 0, 0, 0.85)",
-        glowC: "rgba(255, 0, 0, 0.85)",
-        glowR: "rgba(255, 0, 0, 0.85)",
-      };
-    }
-    if (id === "italian-remix-party") {
-      return {
-        glowL: "rgba(0,166,80,0.65)",
-        glowC: "rgba(255,255,255,0.70)",
-        glowR: "rgba(224,0,42,0.65)",
-      };
-    }
+  if (id === "emotion") {
     return {
-      glowL: "rgba(124,58,237,0.60)",
-      glowC: "rgba(245,158,11,0.70)",
-      glowR: "rgba(249,115,22,0.60)",
+      glowL: "rgba(255, 0, 0, 0.85)",
+      glowC: "rgba(255, 0, 0, 0.85)",
+      glowR: "rgba(255, 0, 0, 0.85)",
     };
+  }
+
+  if (id === "italian-remix-party") {
+    return {
+      glowL: "rgba(0,166,80,0.65)",
+      glowC: "rgba(255,255,255,0.70)",
+      glowR: "rgba(224,0,42,0.65)",
+    };
+  }
+
+  if (id === "all-dance-experience") {
+    return {
+      glowL: "rgba(76, 201, 240, 0.72)",
+      glowC: "rgba(255, 45, 252, 0.78)",
+      glowR: "rgba(255, 140, 0, 0.72)",
+    };
+  }
+
+  return {
+    glowL: "rgba(124,58,237,0.60)",
+    glowC: "rgba(245,158,11,0.70)",
+    glowR: "rgba(249,115,22,0.60)",
   };
+};
 
   const mobileLinks = [
   { label: "Servizi", id: "servizi" },
@@ -781,11 +802,12 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 
       {/* 3) FORMAT */}
       <Section id="format" title="Format">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           {[
-            { id: "emotion", title: "Emotion 90/2000", logo: "/brand/EMOTION_2.png", logoClass: "h-20" },
+            { id: "emotion", title: "Emotion 90/2000", logo: "/brand/emotion.svg", logoClass: "h-20" },
             { id: "italian-remix-party", title: "Italian Remix Party", logo: "/brand/italian-remix-logo.svg", logoClass: "h-28" },
             { id: "the-ritual", title: "The Ritual", logo: "/brand/the-ritual-logo.svg", logoClass: "h-36" },
+             { id: "all-dance-experience", title: "All Dance Experience", logo: "/brand/all-dance-experience.svg", logoClass: "h-28" },
           ].map((f) => {
             const g = formatGlow(f.id);
             return (
@@ -803,14 +825,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
                   } as React.CSSProperties
                 }
                 className={[
-                  "group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-black p-6",
-                  "flex flex-col items-center text-center",
-                  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  "hover:-translate-y-1 hover:border-white/20",
-                  "hover:shadow-[0_0_26px_var(--glowC),0_0_34px_var(--glowL),0_0_34px_var(--glowR)]",
-                  "active:translate-y-[1px] active:scale-[0.985]",
-                  "select-none",
-                ].join(" ")}
+  "group w-full cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-black p-6",
+  "flex min-h-[280px] flex-col items-center text-center",
+  "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+  "hover:-translate-y-1 hover:border-white/20",
+  "hover:shadow-[0_0_26px_var(--glowC),0_0_34px_var(--glowL),0_0_34px_var(--glowR)]",
+  "active:translate-y-[1px] active:scale-[0.985]",
+  "select-none",
+].join(" ")}
               >
                 <div
                   aria-hidden
@@ -851,10 +873,12 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         </div>
 
         <FormatModal
-          open={!!activeFormat}
-          onClose={() => setActiveFormat(null)}
-          format={activeFormat}
-        />
+  open={!!activeFormat}
+  onClose={() => setActiveFormat(null)}
+  format={activeFormat}
+  formats={formats}
+  onNavigate={(next) => setActiveFormat(next)}
+/>
       </Section>
 
       {/* 4) FOTO */}
