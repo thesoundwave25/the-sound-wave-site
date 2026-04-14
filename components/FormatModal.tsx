@@ -329,7 +329,7 @@ export default function FormatModal({
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div
           className={[
-            "touch-none md:touch-auto",
+            "w-full max-w-5xl touch-none md:touch-auto",
             snapBack ? "tsw-drag-snap" : "",
           ].join(" ")}
           style={draggableStyle}
@@ -341,7 +341,7 @@ export default function FormatModal({
               "relative w-full overflow-hidden rounded-3xl border border-white/10",
               "bg-zinc-950/80 shadow-2xl",
               "tsw-shell",
-              "max-w-5xl",
+              "max-w-5xl mx-auto",
               "max-h-[92svh] md:max-h-none",
               isClosing ? "tsw-modal-out" : "tsw-modal-in",
             ].join(" ")}
@@ -433,12 +433,12 @@ export default function FormatModal({
                         </div>
 
                         <div className="relative w-full bg-black/40">
-                          <div className="relative h-[220px] w-full">
+                          <div className="relative h-[180px] w-full sm:h-[220px]">
                             <Image
                               src={item.logoSrc}
                               alt={item.title}
                               fill
-                              className="object-contain object-center p-10"
+                              className="object-contain object-center p-6 sm:p-10"
                               priority={item.id === format.id}
                             />
                           </div>
@@ -512,12 +512,12 @@ export default function FormatModal({
                   </div>
 
                   <div className="relative w-full bg-black/40">
-                    <div className="relative h-[220px] w-full">
+                    <div className="relative h-[180px] w-full sm:h-[220px]">
                       <Image
                         src={format.logoSrc}
                         alt={format.title}
                         fill
-                        className="object-contain object-center p-10"
+                        className="object-contain object-center p-6 sm:p-10"
                         priority
                       />
                     </div>
