@@ -129,9 +129,14 @@ export default function Home() {
     ],
     []
   );
-// MODIFICA LINK FOTO DOENLOAD GOOGLE
+// MODIFICA LINK FOTO DOWNLOAD GOOGLE
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
+      {
+        date: "19 Aprile 2026",
+        venue: "Dj H in Tour - Loft Cafè - Rovato",
+        url: "https://photos.app.goo.gl/iwiGjz9jKJBunz2c9",
+      },
       {
         date: "20 Febbraio 2026",
         venue: "Emotion 90-2000 Vs Italian remix - Loft Cafè - Rovato",
@@ -352,16 +357,6 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   // ====== MODIFICA EVENTI ======
   const events = useMemo<EventItem[]>(
     () => [
-     {
-        id: "event-1",
-        title: "DJH IN TOUR",
-        date: "19 Aprile 2026",
-        venue: "Rovato - Loft Cafè",
-        imageSrc: "/locandine/19_aprile.webp",
-        cta: "Maggiori dettagli",
-        description: "Non sarà il solito aperitivo.Non sarà il classico dj set. Sarà la prima uscita ufficiale dei ragazzi del progetto DJH",
-      },
-     
       {
         id: "event-2",
         title: "ITALIAN REMIX PARTY",
