@@ -506,7 +506,7 @@ const visibleGalleryPhotos = galleryPhotos.slice(
 
           <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-[#17112d] p-8">
             <Image
-              src="/partner-djh/Radio-Bruno-logo1.svg"
+              src="/partner-djh/radio-bruno-logo1.svg"
               alt="Radio Bruno"
               fill
               className="object-contain p-6 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
