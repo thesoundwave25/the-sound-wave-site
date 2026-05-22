@@ -233,6 +233,7 @@ export default function EventModal({ open, onClose, event, events }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showTapToPlay, setShowTapToPlay] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [eventImageZoomOpen, setEventImageZoomOpen] = useState(false);
 
   const [duration, setDuration] = useState(0);
   const [t, setT] = useState(0);
@@ -496,7 +497,7 @@ const goNextEvent = () => {
           {/* ✅ popup */}
           <div
             className={[
-              "relative w-[92vw] max-w-[520px]",
+              "relative w-[94vw] max-w-[860px]",
               "max-h-[92vh]",
               "rounded-3xl tsw-event-glow",
               isClosing
@@ -611,13 +612,19 @@ const goNextEvent = () => {
                                   />
                                 )
                               ) : (
-                                <Image
-                                  src={msEv}
-                                  alt={ev.title}
-                                  fill
-                                  className="object-contain object-center"
-                                  priority={i === safeIndex}
-                                />
+                                <button
+  type="button"
+  onClick={() => setEventImageZoomOpen(true)}
+  className="absolute inset-0 cursor-zoom-in"
+>
+  <Image
+    src={msEv}
+    alt={ev.title}
+    fill
+    className="object-contain object-center"
+    priority={i === safeIndex}
+  />
+</button>
                               )}
                             </div>
                           </div>
@@ -867,13 +874,19 @@ const goNextEvent = () => {
                           }}
                         />
                       ) : (
-                        <Image
-                          src={ms}
-                          alt={event.title}
-                          fill
-                          className="object-contain object-center"
-                          priority
-                        />
+                        <button
+  type="button"
+  onClick={() => setEventImageZoomOpen(true)}
+  className="absolute inset-0 cursor-zoom-in"
+>
+  <Image
+    src={ms}
+    alt={event.title}
+    fill
+    className="object-contain object-center"
+    priority
+  />
+</button>
                       )}
                     </div>
                   </div>
@@ -1039,7 +1052,30 @@ const goNextEvent = () => {
                 </div>
               </div>
             )}
+{eventImageZoomOpen && (
+  <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/90 px-4 py-6 backdrop-blur-xl">
+    <button
+      type="button"
+      aria-label="Chiudi immagine"
+      onClick={() => setEventImageZoomOpen(false)}
+      className="absolute right-4 top-4 z-[10001] grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-2xl text-white transition duration-300 hover:border-white/35 hover:shadow-[0_0_25px_rgba(255,255,255,0.35)] active:scale-[0.96]"
+    >
+      ×
+    </button>
 
+    <div className="relative h-[86vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-black p-2">
+      <Image
+        src={ms}
+        alt={event.title}
+        fill
+        draggable={false}
+        onContextMenu={(e) => e.preventDefault()}
+        className="select-none object-contain object-center"
+        sizes="100vw"
+      />
+    </div>
+  </div>
+)}
             <style jsx global>{`
               .tsw-event-glow::before {
                 content: "";

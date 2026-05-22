@@ -21,6 +21,7 @@ export default function Home() {
   // ✅ MOBILE NAV
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activePhoto, setActivePhoto] = useState<PhotoItem | null>(null);
+  const [photoPage, setPhotoPage] = useState(0);
     // ✅ Soluzione B: scroll senza # nell’URL (refresh torna sempre in alto)
   const goTo = (id: string) => {
     const el = document.getElementById(id);
@@ -44,7 +45,16 @@ export default function Home() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+useEffect(() => {
+  const updateEventsPerPage = () => {
+    setEventsPerPage(window.innerWidth < 1024 ? 2 : 4);
+  };
 
+  updateEventsPerPage();
+
+  window.addEventListener("resize", updateEventsPerPage);
+  return () => window.removeEventListener("resize", updateEventsPerPage);
+}, []);
   // Blocca scroll quando menu aperto (solo mobile)
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -128,6 +138,12 @@ export default function Home() {
       { id: "p23", src: "/gallery/19.webp", alt: "Foto evento 19" },
     ],
     []
+  );
+    const photosPerPage = 12;
+  const totalPhotoPages = Math.ceil(photos.length / photosPerPage);
+  const visiblePhotos = photos.slice(
+    photoPage * photosPerPage,
+    photoPage * photosPerPage + photosPerPage
   );
 // MODIFICA LINK FOTO DOWNLOAD GOOGLE
   const downloadAlbums = useMemo<DownloadAlbum[]>(
@@ -373,7 +389,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         venue: "CALCINATE - Area feste De Andrè",
         imageSrc: "/locandine/FESTA-DELLA-LUCE.webp",
         cta: "Maggiori dettagli",
-        description: "DJH IN TOUR – 2ª TAPPA! La musica che spacca arriva alla 13ª Festa della Luce!n momento speciale dove musica, inclusività ed energia saranno al centro della serata.",
+        description: "DJH IN TOUR – 3ª TAPPA! La musica che spacca arriva alla 13ª Festa della Luce!n momento speciale dove musica, inclusività ed energia saranno al centro della serata.",
       },
  {
         id: "event-3",
@@ -443,7 +459,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   );
 
   const [activeEvent, setActiveEvent] = useState<EventItem | null>(null);
-  const eventTrackRef = useRef<HTMLDivElement | null>(null);
+const [eventPage, setEventPage] = useState(0);
+
+const [eventsPerPage, setEventsPerPage] = useState(4);
+const totalEventPages = Math.ceil(events.length / eventsPerPage);
+const visibleEvents = events.slice(
+  eventPage * eventsPerPage,
+  eventPage * eventsPerPage + eventsPerPage
+);
 
   // ✅ ascolta la navigazione eventi dal modal (frecce desktop + swipe mobile)
   useEffect(() => {
@@ -463,22 +486,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       window.removeEventListener("tsw:event:navigate", onNavigate as EventListener);
   }, [events]);
 
-  const scrollEvents = (dir: -1 | 1) => {
-  const el = eventTrackRef.current;
-  if (!el) return;
-
-  const firstCard = el.querySelector<HTMLElement>("[data-event-card='1']");
-  if (!firstCard) return;
-
-  const styles = window.getComputedStyle(el);
-  const gap = parseFloat(styles.columnGap || styles.gap || "0");
-  const amount = (firstCard.offsetWidth + gap) * dir;
-
-  el.scrollBy({
-    left: amount,
-    behavior: "smooth",
-  });
-};
+ 
   // ✅ glow card format
   const formatGlow = (id: string) => {
   if (id === "emotion") {
@@ -512,12 +520,14 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   };
 };
 
-  const mobileLinks = [
+ const mobileLinks = [
+  { label: "Chi siamo", id: "chi-siamo" },
   { label: "Servizi", id: "servizi" },
   { label: "Format", id: "format" },
+  { label: "Collaborazioni", id: "collaborazioni" },
+  { label: "DJH in tour", id: "djh" },
   { label: "Foto", id: "foto" },
   { label: "Eventi", id: "eventi" },
-  { label: "Chi siamo", id: "chi-siamo" },
   { label: "Contatti", id: "contatti" },
 ];
 
@@ -571,7 +581,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       <button
         type="button"
         onClick={() => goTo("hero")}
-        className="flex items-center justify-center"
+        className="flex items-center justify-start"
       >
         <Image
           src="/brand/tsw-logo.svg"
@@ -584,14 +594,16 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
       </button>
 
       {/* DESKTOP MENU (md+) */}
-      <nav className="hidden justify-center gap-5 text-sm text-zinc-300 md:flex whitespace-nowrap">
-        <button type="button" className="hover:text-white" onClick={() => goTo("servizi")}>Servizi</button>
-        <button type="button" className="hover:text-white" onClick={() => goTo("format")}>Format</button>
-        <button type="button" className="hover:text-white" onClick={() => goTo("foto")}>Foto</button>
-        <button type="button" className="hover:text-white" onClick={() => goTo("eventi")}>Eventi</button>
-        <button type="button" className="hover:text-white" onClick={() => goTo("chi-siamo")}>Chi siamo</button>
-        <button type="button" className="hover:text-white" onClick={() => goTo("contatti")}>Contatti</button>
-      </nav>
+     <nav className="hidden justify-center gap-4 text-sm text-zinc-300 md:flex whitespace-nowrap">
+ <button type="button" className="hover:text-white" onClick={() => goTo("chi-siamo")}>Chi siamo</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("servizi")}>Servizi</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("format")}>Format</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("collaborazioni")}>Collaborazioni</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("djh")}>DJH in tour</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("foto")}>Foto</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("eventi")}>Eventi</button>
+<button type="button" className="hover:text-white" onClick={() => goTo("contatti")}>Contatti</button>
+</nav>
 
       {/* DESKTOP CTA */}
       <button
@@ -776,7 +788,121 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         </div>
       </section>
 
-      {/* 2) SERVIZI */}
+         {/* 2) CHI SIAMO */}
+      <Section id="chi-siamo" title="Chi siamo">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"
+          />
+
+          <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-5">
+              <div className="group relative">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
+                  style={{ background: "rgba(255,255,255,0.12)" }}
+                />
+                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
+                  <div className="relative aspect-[4/5] w-full">
+                    <Image
+                      src="/brand/chi-siamo.webp"
+                      alt="The Sound Wave DJs"
+                      fill
+                      className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7 flex flex-col items-center text-center">
+              <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">
+                The Sound Wave
+              </h3>
+
+              <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
+                The Sound Wave è un progetto nato dall’unione di due professionisti
+                dell’intrattenimento con l’obiettivo di portare eventi musicali
+                strutturati, coinvolgenti.<br />
+                DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del
+                pubblico, l’uso della voce e la capacità di leggere la pista e
+                trasformare la musica in spettacolo.<br />
+                DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla
+                creazione di veri e propri viaggi sonori.<br />
+                Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi
+                format.
+              </p>
+
+              <p className="mt-4 text-zinc-400 leading-relaxed">
+                Dall’organizzazione completa dell’evento alla gestione dell’atmosfera
+                musicale e visiva, ogni dettaglio viene curato per creare momenti
+                memorabili e coinvolgenti.
+              </p>
+
+              <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
+                <div className="group relative">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="relative h-full w-full">
+                      <Image
+                        src="/brand/wallen-logo.svg"
+                        alt="DJ Wallen"
+                        fill
+                        className="object-contain"
+                        sizes="96px"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="group relative">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <div className="relative h-full w-full">
+                      <Image
+                        src="/brand/gianluk-logo.svg"
+                        alt="DJ Gianluk"
+                        fill
+                        className="object-contain"
+                        sizes="96px"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* VIDEO (fuori da Chi siamo) */}
+<section className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-14">
+  <div className="mx-auto w-full max-w-3xl text-center">
+    <div className="mb-4 text-xl sm:text-2xl font-semibold text-white">
+      Intervista radio
+    </div>
+
+    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video">
+      <iframe
+        className="absolute inset-0 h-full w-full"
+        src="https://www.youtube-nocookie.com/embed/D1sUavNV3ts?rel=0"
+        title="Intervista radio - The Sound Wave"
+        frameBorder="0"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    </div>
+  </div>
+</section>
+
+      {/* 3) SERVIZI */}
       <Section id="servizi" title="Servizi">
         <div className="mx-auto max-w-3xl">
           <ul className="grid gap-4 md:grid-cols-2">
@@ -840,7 +966,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         />
       </Section>
 
-      {/* 3) FORMAT */}
+      {/* 4) FORMAT */}
       <Section id="format" title="Format">
         <div className="grid gap-4 md:grid-cols-4">
           {[
@@ -921,104 +1047,129 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
 />
       </Section>
 
-      {/* 4) FOTO */}
-      <Section id="foto" title="Foto" subtitle="Gallery eventi">
-        <div className="relative px-4 sm:px-12">
-          <button
-            aria-label="Indietro"
-            onClick={() => scrollPhotos(-1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ‹
-          </button>
-
-          <button
-            aria-label="Avanti"
-            onClick={() => scrollPhotos(1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ›
-          </button>
-
+       {/* 5) COLLABORAZIONI */}
+      <Section id="collaborazioni" title="Collaborazioni">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12">
           <div
-            ref={photoTrackRef}
-            style={{ overflowY: "visible" }}
-            className={[
-              "tsw-hide-scrollbar",
-              "flex gap-4 overflow-x-auto",
-              "scroll-smooth",
-              "px-4 sm:px-12 py-5 sm:py-6",
-              "snap-x snap-mandatory",
-            ].join(" ")}
-          >
-            {photos.map((p, idx) => (
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl"
+          />
+
+          <div className="relative flex min-h-[260px] items-center justify-center text-center">
+            <h3 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
+              WORK IN PROGRESS
+            </h3>
+          </div>
+        </div>
+      </Section>
+
+            {/* 6) DJH */}
+      <Section id="djh" title="DJH IN TOUR" subtitle="DJH VI.RE.DIS PROJECT">
+        <div className="grid gap-8 rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-6 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-5">
+            <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-3">
+              <Image
+                src="/brand/djh-in-tour.webp"
+                alt="DJH in Tour"
+                width={900}
+                height={900}
+                className="h-auto w-full object-contain"
+                priority={false}
+              />
+            </div>
+          </div>
+
+          <div className="lg:col-span-7 text-center lg:text-left">
+            <p className="text-sm uppercase tracking-[0.35em] text-zinc-500">
+              Vi.Re.Dis. Project
+            </p>
+
+            <h3 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-5xl">
+              DJH IN TOUR
+            </h3>
+
+            <p className="mt-4 text-zinc-300 leading-relaxed">
+             DJH è un progetto che unisce musica, inclusione e crescita personale, dando ai ragazzi la possibilità di diventare protagonisti attraverso il mondo del DJing. Tra formazione, creatività ed esibizioni dal vivo, il percorso trasforma una passione in un’esperienza reale di condivisione, divertimento e valorizzazione delle proprie capacità.
+            </p>
+
+           <a
+  href="/djhviredisproject"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-6 inline-flex rounded-full border border-fuchsia-400/30 bg-white px-6 py-3 text-sm font-semibold text-black transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-[1.03] hover:border-fuchsia-300/70 hover:bg-white hover:shadow-[0_0_28px_rgba(236,72,153,0.75),0_0_70px_rgba(236,72,153,0.35)] active:scale-[0.98]"
+>
+  Scopri il progetto ed eventi
+</a>
+          </div>
+        </div>
+      </Section>
+
+          {/* 7) FOTO */}
+      <Section id="foto" title="Foto" subtitle="Gallery eventi">
+        <div className="mx-auto max-w-7xl rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_0_60px_rgba(255,255,255,0.08)] backdrop-blur sm:p-10">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {visiblePhotos.map((p, idx) => (
               <button
                 key={p.id}
                 type="button"
-                data-photo-card={idx === 0 ? "1" : undefined}
                 onClick={(e) => {
                   e.preventDefault();
                   e.currentTarget.blur();
                   setActivePhoto(p);
                 }}
                 className={[
-                  "snap-start shrink-0 text-left",
-                  "group cursor-pointer relative rounded-2xl border border-white/10 bg-black",
+                  "group relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-1",
                   "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  "hover:-translate-y-1 hover:border-white/20",
-                  "active:translate-y-[1px] active:scale-[0.985]",
+                  "hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.22)]",
+                  "active:scale-[0.98]",
                   "select-none",
-                  "w-[82vw] sm:w-[46vw] md:w-[24%]",
                 ].join(" ")}
               >
-                <div className="relative overflow-hidden rounded-2xl bg-black">
-                  {/* MOBILE */}
-                  <div className="md:hidden flex items-center justify-center px-2 py-3">
-                    <Image
-                      src={p.src}
-                      alt={p.alt ?? "Foto evento"}
-                      width={800}
-                      height={450}
-                      className="w-full h-auto max-h-[220px] object-contain"
-                    />
-                  </div>
-                  {/* DESKTOP */}
-                  <div className="hidden md:block relative aspect-[16/10] w-full">
-                    <Image
-                      src={p.src}
-                      alt={p.alt ?? "Foto evento"}
-                      fill
-                      className="object-cover"
-                      sizes="25vw"
-                    />
-                  </div>
-                  <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center md:hidden">
-                    <div className="rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 backdrop-blur border border-white/10">
-                      ← scorri →
-                    </div>
-                  </div>
+                <div className="relative aspect-square overflow-hidden rounded-xl bg-black">
+                  <Image
+                    src={p.src}
+                    alt={p.alt ?? "Foto evento"}
+                    fill
+                    draggable={false}
+                    className="select-none object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                  />
                 </div>
               </button>
             ))}
           </div>
+
+          {totalPhotoPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setPhotoPage((current) =>
+                    current === 0 ? totalPhotoPages - 1 : current - 1
+                  )
+                }
+                className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm text-white transition duration-300 hover:border-white/35 hover:shadow-[0_0_22px_rgba(255,255,255,0.25)] active:scale-[0.96]"
+              >
+                Indietro
+              </button>
+
+              <div className="text-sm text-zinc-300">
+                {photoPage + 1} / {totalPhotoPages}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPhotoPage((current) =>
+                    current === totalPhotoPages - 1 ? 0 : current + 1
+                  )
+                }
+                className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm text-white transition duration-300 hover:border-white/35 hover:shadow-[0_0_22px_rgba(255,255,255,0.25)] active:scale-[0.96]"
+              >
+                Avanti
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="mt-7 sm:mt-8 flex justify-center">
@@ -1030,13 +1181,6 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
               setOpenDownloads(true);
             }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
-            >
-              <span className="absolute inset-0 rounded-2xl bg-white/45 blur-xl" />
-              <span className="absolute inset-0 rounded-2xl bg-white/20 blur-2xl" />
-            </span>
             <span className="relative z-10">Foto eventi • Download</span>
           </button>
         </div>
@@ -1047,6 +1191,7 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
           photo={activePhoto}
           photos={photos as any}
         />
+
         <PhotoDownloadModal
           open={openDownloads}
           onClose={() => setOpenDownloads(false)}
@@ -1054,140 +1199,134 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         />
       </Section>
 
-      {/* 5) EVENTI */}
+              {/* 8) EVENTI */}
       <Section id="eventi" title="Eventi" subtitle="Prossimi eventi">
-        <div className="relative px-4 sm:px-12">
-          <button
-            aria-label="Indietro"
-            onClick={() => scrollEvents(-1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -left-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ‹
-          </button>
+        <div className="mx-auto max-w-7xl rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_0_60px_rgba(255,255,255,0.08)] backdrop-blur sm:p-10">
+        <div className="relative pb-8">
 
-          <button
-            aria-label="Avanti"
-            onClick={() => scrollEvents(1)}
-            className={[
-              "hidden sm:grid",
-              "absolute -right-2 top-1/2 -translate-y-1/2 z-10",
-              "h-11 w-11 rounded-full",
-              "border border-white/15 bg-black/55 backdrop-blur",
-              "place-items-center text-white/90",
-              "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              "hover:scale-[1.06]",
-              "active:scale-[0.98]",
-            ].join(" ")}
-          >
-            ›
-          </button>
+  {/* Freccia sinistra */}
+  <button
+    type="button"
+    onClick={() =>
+      setEventPage((current) =>
+        current === 0 ? totalEventPages - 1 : current - 1
+      )
+    }
+    className={[
+      "hidden lg:flex",
+      "absolute left-[-70px] top-1/2 -translate-y-1/2 z-20",
+      "h-14 w-14 items-center justify-center rounded-full",
+      "border border-white/15 bg-black/60 backdrop-blur",
+      "text-3xl text-white/90",
+      "transition-all duration-300",
+      "hover:scale-110 hover:border-white/30 hover:bg-black/80",
+      "active:scale-95",
+    ].join(" ")}
+  >
+    ‹
+  </button>
 
-          <div
-  ref={eventTrackRef}
- className={[
-  "tsw-hide-scrollbar tsw-xtrack",
-  "flex gap-6 md:gap-16 overflow-x-auto overflow-y-visible",
-  "scroll-smooth",
-  "px-4 sm:px-10",
-  "py-10",
-  "snap-x snap-mandatory",
-].join(" ")}
->
-            {events.map((ev, idx) => (
-             <button
-  key={ev.id}
-  data-event-card={idx === 0 ? "1" : undefined}
-  onClick={() => setActiveEvent(ev)}
+  {/* Freccia destra */}
+  <button
+    type="button"
+    onClick={() =>
+      setEventPage((current) =>
+        current === totalEventPages - 1 ? 0 : current + 1
+      )
+    }
+    className={[
+      "hidden lg:flex",
+      "absolute right-[-70px] top-1/2 -translate-y-1/2 z-20",
+      "h-14 w-14 items-center justify-center rounded-full",
+      "border border-white/15 bg-black/60 backdrop-blur",
+      "text-3xl text-white/90",
+      "transition-all duration-300",
+      "hover:scale-110 hover:border-white/30 hover:bg-black/80",
+      "active:scale-95",
+    ].join(" ")}
+  >
+    ›
+  </button>
+          
+  <div className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {visibleEvents.map((ev) => (
+              <button
+                key={ev.id}
+                type="button"
+                onClick={() => setActiveEvent(ev)}
                 className={[
-                  "snap-start shrink-0 text-left",
-                  "group cursor-pointer relative rounded-2xl bg-black overflow-visible",
-                  "border border-white/5 md:border-white/10",
+                  "group relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-black/30 p-4 text-left lg:min-h-[450px]",
                   "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  "hover:-translate-y-1 hover:border-white/20",
-                  "hover:ring-1 hover:ring-white/25",
-                  "hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18),inset_0_0_90px_rgba(255,255,255,0.18)]",
-                  "active:translate-y-[1px] active:scale-[0.985]",
+                  "hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_0_28px_rgba(255,255,255,0.22)]",
+                  "active:scale-[0.98]",
                   "select-none",
-                  "w-[50vw] sm:w-[36vw] md:w-[24%] lg:w-[30%]",
                 ].join(" ")}
               >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100"
-                >
-                  <div
-                    className="absolute inset-0 rounded-2xl"
-                    style={{
-                      background: `
-                        radial-gradient(140% 160% at 50% 35%, rgba(255,255,255,0.85) 0%, transparent 66%)
-                      `,
-                      opacity: 0.14,
-                      filter: "blur(18px)",
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0 rounded-2xl"
-                    style={{ background: "rgba(255,255,255,0.03)" }}
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-black">
+                  <Image
+                    src={ev.imageSrc}
+                    alt={ev.title}
+                    fill
+                    className="object-contain object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                    priority={false}
                   />
                 </div>
 
-                <div className="relative overflow-hidden rounded-2xl">
-                  <div className="relative mx-4 mt-4 aspect-[2480/3508] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-white/10 bg-black">
-                    <Image
-                      src={ev.imageSrc}
-                      alt={ev.title}
-                      fill
-                      className="object-contain object-center"
-                      sizes="(max-width: 768px) 84vw, (max-width: 1024px) 46vw, 33vw"
-                      priority={false}
-                    />
+                <div className="flex flex-1 flex-col justify-between px-2 pb-3 pt-5 text-center">
+                  <div className="text-xs text-zinc-400">
+                    {ev.date} • {ev.venue}
                   </div>
 
-                  <div className="relative px-4 pt-4 pb-5">
-                    <div className="text-xs text-zinc-400">
-                      {ev.date} • {ev.venue}
-                    </div>
+                  <div className="mt-2 text-base font-semibold tracking-tight text-white">
+                    {ev.title}
+                  </div>
 
-                    <div className="mt-1 text-lg font-semibold tracking-tight text-white">
-                      {ev.title}
-                    </div>
-
-                    <p className="mt-2 text-sm text-zinc-300">{ev.cta}</p>
-
-                    <span
-                      className={[
-                        "absolute bottom-4 right-4",
-                        "text-zinc-400",
-                        "transition duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                        "group-hover:translate-x-1 group-hover:text-white/70",
-                      ].join(" ")}
-                    >
+                  <div className="mt-2 flex items-center justify-center gap-2 text-sm text-zinc-300 transition duration-300 group-hover:text-white">
+                    {ev.cta}
+                    <span className="transition duration-300 group-hover:translate-x-1">
                       →
                     </span>
                   </div>
                 </div>
               </button>
-            ))}
+                        ))}
           </div>
         </div>
-<div className="mt-6 mb-2 flex items-center justify-center gap-2">
-  {events.map((_, idx) => (
-    <span
-      key={`event-indicator-${idx}`}
-      aria-hidden="true"
-      className="h-2.5 w-5 rounded-full bg-white/20"
-    />
-  ))}
-</div>
+
+          {totalEventPages > 1 && (
+            <div className="mt-2 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setEventPage((current) =>
+                    current === 0 ? totalEventPages - 1 : current - 1
+                  )
+                }
+                className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm text-white transition duration-300 hover:border-white/35 hover:shadow-[0_0_22px_rgba(255,255,255,0.25)] active:scale-[0.96]"
+              >
+                Indietro
+              </button>
+
+              <div className="text-sm text-zinc-300">
+                {eventPage + 1} / {totalEventPages}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEventPage((current) =>
+                    current === totalEventPages - 1 ? 0 : current + 1
+                  )
+                }
+                className="rounded-full border border-white/15 bg-white/10 px-5 py-2 text-sm text-white transition duration-300 hover:border-white/35 hover:shadow-[0_0_22px_rgba(255,255,255,0.25)] active:scale-[0.96]"
+              >
+                Avanti
+              </button>
+            </div>
+          )}
+        </div>
+
         <EventModal
           open={!!activeEvent}
           onClose={() => setActiveEvent(null)}
@@ -1196,124 +1335,10 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
         />
       </Section>
 
-      {/* 6) CHI SIAMO */}
-      <Section id="chi-siamo" title="Chi siamo">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 sm:p-8">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-28 -right-24 h-96 w-96 rounded-full bg-white/5 blur-3xl"
-          />
-
-          <div className="relative grid gap-8 sm:gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-5">
-              <div className="group relative">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-60 blur-xl"
-                  style={{ background: "rgba(255,255,255,0.12)" }}
-                />
-                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black">
-                  <div className="relative aspect-[4/5] w-full">
-                    <Image
-                      src="/brand/chi-siamo.webp"
-                      alt="The Sound Wave DJs"
-                      fill
-                      className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-                      sizes="(max-width: 1024px) 100vw, 40vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 flex flex-col items-center text-center">
-              <h3 className="text-2xl sm:text-4xl font-semibold tracking-tight">
-                The Sound Wave
-              </h3>
-
-              <p className="mt-5 sm:mt-6 text-zinc-300 leading-relaxed">
-                The Sound Wave è un progetto nato dall’unione di due professionisti
-                dell’intrattenimento con l’obiettivo di portare eventi musicali
-                strutturati, coinvolgenti.<br />
-                DJ Gianluk - DJ & Vocalist, la sua forza è il coinvolgimento del
-                pubblico, l’uso della voce e la capacità di leggere la pista e
-                trasformare la musica in spettacolo.<br />
-                DJ Wallen - DJ orientato alla costruzione musicale dell’evento e alla
-                creazione di veri e propri viaggi sonori.<br />
-                Entrambi curano lo sviluppo del progetto, e l'ideazione di nuovi
-                format.
-              </p>
-
-              <p className="mt-4 text-zinc-400 leading-relaxed">
-                Dall’organizzazione completa dell’evento alla gestione dell’atmosfera
-                musicale e visiva, ogni dettaglio viene curato per creare momenti
-                memorabili e coinvolgenti.
-              </p>
+   
 
 
-
-              <div className="mt-7 sm:mt-8 flex items-center justify-center gap-5 sm:gap-6">
-                <div className="group relative">
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src="/brand/wallen-logo.svg"
-                        alt="DJ Wallen"
-                        fill
-                        className="object-contain"
-                        sizes="96px"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="group relative">
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src="/brand/gianluk-logo.svg"
-                        alt="DJ Gianluk"
-                        fill
-                        className="object-contain"
-                        sizes="96px"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </Section>
-
-      {/* VIDEO (fuori da Chi siamo) */}
-<section className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-14">
-  <div className="mx-auto w-full max-w-3xl text-center">
-    <div className="mb-4 text-xl sm:text-2xl font-semibold text-white">
-      Intervista radio
-    </div>
-
-    <div className="relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video">
-      <iframe
-        className="absolute inset-0 h-full w-full"
-        src="https://www.youtube-nocookie.com/embed/D1sUavNV3ts?rel=0"
-        title="Intervista radio - The Sound Wave"
-        frameBorder="0"
-        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-      />
-    </div>
-  </div>
-</section>
-
-
-      {/* 8) CONTATTI */}
+      {/* 9) CONTATTI */}
       <Section id="contatti" title="Contatti">
         <div className="grid gap-4 md:grid-cols-3">
           <a
