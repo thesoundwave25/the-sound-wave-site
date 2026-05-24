@@ -181,6 +181,7 @@ const visiblePartnerPublications = partnerPublications.slice(
 );
 const [eventImageZoomOpen, setEventImageZoomOpen] = useState(false);
 const eventTouchStart = useRef<{ x: number; y: number } | null>(null);
+const photoTouchStart = useRef<{ x: number; y: number } | null>(null);
 
 const eventsPerPage = 4;
 const totalEventsPages = Math.ceil(djhEvents.length / eventsPerPage);
@@ -331,7 +332,7 @@ const visibleGalleryPhotos = galleryPhotos.slice(
 
       <section
         id="hero"
-        className="relative flex min-h-screen items-center scroll-mt-24 px-6 pt-20 pb-20"
+        className="relative flex min-h-screen items-center scroll-mt-24 px-6 pt-44 pb-20"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_35%,rgba(236,72,153,0.24),transparent_34%),radial-gradient(circle_at_75%_55%,rgba(14,165,233,0.18),transparent_34%),radial-gradient(circle_at_55%_85%,rgba(132,204,22,0.12),transparent_32%)]" />
 
@@ -888,9 +889,39 @@ const visibleGalleryPhotos = galleryPhotos.slice(
 
                 {activePhotoIndex !== null && (
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-xl"
-            onContextMenu={(event) => event.preventDefault()}
-          >
+  className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-xl"
+  onContextMenu={(event) => event.preventDefault()}
+  onTouchStart={(event) => {
+    const touch = event.touches[0];
+    photoTouchStart.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
+  }}
+  onTouchEnd={(event) => {
+    if (!photoTouchStart.current) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - photoTouchStart.current.x;
+    const deltaY = touch.clientY - photoTouchStart.current.y;
+
+    if (Math.abs(deltaX) > 70 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      setActivePhotoIndex((current) => {
+        if (current === null) return null;
+
+        return deltaX > 0
+          ? current === 0
+            ? galleryPhotos.length - 1
+            : current - 1
+          : current === galleryPhotos.length - 1
+          ? 0
+          : current + 1;
+      });
+    }
+
+    photoTouchStart.current = null;
+  }}
+>
             <button
               type="button"
               aria-label="Chiudi foto"
@@ -1088,23 +1119,24 @@ const visibleGalleryPhotos = galleryPhotos.slice(
                 const deltaY = touch.clientY - eventTouchStart.current.y;
 
                 if (Math.abs(deltaX) > 70 && Math.abs(deltaX) > Math.abs(deltaY)) {
-                  setActiveEventIndex((current) => {
-                    if (current === null) return null;
-                    return deltaX > 0
-                      ? current === 0
-                        ? djhEvents.length - 1
-                        : current - 1
-                      : current === djhEvents.length - 1
-                      ? 0
-                      : current + 1;
-                  });
-                }
+  setActivePhotoIndex((current) => {
+    if (current === null) return null;
 
-                if (deltaY < -90 && Math.abs(deltaY) > Math.abs(deltaX)) {
-                  setActiveEventIndex(null);
-                }
+    return deltaX > 0
+      ? current === 0
+        ? galleryPhotos.length - 1
+        : current - 1
+      : current === galleryPhotos.length - 1
+      ? 0
+      : current + 1;
+  });
+}
 
-                eventTouchStart.current = null;
+if (deltaY < -90 && Math.abs(deltaY) > Math.abs(deltaX)) {
+  setActivePhotoIndex(null);
+}
+
+photoTouchStart.current = null;
               }}
             >
               <div
