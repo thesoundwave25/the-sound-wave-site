@@ -113,11 +113,13 @@ useEffect(() => {
   // --- FOTO GALLERY (cards + popup) ---
   const photos = useMemo<PhotoItem[]>(
     () => [
-      { id: "p1", src: "/gallery/7B3A5169.webp", alt: "Foto evento 01" },
-      { id: "p2", src: "/gallery/7B3A5145.webp", alt: "Foto evento 01" },
-      { id: "p3", src: "/gallery/7B3A5170.webp", alt: "Foto evento 01" },
-      { id: "p4", src: "/gallery/7B3A5100.webp", alt: "Foto evento 01" },
-      { id: "p5", src: "/gallery/7B3A5240.webp", alt: "Foto evento 01" },
+      { id: "p25", src: "/gallery/22-maggio-1.webp", alt: "Foto evento 25" },
+      { id: "p26", src: "/gallery/22-maggio-2.webp", alt: "Foto evento 26" },
+      { id: "p1", src: "/gallery/7B3A5169.webp", alt: "Foto evento 20" },
+      { id: "p2", src: "/gallery/7B3A5145.webp", alt: "Foto evento 21" },
+      { id: "p3", src: "/gallery/7B3A5170.webp", alt: "Foto evento 22" },
+      { id: "p4", src: "/gallery/7B3A5100.webp", alt: "Foto evento 23" },
+      { id: "p5", src: "/gallery/7B3A5240.webp", alt: "Foto evento 24" },
       { id: "p6", src: "/gallery/1.webp", alt: "Foto evento 01" },
       { id: "p7", src: "/gallery/2.webp", alt: "Foto evento 02" },
       { id: "p8", src: "/gallery/3.webp", alt: "Foto evento 03" },
@@ -148,6 +150,12 @@ useEffect(() => {
 // MODIFICA LINK FOTO DOWNLOAD GOOGLE
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
+       {
+        date: "22 Maggio 2026",
+        venue: "Beer fest by Posto fisso - 22 Maggio - Cividate",
+        url: "https://photos.app.goo.gl/jjXxpLdXib8VqugU6",
+      },
+      
       {
         date: "19 Aprile 2026",
         venue: "Dj H in Tour - Loft Cafè - Rovato",
