@@ -100,17 +100,10 @@ const galleryPhotos = [
   "/foto-djh/foto-23.webp",
   "/foto-djh/foto-24.webp",
   "/foto-djh/foto-25.webp",
+
+// modifica eventi //
 ];
 const djhEvents = [
-  {
-    title: "DJH in Tour 2 TAPPA",
-    place: "DJH in Tour 2 TAPPA",
-    date: "24 maggio - ore 19.45 - 21.00",
-    location: "Area feste alpini - via Fava, 21 - Zocco",
-    image: "/locandine-djh/tappa-2.webp",
-    description:
-      "4UATER PASS PER AL SOC - DJH – VI.RE.DIS. Project “La musica che spacca!” torna con la 2ª tappa ufficiale: domenica 24 maggio dalle 19:45 alle 21:00 al “4UATER Pass per Al Soc” di Zocco d’Erbusco (BS). Una serata di musica, inclusività e divertimento insieme a Connessioni, La Scotta Coop, Maestrale, The Sound Wave, DJS & Voice e VI.RE.DIS. Project. “La differenza che fa ballare”.",
-  },
   {
     title: "DJH in Tour 3 TAPPA",
     place: "DJH in Tour 3 TAPPA",
