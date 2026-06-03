@@ -104,15 +104,7 @@ const galleryPhotos = [
 // modifica eventi //
 ];
 const djhEvents = [
-  {
-    title: "DJH in Tour 3 TAPPA",
-    place: "DJH in Tour 3 TAPPA",
-    date: "dal 29 maggio al 2 giugno - ore 21.30",
-    location: "Area feste De Andre - via degli olmi - Calcinate",
-    image: "/locandine-djh/tappa-3.webp",
-    description:
-      "La musica che spacca arriva alla 13ª Festa della Luce!n momento speciale dove musica, inclusività ed energia saranno al centro della serata.",
-  },
+
   {
     title: "DJH in Tour 4 TAPPA",
     place: "DJH in Tour 4 TAPPA",
