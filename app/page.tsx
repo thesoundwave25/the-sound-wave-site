@@ -382,24 +382,6 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
   const events = useMemo<EventItem[]>(
     () => [
 
-      {
-        id: "event-1",
-        title: "IL SORRISO OLTRE L'OSTACOLO - DJH IN TOUR",
-        date: "7 GIUGNO",
-        venue: "PONTOGLIO - CAMPO SPORTIVO PONTOGLIO ",
-        imageSrc: "/locandine/7-Giugno-PONTOGLIO.webp",
-        cta: "Maggiori dettagli",
-        description: "Domenica 7 giugno i ragazzi del progetto DJH – arrivano a Pontoglio per la terza tappa. Un pomeriggio speciale dove musica, inclusività e sorrisi saranno i veri protagonisti. Dalle 14:00 alle 18:00. ",
-      },
-       {
-        id: "event-2",
-        title: "DJH in Tour 5 TAPPA",
-        date: "13 giugno - ore 17.00 - 18.30",
-        venue: "Oratorio S.Maria Immacolata - via Verdi 2/A - Mornico al Serio",
-        imageSrc: "/locandine-djh/tappa-5.webp",
-        cta: "Maggiori dettagli",
-        description: "La musica che spacca!” torna con la 5ª tappa ufficiale: sabato 13 giugno 2026 dalle 17:00 alle 18:30 alla Festa POGI, presso l’Oratorio S. Maria Immacolata di Mornico al Serio (BG). Un evento di musica, inclusività e divertimento insieme a POGI, The Sound Wave e VI.RE.DIS. Project. “La differenza che fa ballare",
-      },
        {
         id: "event-3",
         title: "All Dance Experience",
