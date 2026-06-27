@@ -113,6 +113,9 @@ useEffect(() => {
   // --- FOTO GALLERY (cards + popup) ---
   const photos = useMemo<PhotoItem[]>(
     () => [
+      { id: "p27", src: "/gallery/IMG_5200.webp", alt: "Foto evento 27" },
+      { id: "p28", src: "/gallery/IMG_5214.webp", alt: "Foto evento 28" },
+      { id: "p29", src: "/gallery/IMG_5231.webp", alt: "Foto evento 29" },
       { id: "p25", src: "/gallery/22-maggio-1.webp", alt: "Foto evento 25" },
       { id: "p26", src: "/gallery/22-maggio-2.webp", alt: "Foto evento 26" },
       { id: "p1", src: "/gallery/7B3A5169.webp", alt: "Foto evento 20" },
@@ -150,7 +153,13 @@ useEffect(() => {
 // MODIFICA LINK FOTO DOWNLOAD GOOGLE
   const downloadAlbums = useMemo<DownloadAlbum[]>(
     () => [
-       {
+     {
+        date: "20 Giugno 2026",
+        venue: "Notte Bianca - 20 Giugno - Pontoglio",
+        url: "https://photos.app.goo.gl/QTJubU9SodD79nKQA",
+      }, 
+      
+      {
         date: "22 Maggio 2026",
         venue: "Beer fest by Posto fisso - 22 Maggio - Cividate",
         url: "https://photos.app.goo.gl/jjXxpLdXib8VqugU6",
@@ -383,13 +392,13 @@ coinvolgendo il pubblico, creando un’atmosfera magica ed energica.`,
     () => [
 
        {
-        id: "event-3",
-        title: "All Dance Experience",
-        date: "20 giugno 2026",
-        venue: "Pontoglio - Notte Bianca - Dalle ore 18.00 alle 03.00,",
-        imageSrc: "/locandine/20-giugno.webp",
-        cta: "Maggiori dettagli",
-        description: "Una notte tutta da cantare, ballare e vivere fino in fondo, tra hit leggendarie, energia pura e vibrazioni che uniscono generazioni diverse in un unico grande party.",
+        id: "event-1",
+        title: "Work in progress",
+        date: "luglio",
+        venue: "Mistery",
+        imageSrc: "/locandine/",
+        cta: "Work in progress",
+        description: "Work in progress",
       },
     ],
     []
